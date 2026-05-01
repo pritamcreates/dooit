@@ -1,0 +1,3493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dooit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --bg: #fafaf8;
+            --text: #111110;
+            --border: #111110;
+            --mid: #555553;
+            --light: #e8e8e4;
+            --accent: #111110;
+            --font-mono: 'DM Mono', 'Courier New', monospace;
+            --font-serif: 'DM Serif Display', Georgia, serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 24px 20px;
+        }
+
+        h1, h2, h3, .serif { font-family: var(--font-serif); font-weight: normal; }
+
+        button, input, select, textarea {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border: 1px solid var(--border);
+            background: transparent;
+            padding: 6px 11px;
+            outline: none;
+            color: var(--text);
+            border-radius: 0;
+            -webkit-appearance: none;
+        }
+
+        button {
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: background 0.12s, color 0.12s;
+        }
+        button:hover { background: var(--text); color: var(--bg); }
+        button:disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; }
+        button:disabled:hover { background: transparent; color: #ccc; }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        /* ── Header ── */
+        header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 100;
+            padding-top: 4px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .brand {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .brand-tagline {
+            font-size: 0.68rem;
+            opacity: 0.4;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-left: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-add {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-add input[type="text"] {
+            flex-grow: 1;
+            min-width: 180px;
+        }
+
+        .time-input-group {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .time-input-group input[type="number"] {
+            width: 44px;
+            text-align: center;
+        }
+
+        .time-input-group select { width: auto; }
+
+        .time-sep { opacity: 0.4; font-size: 0.85rem; padding: 0 1px; }
+
+        /* ── Board — FIX: 4 columns ── */
+        .board {
+            display: grid;
+            grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .column {
+            border: 1px solid var(--border);
+            padding: 14px;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 9px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 500;
+        }
+
+        /* Previous unfinished column — distinct but not garish */
+        #col-previous-unfinished {
+            border: 2px dashed var(--border);
+            background: #f0ede6;
+        }
+
+        #col-previous-unfinished h2 {
+            color: var(--text);
+            border-bottom-style: dashed;
+            opacity: 0.7;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--mid);
+            font-style: italic;
+            margin-top: 24px;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        /* ── Task Card ── */
+        .task-card {
+            border: 1px solid var(--border);
+            padding: 11px;
+            margin-bottom: 12px;
+            background: var(--bg);
+            transition: box-shadow 0.15s;
+        }
+
+        .task-card.in-progress {
+            border-width: 2px;
+            box-shadow: 3px 3px 0 var(--text);
+        }
+
+        .task-card.paused {
+            border-style: dashed;
+            background: #f5f5f2;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 7px;
+            gap: 8px;
+        }
+
+        .task-name { font-weight: 500; font-size: 0.85rem; word-break: break-word; flex: 1; }
+        .task-time-planned { font-size: 0.68rem; opacity: 0.55; text-align: right; white-space: nowrap; }
+
+        .task-note-snippet {
+            font-family: var(--font-serif);
+            font-size: 0.8rem;
+            margin-bottom: 9px;
+            font-style: italic;
+            color: var(--mid);
+            border-left: 2px solid var(--light);
+            padding-left: 7px;
+        }
+
+        .badge-container { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.58rem;
+            padding: 1px 5px;
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .badge.paused { background: var(--text); color: var(--bg); }
+        .badge.rollover { background: var(--light); }
+        .badge.on-time { background: var(--text); color: var(--bg); }
+
+        .task-timer {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 9px 0;
+            text-align: center;
+            letter-spacing: 0.06em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .task-planned-label {
+            font-size: 0.6rem;
+            text-align: center;
+            margin-bottom: 9px;
+            opacity: 0.45;
+        }
+
+        .task-controls {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 9px;
+            padding-top: 9px;
+            border-top: 1px solid var(--light);
+        }
+
+        .task-controls button { font-size: 0.65rem; padding: 3px 7px; }
+
+        /* ── Panels ── */
+        .panels-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .panel { border: 1px solid var(--border); padding: 14px; }
+
+        .panel h3 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        /* ── Progress Chart Panel ── */
+        .progress-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-tab {
+            flex: 1;
+            text-align: center;
+            padding: 5px 8px;
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border: none;
+            border-right: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .progress-tab:last-child { border-right: none; }
+        .progress-tab.active { background: var(--text); color: var(--bg); }
+        .progress-tab:hover:not(.active) { background: var(--light); }
+
+        .progress-view { display: none; }
+        .progress-view.active { display: block; }
+
+        /* Ring chart */
+        .progress-rings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-around;
+            margin-bottom: 12px;
+        }
+
+        .ring-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ring-svg { transform: rotate(-90deg); }
+
+        .ring-track { fill: none; stroke: var(--light); }
+        .ring-fill {
+            fill: none;
+            stroke: var(--text);
+            stroke-linecap: square;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .ring-label-group {
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .ring-pct {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            fill: var(--text);
+        }
+
+        .ring-sub-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+            margin-top: 2px;
+        }
+
+        /* Bar rows for week/month */
+        .progress-bar-rows { display: flex; flex-direction: column; gap: 7px; }
+
+        .prog-row {
+            display: grid;
+            grid-template-columns: 38px 1fr 38px;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.68rem;
+        }
+
+        .prog-row-label { opacity: 0.55; font-size: 0.62rem; }
+
+        .prog-track {
+            height: 5px;
+            background: var(--light);
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        .prog-fill {
+            height: 100%;
+            background: var(--text);
+            transition: width 0.5s ease;
+        }
+
+        .prog-val { text-align: right; opacity: 0.7; font-size: 0.65rem; }
+
+        .progress-summary-line {
+            font-size: 0.65rem;
+            opacity: 0.45;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .done-item {
+            border-bottom: 1px dashed var(--light);
+            padding: 7px 0;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Collapsible sections ── */
+        .collapsible-section { margin-top: 28px; border: 1px solid var(--border); }
+
+        .collapsible-header {
+            padding: 10px 14px;
+            background: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .collapsible-content { padding: 14px; display: none; }
+        .collapsible-content.open { display: block; }
+
+        /* ── Modals ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(250,250,248,0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--bg);
+            border: 2px solid var(--text);
+            padding: 26px;
+            max-width: 520px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal h2 {
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.6;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea { width: 100%; }
+
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        /* ── Reports modal ── */
+        #reports-modal {
+            max-width: 92vw;
+            width: 92%;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 10px; right: 12px;
+            border: none;
+            background: transparent;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 1;
+        }
+
+        .report-toggle-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .report-toggle-buttons button { flex-grow: 1; }
+        .report-toggle-buttons button.active { background: var(--text); color: var(--bg); }
+
+        .report-section {
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        .report-section h4 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 14px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        .report-filters {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed var(--light);
+            font-size: 0.8rem;
+        }
+
+        #reports-modal table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.78rem;
+        }
+
+        #reports-modal th, #reports-modal td {
+            border: 1px solid var(--border);
+            padding: 7px;
+            text-align: left;
+        }
+
+        #reports-modal th { background: var(--light); font-weight: 500; }
+
+        /* ── Notification panel ── */
+        /* notification-panel-toggle now uses .icon-toggle-btn base */
+        #notification-panel-toggle .notif-badge {
+            position: absolute;
+            top: -7px; right: -7px;
+            background: var(--text);
+            color: var(--bg);
+            font-size: 0.6rem;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+        }
+
+        #notification-panel {
+            position: fixed;
+            bottom: 68px; right: 20px;
+            width: 300px; max-height: 380px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        #notification-panel.open { display: flex; }
+
+        #notification-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+        }
+
+        .notification-entry {
+            padding: 9px 12px;
+            border-bottom: 1px dashed var(--light);
+            font-size: 0.75rem;
+            position: relative;
+        }
+
+        .notification-entry .dismiss-btn {
+            position: absolute;
+            top: 5px; right: 6px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            opacity: 0.4;
+        }
+
+        .notification-entry .dismiss-btn:hover { background: var(--text); color: var(--bg); opacity: 1; }
+        .notification-entry .notif-time { font-size: 0.62rem; opacity: 0.5; margin-bottom: 2px; }
+        .notification-entry .notif-task { font-weight: 500; margin-bottom: 2px; }
+        .notification-entry .notif-type { font-style: italic; font-size: 0.68rem; opacity: 0.6; }
+
+        /* ── Focus mode ── */
+        .dimmed {
+            opacity: 0.12 !important;
+            transition: opacity 0.25s;
+            pointer-events: none;
+        }
+
+        #focus-mode-overlay {
+            position: fixed;
+            top: 96px; left: 0;
+            width: 100%;
+            background: var(--bg);
+            border-top: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            padding: 16px 24px;
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .focus-mode-active #focus-mode-overlay { display: flex; }
+
+        /* FIX: don't dim the overlay itself */
+        .focus-mode-active #focus-mode-overlay { opacity: 1 !important; pointer-events: all !important; }
+
+        #focus-task-name {
+            font-size: 1.6rem;
+            font-family: var(--font-serif);
+            text-align: center;
+        }
+
+        .focus-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .focus-progress-bar {
+            width: 80%;
+            max-width: 560px;
+            height: 6px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .focus-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--text);
+            transition: width 1s linear;
+        }
+
+        .focus-progress-bar.overrun { border-style: dashed; }
+        .focus-progress-fill.overrun { background: #bbb; }
+
+        /* ── Footer ── */
+        .footer-summary {
+            margin-top: 24px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            font-size: 0.78rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            opacity: 0.7;
+        }
+
+        /* FIX: Productivity score — capped display */
+        .productivity-score { font-weight: 500; }
+
+        .score-label {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 6px;
+            border: 1px solid var(--border);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Analytics ── */
+        .analytics-section {
+            margin-top: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .analytics-header {
+            padding: 10px 14px;
+            background: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .analytics-body {
+            padding: 20px;
+            display: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .analytics-body.open { display: block; }
+
+        .analytics-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .analytics-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        @media (max-width: 600px) {
+            .analytics-kpis { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .kpi-card {
+            border: 1px solid var(--border);
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 1.4rem;
+            font-family: var(--font-serif);
+            font-weight: normal;
+            margin-bottom: 3px;
+        }
+
+        .kpi-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+        }
+
+        .kpi-delta { font-size: 0.62rem; margin-top: 4px; opacity: 0.6; }
+
+        .analytics-chart-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+            margin-bottom: 8px;
+        }
+
+        .analytics-heatmap {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            align-items: flex-end;
+            height: 90px;
+        }
+
+        .hm-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 3px;
+        }
+
+        .hm-bar { width: 100%; background: var(--text); min-height: 1px; transition: height 0.3s ease; }
+        .hm-bar.today { background: var(--text); outline: 2px solid var(--text); outline-offset: 1px; }
+        .hm-bar.empty { background: var(--light); min-height: 4px; }
+        .hm-day { font-size: 0.58rem; opacity: 0.45; text-align: center; }
+        .hm-val { font-size: 0.58rem; opacity: 0.65; text-align: center; margin-bottom: 2px; }
+
+        .analytics-score-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--light);
+            border: 1px solid #ddd;
+            margin-top: 4px;
+        }
+
+        .analytics-score-bar-fill {
+            height: 100%;
+            background: var(--text);
+            transition: width 0.4s ease;
+        }
+
+        .analytics-priority-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+        .priority-bar-row {
+            display: grid;
+            grid-template-columns: 72px 1fr 36px;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+        }
+
+        .priority-bar-track { background: var(--light); height: 6px; width: 100%; }
+        .priority-bar-fill { height: 100%; background: var(--text); }
+
+        .analytics-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .insight-card { border: 1px solid var(--light); padding: 10px 12px; }
+        .insight-card-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; margin-bottom: 4px; }
+        .insight-card-value { font-size: 0.9rem; font-family: var(--font-serif); }
+        .insight-card-sub { font-size: 0.65rem; opacity: 0.55; margin-top: 2px; }
+
+        .top-task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--light);
+            padding: 6px 0;
+            font-size: 0.76rem;
+            gap: 10px;
+        }
+
+        .top-task-bar-wrap { flex: 1; background: var(--light); height: 3px; margin: 0 8px; }
+        .top-task-bar { height: 100%; background: var(--text); }
+        .top-task-time { font-size: 0.65rem; opacity: 0.55; white-space: nowrap; }
+
+        /* ── Responsive ── */
+        @media (max-width: 860px) {
+            .board { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 540px) {
+            .board { grid-template-columns: 1fr; }
+            .panels-grid { grid-template-columns: 1fr; }
+            .analytics-two-col { grid-template-columns: 1fr; }
+            #focus-mode-overlay { top: 140px; }
+            #notification-panel { width: 260px; right: 10px; bottom: 64px; }
+            #notification-panel-toggle { right: 10px; bottom: 12px; }
+            .footer-summary { flex-direction: column; }
+        }
+
+        /* ── Add task feedback flash ── */
+        @keyframes flash-in {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-card.just-added { animation: flash-in 0.22s ease; }
+
+        /* ── Icon buttons (notification + calendar) ── */
+        .icon-toggle-btn {
+            position: fixed;
+            width: 40px; height: 40px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1100;
+            transition: background 0.12s, color 0.12s;
+        }
+        .icon-toggle-btn:hover { background: var(--text); color: var(--bg); }
+        .icon-toggle-btn svg { pointer-events: none; }
+
+        /* Notification button — now uses SVG icon */
+        #notification-panel-toggle {
+            bottom: 20px; right: 20px;
+            font-size: unset;
+        }
+
+        /* Calendar button — sits left of notification button */
+        #calendar-panel-toggle {
+            bottom: 20px; right: 68px;
+        }
+
+        .icon-badge {
+            position: absolute;
+            top: -7px; right: -7px;
+            background: var(--text);
+            color: var(--bg);
+            font-size: 0.6rem;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            font-family: var(--font-mono);
+        }
+
+        /* ── Calendar Panel ── */
+        #calendar-panel {
+            position: fixed;
+            bottom: 68px; right: 68px;
+            width: 300px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+        #calendar-panel.open { display: flex; }
+
+        #calendar-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 1;
+        }
+
+        .calendar-grid {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calendar-month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+        }
+
+        .calendar-month-nav button {
+            border: none;
+            background: transparent;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            cursor: pointer;
+            color: var(--text);
+            transition: background 0.1s, color 0.1s;
+        }
+        .calendar-month-nav button:hover { background: var(--text); color: var(--bg); }
+
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.55rem;
+            opacity: 0.45;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .cal-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .cal-day {
+            text-align: center;
+            font-size: 0.68rem;
+            padding: 4px 2px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background 0.1s, border-color 0.1s;
+            position: relative;
+        }
+
+        .cal-day:hover { border-color: var(--border); }
+        .cal-day.today { border: 1px solid var(--text); font-weight: 500; }
+        .cal-day.other-month { opacity: 0.25; }
+        .cal-day.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .cal-day.has-project::after {
+            content: '';
+            display: block;
+            width: 3px; height: 3px;
+            background: var(--text);
+            border-radius: 50%;
+            margin: 1px auto 0;
+        }
+        .cal-day.selected.has-project::after { background: var(--bg); }
+
+        /* Project add form */
+        .calendar-add-form {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calendar-add-form .form-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+
+        .calendar-add-form input[type="text"] {
+            flex: 1;
+            font-size: 0.72rem;
+            padding: 5px 8px;
+        }
+
+        .calendar-add-form input[type="date"] {
+            font-size: 0.68rem;
+            padding: 5px 7px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .calendar-add-form button {
+            font-size: 0.65rem;
+            padding: 4px 9px;
+            white-space: nowrap;
+        }
+
+        .calendar-selected-label {
+            font-size: 0.62rem;
+            opacity: 0.5;
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+        }
+
+        /* Project list entries */
+        .cal-project-list {
+            flex: 1;
+        }
+
+        .cal-project-entry {
+            padding: 8px 12px;
+            border-bottom: 1px dashed var(--light);
+            font-size: 0.75rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cal-project-entry .cal-proj-name { font-weight: 500; padding-right: 20px; }
+        .cal-project-entry .cal-proj-date { font-size: 0.6rem; opacity: 0.5; }
+        .cal-project-entry .cal-proj-note { font-size: 0.68rem; font-style: italic; opacity: 0.65; }
+
+        .cal-project-entry .cal-dismiss-btn {
+            position: absolute;
+            top: 5px; right: 6px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            opacity: 0.35;
+        }
+        .cal-project-entry .cal-dismiss-btn:hover { background: var(--text); color: var(--bg); opacity: 1; }
+
+        .cal-empty-state {
+            padding: 14px 12px;
+            font-size: 0.72rem;
+            font-style: italic;
+            opacity: 0.4;
+            text-align: center;
+        }
+
+        .cal-section-label {
+            padding: 7px 12px 3px;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.45;
+            border-bottom: 1px solid var(--light);
+            background: var(--light);
+        }
+
+        @media (max-width: 540px) {
+            #calendar-panel { width: 260px; right: 10px; bottom: 64px; }
+            #calendar-panel-toggle { right: 58px; bottom: 12px; }
+        }
+        /* ── Header score widget ── */
+        .header-score-widget {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            padding: 5px 11px;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            position: relative;
+            min-width: 120px;
+        }
+
+        .header-score-bar-bg {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 2px;
+            width: 100%;
+            background: var(--light);
+        }
+
+        .header-score-bar-fill {
+            height: 100%;
+            background: var(--text);
+            transition: width 0.4s ease;
+        }
+
+        .header-score-number {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .header-score-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .header-score-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+        }
+
+        .header-score-grade {
+            font-size: 0.65rem;
+            font-weight: 500;
+        }
+        /* ── Google Auth ── */
+        #auth-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #google-signin-button {
+            display: flex;
+            align-items: center;
+            min-height: 36px;
+        }
+        #user-info {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            font-size: 0.72rem;
+        }
+        #user-avatar {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            object-fit: cover;
+        }
+        #user-name {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        #sign-out-btn {
+            font-size: 0.62rem;
+            padding: 2px 7px;
+            cursor: pointer;
+        }
+        #auth-status-note {
+            font-size: 0.62rem;
+            opacity: 0.4;
+            letter-spacing: 0.04em;
+        }
+    </style>
+<body>
+<div class="container">
+
+    <header>
+        <div class="header-top">
+            <div style="display:flex;align-items:baseline;gap:4px;">
+                <span class="brand">dooit</span>
+                <span class="brand-tagline">task &amp; time tracker</span>
+            </div>
+            <div class="header-actions">
+                <div id="auth-area">
+                    <div id="google-signin-button"></div>
+                    <div id="user-info">
+                        <img id="user-avatar" src="" alt="">
+                        <span id="user-name"></span>
+                        <span id="sync-status" style="font-size:0.6rem;letter-spacing:0.04em;opacity:0.45;"></span>
+                        <button id="sign-out-btn" onclick="signOut()">Sign out</button>
+                    </div>
+                    <span id="auth-status-note">not signed in</span>
+                </div>
+                <div class="header-score-widget" id="header-score-widget" title="Daily productivity score">
+                    <div class="header-score-number" id="header-score-num">—</div>
+                    <div class="header-score-details">
+                        <div class="header-score-label">Score / 100</div>
+                        <div class="header-score-grade" id="header-score-grade">—</div>
+                    </div>
+                    <div class="header-score-bar-bg">
+                        <div class="header-score-bar-fill" id="header-score-bar" style="width:0%"></div>
+                    </div>
+                </div>
+                <button id="show-summary-btn-header">End of Day</button>
+                <button id="show-reports-btn">Reports</button>
+                <button id="focus-mode-btn">Focus Mode</button>
+            </div>
+        </div>
+        <div class="quick-add">
+            <input type="text" id="new-task-text" placeholder="What needs doing...">
+            <select id="new-task-priority">
+                <option value="urgent">Urgent</option>
+                <option value="important">Important</option>
+                <option value="later">Later</option>
+            </select>
+            <div class="time-input-group">
+                <input type="number" id="new-task-start-hour" min="1" max="12" placeholder="HH">
+                <span class="time-sep">:</span>
+                <input type="number" id="new-task-start-minute" min="0" max="59" placeholder="MM">
+                <select id="new-task-start-ampm">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+            <span class="time-sep">–</span>
+            <div class="time-input-group">
+                <input type="number" id="new-task-end-hour" min="1" max="12" placeholder="HH">
+                <span class="time-sep">:</span>
+                <input type="number" id="new-task-end-minute" min="0" max="59" placeholder="MM">
+                <select id="new-task-end-ampm">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+            <button id="add-task-btn">+ Add</button>
+        </div>
+    </header>
+
+    <!-- Focus Mode Overlay -->
+    <div id="focus-mode-overlay">
+        <div id="focus-task-name"></div>
+        <div class="focus-details">
+            <span id="focus-timer">00:00:00</span>
+            <span style="opacity:.4">/</span>
+            <span id="focus-planned-end">--:--</span>
+        </div>
+        <div class="focus-progress-bar" id="focus-progress-bar">
+            <div class="focus-progress-fill" id="focus-progress-fill"></div>
+        </div>
+        <button id="exit-focus-btn" style="margin-top:6px;font-size:0.75rem;">Exit Focus</button>
+    </div>
+
+    <!-- Board: 4 columns -->
+    <div class="board">
+        <div class="column" id="col-previous-unfinished">
+            <h2>Unfinished <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+        <div class="column" id="col-urgent">
+            <h2>Urgent <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+        <div class="column" id="col-important">
+            <h2>Important <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+        <div class="column" id="col-later">
+            <h2>Later <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+    </div>
+
+    <!-- Progress Chart + Done -->
+    <div class="panels-grid">
+        <div class="panel">
+            <h3>Progress</h3>
+            <div class="progress-tabs">
+                <button class="progress-tab active" onclick="switchProgressTab('day', this)">Day</button>
+                <button class="progress-tab" onclick="switchProgressTab('week', this)">Week</button>
+                <button class="progress-tab" onclick="switchProgressTab('month', this)">Month</button>
+            </div>
+
+            <!-- DAY view: 3 rings -->
+            <div class="progress-view active" id="progress-day">
+                <div class="progress-rings" id="day-rings">
+                    <!-- rendered by JS -->
+                </div>
+                <div class="progress-summary-line" id="day-summary-line"></div>
+            </div>
+
+            <!-- WEEK view: bar rows per day -->
+            <div class="progress-view" id="progress-week">
+                <div class="progress-bar-rows" id="week-bars"></div>
+                <div class="progress-summary-line" id="week-summary-line"></div>
+            </div>
+
+            <!-- MONTH view: bar rows per week -->
+            <div class="progress-view" id="progress-month">
+                <div class="progress-bar-rows" id="month-bars"></div>
+                <div class="progress-summary-line" id="month-summary-line"></div>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>Done Today</h3>
+            <div id="done-list"></div>
+            <div style="margin-top:16px;">
+                <button id="show-summary-btn">End of Day Summary</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Wins -->
+    <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleSection('quick-wins-content')">
+            <span>Quick Wins Today</span>
+            <span id="quick-wins-count">0</span>
+        </div>
+        <div class="collapsible-content" id="quick-wins-content"></div>
+    </div>
+
+    <!-- Analytics (integrated, no external paste needed) -->
+    <div class="analytics-section" id="analytics-section">
+        <div class="analytics-header" onclick="toggleAnalytics()">
+            <span>Weekly Analytics</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span id="analytics-week-label" style="font-size:0.7rem;opacity:0.5;"></span>
+                <span id="analytics-toggle-icon">▼</span>
+            </div>
+        </div>
+        <div class="analytics-body" id="analytics-body">
+            <div class="analytics-nav">
+                <button onclick="analyticsChangeWeek(-1)">← Prev</button>
+                <span id="analytics-week-range" style="font-size:0.78rem;opacity:.7;"></span>
+                <button onclick="analyticsChangeWeek(1)" id="analytics-next-btn">Next →</button>
+            </div>
+            <div class="analytics-kpis" id="analytics-kpis"></div>
+            <div class="analytics-chart-label">Focus hours per day</div>
+            <div class="analytics-heatmap" id="analytics-heatmap"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">
+                Weekly focus score &nbsp;<span id="analytics-score-val" style="font-weight:500;"></span>
+            </div>
+            <div class="analytics-score-bar-bg">
+                <div class="analytics-score-bar-fill" id="analytics-score-fill"></div>
+            </div>
+            <div style="font-size:0.65rem;opacity:.45;margin-top:4px;" id="analytics-score-note"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">Tasks completed by priority</div>
+            <div class="analytics-priority-bars" id="analytics-priority-bars"></div>
+            <div class="analytics-two-col" id="analytics-insights"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">Most focused tasks this week</div>
+            <div id="analytics-top-tasks"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-summary">
+        <span id="daily-break-summary">Break time today: 00:00:00</span>
+        <span id="current-date-display"></span>
+        <span class="productivity-score" id="productivity-score-display">Score: 100 <span class="score-label" id="productivity-label">Excellent</span></span>
+    </div>
+
+</div><!-- /container -->
+
+<!-- Generic Modal -->
+<div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- Reports Modal -->
+<div id="reports-modal-overlay" class="modal-overlay">
+    <div class="modal" id="reports-modal">
+        <button class="modal-close-btn" onclick="closeReportsModal()">×</button>
+        <h2>Reports</h2>
+        <div class="report-toggle-buttons">
+            <button id="daily-report-toggle" class="active">Daily</button>
+            <button id="weekly-report-toggle">Weekly</button>
+        </div>
+        <div id="daily-report-view">
+            <div class="report-section">
+                <h4>Daily Report</h4>
+                <div class="report-filters">
+                    <label for="daily-report-date">Date:</label>
+                    <input type="date" id="daily-report-date">
+                    <button id="daily-report-generate">Show Report</button>
+                </div>
+            </div>
+            <div id="daily-report-content"></div>
+        </div>
+        <div id="weekly-report-view" style="display:none;">
+            <div class="report-section">
+                <h4>Weekly Report</h4>
+                <div class="report-filters">
+                    <label for="weekly-report-from">From:</label>
+                    <input type="date" id="weekly-report-from">
+                    <label for="weekly-report-to">To:</label>
+                    <input type="date" id="weekly-report-to">
+                    <button id="weekly-report-generate">Show Report</button>
+                </div>
+            </div>
+            <div id="weekly-report-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Panel Toggle -->
+<div id="calendar-panel-toggle" class="icon-toggle-btn" title="Upcoming Projects">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="2.5" width="14" height="12.5" rx="0" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <line x1="1" y1="6" x2="15" y2="6" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="5" y1="1" x2="5" y2="4" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="11" y1="1" x2="11" y2="4" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="5" cy="9.5" r="0.9" fill="currentColor"/>
+        <circle cx="8" cy="9.5" r="0.9" fill="currentColor"/>
+        <circle cx="11" cy="9.5" r="0.9" fill="currentColor"/>
+        <circle cx="5" cy="12.5" r="0.9" fill="currentColor"/>
+        <circle cx="8" cy="12.5" r="0.9" fill="currentColor"/>
+    </svg>
+    <span class="icon-badge" id="calendar-project-count" style="display:none;">0</span>
+</div>
+
+<!-- Calendar Panel -->
+<div id="calendar-panel">
+    <div id="calendar-panel-header">
+        <span>Upcoming Projects</span>
+        <button id="clear-all-projects" style="font-size:0.65rem;padding:2px 7px;">Clear all</button>
+    </div>
+    <!-- Mini calendar grid -->
+    <div class="calendar-grid">
+        <div class="calendar-month-nav">
+            <button id="cal-prev-month">←</button>
+            <span id="cal-month-label"></span>
+            <button id="cal-next-month">→</button>
+        </div>
+        <div class="cal-weekdays">
+            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div class="cal-days" id="cal-days-grid"></div>
+    </div>
+    <!-- Add project form -->
+    <div class="calendar-add-form">
+        <div class="calendar-selected-label" id="cal-selected-label">Select a date to add project</div>
+        <input type="text" id="cal-project-name" placeholder="Project name..." style="width:100%;margin-bottom:6px;">
+        <input type="text" id="cal-project-note" placeholder="Note (optional)..." style="width:100%;margin-bottom:6px;font-style:italic;">
+        <div class="form-row">
+            <button id="cal-add-project-btn" disabled>+ Add Project</button>
+        </div>
+    </div>
+    <!-- Project list -->
+    <div class="cal-project-list" id="cal-project-list">
+        <div class="cal-empty-state">No upcoming projects yet.</div>
+    </div>
+</div>
+
+<!-- Notification Panel -->
+<div id="notification-panel-toggle" class="icon-toggle-btn" title="Notifications">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 1.5C8 1.5 4 3 4 8V11.5H12V8C12 3 8 1.5 8 1.5Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+        <line x1="2.5" y1="11.5" x2="13.5" y2="11.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M6.5 11.5 C6.5 12.33 7.17 13 8 13 C8.83 13 9.5 12.33 9.5 11.5" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <line x1="8" y1="1.5" x2="8" y2="0.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    <span class="notif-badge" id="unread-notification-count">0</span>
+</div>
+<div id="notification-panel">
+    <div id="notification-panel-header">
+        <span>Notifications</span>
+        <button id="clear-all-notifications" style="font-size:0.65rem;padding:2px 7px;">Clear all</button>
+    </div>
+    <div id="notification-list"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Constants & State
+// ─────────────────────────────────────────────
+const STORAGE_TASKS    = 'dooit_tasks';
+const STORAGE_ACTIVE   = 'dooit_active_task';
+const STORAGE_LAST_DATE = 'dooit_last_date';
+const STORAGE_NOTIF    = 'dooit_notifications_';
+
+let tasks = [];
+let activeTaskId = null;
+let today = new Date().toISOString().split('T')[0];
+
+let notificationPermissionGranted = false;
+let firedNotifications = new Set();
+let currentDayNotifications = [];
+let isFocusMode = false;
+
+// Analytics state
+let analyticsWeekOffset = 0;
+
+// ─────────────────────────────────────────────
+// Storage utils
+// ─────────────────────────────────────────────
+function safeGet(key, fallback = '[]') {
+    try {
+        const item = localStorage.getItem(key);
+        return item !== null ? item : fallback;
+    } catch (e) { return fallback; }
+}
+
+function safeSet(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { console.error(e); }
+}
+
+// ─────────────────────────────────────────────
+// Time helpers
+// ─────────────────────────────────────────────
+function formatTime12Hour(time24) {
+    if (!time24) return '';
+    const [hour, minute] = time24.split(':').map(Number);
+    if (isNaN(hour) || isNaN(minute)) return '';
+    const d = new Date();
+    d.setHours(hour, minute);
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/ /g, '');
+}
+
+function convert12to24(hour12, minute, ampm) {
+    let h = parseInt(hour12, 10);
+    const m = parseInt(minute, 10);
+    if (ampm === 'PM' && h < 12) h += 12;
+    else if (ampm === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function formatDuration(ms) {
+    const s = Math.floor((ms / 1000) % 60);
+    const m = Math.floor((ms / 60000) % 60);
+    const h = Math.floor(ms / 3600000);
+    return [h,m,s].map(n => String(n).padStart(2,'0')).join(':');
+}
+
+function getPlannedMinutes(task) {
+    if (!task.plannedStart || !task.plannedEnd) return null;
+    try {
+        const [sh, sm] = task.plannedStart.split(':').map(Number);
+        const [eh, em] = task.plannedEnd.split(':').map(Number);
+        if ([sh,sm,eh,em].some(isNaN)) return null;
+        let start = sh * 60 + sm;
+        let end = eh * 60 + em;
+        if (end < start) end += 1440;
+        return end - start;
+    } catch { return null; }
+}
+
+// ─────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────
+function init() {
+    tasks = JSON.parse(safeGet(STORAGE_TASKS));
+    activeTaskId = safeGet(STORAGE_ACTIVE, null);
+
+    checkRollover();
+    document.getElementById('current-date-display').innerText = today;
+
+    loadNotifications();
+    render();
+    startGlobalTimer();
+    requestNotificationPermission();
+
+    // Event listeners
+    document.getElementById('add-task-btn').addEventListener('click', addTask);
+    document.getElementById('new-task-text').addEventListener('keypress', e => {
+        if (e.key === 'Enter') addTask();
+    });
+    document.getElementById('show-summary-btn').addEventListener('click', showSummary);
+    document.getElementById('show-summary-btn-header').addEventListener('click', showSummary);
+
+    // Reports
+    document.getElementById('show-reports-btn').addEventListener('click', showReportsModal);
+    document.getElementById('daily-report-toggle').addEventListener('click', () => toggleReportView('daily'));
+    document.getElementById('weekly-report-toggle').addEventListener('click', () => toggleReportView('weekly'));
+    document.getElementById('daily-report-date').value = today;
+    document.getElementById('daily-report-generate').addEventListener('click', generateDailyReport);
+    document.getElementById('daily-report-date').addEventListener('change', generateDailyReport);
+
+    const todayDate = new Date();
+    const dow = todayDate.getDay();
+    const monday = new Date(todayDate);
+    monday.setDate(todayDate.getDate() - ((dow + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    document.getElementById('weekly-report-from').value = monday.toISOString().split('T')[0];
+    document.getElementById('weekly-report-to').value = sunday.toISOString().split('T')[0];
+    document.getElementById('weekly-report-generate').addEventListener('click', generateWeeklyReport);
+
+    // Notifications
+    document.getElementById('notification-panel-toggle').addEventListener('click', toggleNotificationPanel);
+    document.getElementById('clear-all-notifications').addEventListener('click', clearAllNotifications);
+
+    // Focus mode
+    document.getElementById('focus-mode-btn').addEventListener('click', toggleFocusMode);
+    document.getElementById('exit-focus-btn').addEventListener('click', exitFocusMode);
+}
+
+// ─────────────────────────────────────────────
+// Rollover
+// ─────────────────────────────────────────────
+function checkRollover() {
+    const lastDate = safeGet(STORAGE_LAST_DATE, null);
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    if (lastDate && lastDate !== currentDate) {
+        today = currentDate;
+        firedNotifications.clear();
+        currentDayNotifications = [];
+        safeSet(STORAGE_NOTIF + today, '[]');
+
+        tasks.forEach(t => {
+            if (t.date < today && (t.status === 'pending' || t.status === 'in_progress')) {
+                t.status = 'previous_unfinished';
+                t.actualStart = null;
+                t.breaks = [];
+            }
+        });
+        saveTasks();
+    }
+    today = currentDate;
+    safeSet(STORAGE_LAST_DATE, today);
+}
+
+// ─────────────────────────────────────────────
+// Add task — with visual feedback
+// ─────────────────────────────────────────────
+function addTask() {
+    const textInput = document.getElementById('new-task-text');
+    const text = textInput.value.trim();
+    if (!text) {
+        textInput.focus();
+        return;
+    }
+
+    const startHour = document.getElementById('new-task-start-hour').value;
+    const startMin  = document.getElementById('new-task-start-minute').value;
+    const startAP   = document.getElementById('new-task-start-ampm').value;
+    const endHour   = document.getElementById('new-task-end-hour').value;
+    const endMin    = document.getElementById('new-task-end-minute').value;
+    const endAP     = document.getElementById('new-task-end-ampm').value;
+
+    const plannedStart = (startHour && startMin) ? convert12to24(startHour, startMin, startAP) : '';
+    const plannedEnd   = (endHour && endMin)     ? convert12to24(endHour, endMin, endAP)       : '';
+
+    const newTask = {
+        id: 't_' + Date.now(),
+        text,
+        priority: document.getElementById('new-task-priority').value,
+        note: '',
+        date: today,
+        status: 'pending',
+        plannedStart,
+        plannedEnd,
+        actualStart: null,
+        actualEnd: null,
+        rolledOver: false,
+        rolledOverFrom: null,
+        breaks: [],
+        _justAdded: true  // flag for animation
+    };
+
+    tasks.push(newTask);
+    saveTasks();
+    render();
+    updateProductivityScore();
+
+    // Clear inputs
+    textInput.value = '';
+    ['new-task-start-hour','new-task-start-minute','new-task-end-hour','new-task-end-minute']
+        .forEach(id => document.getElementById(id).value = '');
+    textInput.focus();
+}
+
+// ─────────────────────────────────────────────
+// Save tasks — FIX: explicit deletion tracking
+// ─────────────────────────────────────────────
+function saveTasks() {
+    // tasks array is the source of truth — just serialize it directly
+    safeSet(STORAGE_TASKS, JSON.stringify(tasks));
+    // Sync to Firestore if signed in
+    if (window.__firebaseSync && window.__firebaseSync.getUserId()) {
+        window.__firebaseSync.syncTasks();
+    }
+}
+
+// ─────────────────────────────────────────────
+// Task actions
+// ─────────────────────────────────────────────
+function startTask(id) {
+    if (activeTaskId && activeTaskId !== id) pauseTask(activeTaskId);
+
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    // If rolling over a previous_unfinished task
+    if (task.status === 'previous_unfinished') {
+        task.status = 'in_progress';
+        task.rolledOver = true;
+        task.rolledOverFrom = task.date;
+        task.date = today;
+        task.actualStart = Date.now();
+    } else {
+        if (!task.actualStart) {
+            task.actualStart = Date.now();
+        } else {
+            // Resume from break — close the last open break
+            const lastBreak = task.breaks[task.breaks.length - 1];
+            if (lastBreak && !lastBreak.end) lastBreak.end = Date.now();
+        }
+        task.status = 'in_progress';
+    }
+
+    activeTaskId = id;
+    safeSet(STORAGE_ACTIVE, id);
+    saveTasks();
+    render();
+    updateFocusModeUI();
+    updateProductivityScore();
+}
+
+function pauseTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task || task.status !== 'in_progress') return;
+
+    const lastBreak = task.breaks[task.breaks.length - 1];
+    if (!lastBreak || lastBreak.end) task.breaks.push({ start: Date.now(), end: null });
+
+    task.status = 'in_progress'; // stays in_progress but visually paused
+    if (activeTaskId === id) {
+        activeTaskId = null;
+        localStorage.removeItem(STORAGE_ACTIVE);
+    }
+
+    saveTasks();
+    render();
+    updateFocusModeUI();
+}
+
+function completeTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const lastBreak = task.breaks[task.breaks.length - 1];
+    if (lastBreak && !lastBreak.end) lastBreak.end = Date.now();
+
+    task.actualEnd = Date.now();
+    task.status = 'done';
+
+    if (activeTaskId === id) {
+        activeTaskId = null;
+        localStorage.removeItem(STORAGE_ACTIVE);
+    }
+
+    saveTasks();
+    render();
+    updateFocusModeUI();
+    updateProductivityScore();
+}
+
+function deleteTask(id) {
+    showModal('Delete task', `
+        <p style="margin-bottom:4px;">This cannot be undone.</p>
+        <div class="modal-actions">
+            <button onclick="confirmDelete('${id}')">Delete</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    `);
+}
+
+function confirmDelete(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    if (activeTaskId === id) {
+        activeTaskId = null;
+        localStorage.removeItem(STORAGE_ACTIVE);
+    }
+    saveTasks();
+    closeModal();
+    render();
+    updateFocusModeUI();
+    updateProductivityScore();
+}
+
+// FIX: editTask — safely handles missing planned times
+function editTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    function get12(time24) {
+        if (!time24) return { hour: '', minute: '', ampm: 'AM' };
+        const [h24, m] = time24.split(':').map(Number);
+        if (isNaN(h24) || isNaN(m)) return { hour: '', minute: '', ampm: 'AM' };
+        let hour = h24 % 12;
+        if (hour === 0) hour = 12;
+        return { hour, minute: String(m).padStart(2,'0'), ampm: h24 < 12 ? 'AM' : 'PM' };
+    }
+
+    const s = get12(task.plannedStart);
+    const e = get12(task.plannedEnd);
+
+    showModal('Edit task', `
+        <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="edit-text" value="${escHtml(task.text)}">
+        </div>
+        <div class="form-group">
+            <label>Priority</label>
+            <select id="edit-priority">
+                <option value="urgent"    ${task.priority==='urgent'    ?'selected':''}>Urgent</option>
+                <option value="important" ${task.priority==='important' ?'selected':''}>Important</option>
+                <option value="later"     ${task.priority==='later'     ?'selected':''}>Later</option>
+            </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+                <label>Planned Start</label>
+                <div class="time-input-group">
+                    <input type="number" id="edit-start-hour" min="1" max="12" placeholder="HH" value="${s.hour}">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="edit-start-minute" min="0" max="59" placeholder="MM" value="${s.minute}">
+                    <select id="edit-start-ampm">
+                        <option value="AM" ${s.ampm==='AM'?'selected':''}>AM</option>
+                        <option value="PM" ${s.ampm==='PM'?'selected':''}>PM</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Planned End</label>
+                <div class="time-input-group">
+                    <input type="number" id="edit-end-hour" min="1" max="12" placeholder="HH" value="${e.hour}">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="edit-end-minute" min="0" max="59" placeholder="MM" value="${e.minute}">
+                    <select id="edit-end-ampm">
+                        <option value="AM" ${e.ampm==='AM'?'selected':''}>AM</option>
+                        <option value="PM" ${e.ampm==='PM'?'selected':''}>PM</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea id="edit-note">${escHtml(task.note)}</textarea>
+        </div>
+        <div class="modal-actions">
+            <button onclick="saveEdit('${id}')">Save</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    `);
+}
+
+function saveEdit(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    task.text = document.getElementById('edit-text').value;
+    task.priority = document.getElementById('edit-priority').value;
+
+    const sh = document.getElementById('edit-start-hour').value;
+    const sm = document.getElementById('edit-start-minute').value;
+    const sap = document.getElementById('edit-start-ampm').value;
+    const eh = document.getElementById('edit-end-hour').value;
+    const em = document.getElementById('edit-end-minute').value;
+    const eap = document.getElementById('edit-end-ampm').value;
+
+    task.plannedStart = (sh && sm) ? convert12to24(sh, sm, sap) : '';
+    task.plannedEnd   = (eh && em) ? convert12to24(eh, em, eap) : '';
+    task.note = document.getElementById('edit-note').value;
+
+    saveTasks();
+    closeModal();
+    render();
+    updateProductivityScore();
+}
+
+function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// Timer logic
+// ─────────────────────────────────────────────
+function getElapsed(task) {
+    if (!task.actualStart) return 0;
+    let totalBreak = 0;
+    task.breaks.forEach(b => {
+        totalBreak += b.end ? (b.end - b.start) : (Date.now() - b.start);
+    });
+    return Math.max(0, (task.actualEnd || Date.now()) - task.actualStart - totalBreak);
+}
+
+function getBreakTime(task) {
+    return task.breaks.reduce((sum, b) =>
+        sum + (b.end ? (b.end - b.start) : (Date.now() - b.start)), 0);
+}
+
+// ─────────────────────────────────────────────
+// Render
+// ─────────────────────────────────────────────
+function render() {
+    const lists = {
+        previous_unfinished: document.querySelector('#col-previous-unfinished .task-list'),
+        urgent:    document.querySelector('#col-urgent .task-list'),
+        important: document.querySelector('#col-important .task-list'),
+        later:     document.querySelector('#col-later .task-list'),
+    };
+    const counts = {
+        previous_unfinished: document.querySelector('#col-previous-unfinished .count'),
+        urgent:    document.querySelector('#col-urgent .count'),
+        important: document.querySelector('#col-important .count'),
+        later:     document.querySelector('#col-later .count'),
+    };
+
+    Object.values(lists).forEach(el => el.innerHTML = '');
+    document.getElementById('done-list').innerHTML = '';
+    const quickWins = document.getElementById('quick-wins-content');
+    quickWins.innerHTML = '';
+
+    const currentTasks  = tasks.filter(t => t.date === today && ['pending','in_progress','done'].includes(t.status));
+    const prevUnfinished = tasks.filter(t => t.status === 'previous_unfinished');
+
+    const activeCounts = { previous_unfinished:0, urgent:0, important:0, later:0 };
+    let totalBreakToday = 0;
+    let quickWinsCount = 0;
+
+    prevUnfinished.forEach(task => {
+        renderBoardTask(task, lists.previous_unfinished);
+        activeCounts.previous_unfinished++;
+    });
+
+    currentTasks.forEach(task => {
+        totalBreakToday += getBreakTime(task);
+        if (task.status === 'done') {
+            renderDoneTask(task, document.getElementById('done-list'));
+            if (isTaskOnTime(task)) {
+                renderQuickWinTask(task, quickWins);
+                quickWinsCount++;
+            }
+        } else {
+            renderBoardTask(task, lists[task.priority]);
+            activeCounts[task.priority]++;
+        }
+    });
+
+    Object.keys(activeCounts).forEach(p => {
+        counts[p].innerText = `(${activeCounts[p]})`;
+        if (activeCounts[p] === 0) {
+            lists[p].innerHTML = '<div class="empty-state">Nothing here.</div>';
+        }
+    });
+
+    document.getElementById('quick-wins-count').innerText = quickWinsCount;
+    if (quickWinsCount === 0) quickWins.innerHTML = '<div class="empty-state">No quick wins yet today.</div>';
+
+    document.getElementById('daily-break-summary').innerText =
+        `Break time today: ${formatDuration(totalBreakToday)}`;
+
+    applyFocusModeStyling();
+    renderProgressCharts();
+}
+
+function renderBoardTask(task, container) {
+    const isPaused = task.status === 'in_progress' &&
+        task.breaks.length > 0 && !task.breaks[task.breaks.length - 1].end;
+
+    const card = document.createElement('div');
+    const isJustAdded = task._justAdded;
+    if (isJustAdded) { delete task._justAdded; }
+
+    card.className = `task-card ${task.status === 'in_progress' ? 'in-progress' : ''} ${isPaused ? 'paused' : ''} ${isJustAdded ? 'just-added' : ''}`;
+    card.id = `card-${task.id}`;
+
+    const elapsed   = getElapsed(task);
+    const plannedMin = getPlannedMinutes(task);
+    const timeDisplay = (task.plannedStart && task.plannedEnd)
+        ? `${formatTime12Hour(task.plannedStart)} – ${formatTime12Hour(task.plannedEnd)}`
+        : '';
+
+    const isStartable = task.status === 'pending' || task.status === 'previous_unfinished' || isPaused;
+
+    card.innerHTML = `
+        <div class="task-header">
+            <span class="task-name">${escHtml(task.text)}</span>
+            ${timeDisplay ? `<span class="task-time-planned">${timeDisplay}</span>` : ''}
+        </div>
+        <div class="badge-container">
+            ${task.status === 'previous_unfinished' ? `<span class="badge rollover">From ${task.date}</span>` : ''}
+            ${isPaused ? `<span class="badge paused">Paused</span>` : ''}
+            ${task.rolledOver && task.date === today ? `<span class="badge rollover">Rolled from ${task.rolledOverFrom}</span>` : ''}
+        </div>
+        ${task.note ? `<div class="task-note-snippet">${escHtml(task.note)}</div>` : ''}
+        <div class="task-timer" id="timer-${task.id}">${formatDuration(elapsed)}</div>
+        <div class="task-planned-label">Planned: ${plannedMin !== null ? plannedMin + 'm' : '—'}</div>
+        <div class="task-controls">
+            ${isStartable
+                ? `<button onclick="startTask('${task.id}')">Start</button>`
+                : `<button onclick="pauseTask('${task.id}')">Break</button>`
+            }
+            <button onclick="completeTask('${task.id}')">Done</button>
+            <button onclick="editTask('${task.id}')">Edit</button>
+            <button onclick="deleteTask('${task.id}')">Delete</button>
+        </div>
+    `;
+
+    container.appendChild(card);
+}
+
+function renderDoneTask(task, container) {
+    const elapsed = getElapsed(task);
+    const plannedMin = getPlannedMinutes(task);
+    let deltaStr = '—';
+    if (plannedMin !== null) {
+        const delta = Math.round((elapsed - plannedMin * 60000) / 60000);
+        deltaStr = delta >= 0 ? `+${delta}m` : `${delta}m`;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'done-item';
+    item.innerHTML = `
+        <div style="flex:1;">
+            <div style="font-weight:500;">${escHtml(task.text)}</div>
+            <div style="font-size:0.65rem;opacity:.5;">${deltaStr}</div>
+        </div>
+        <div style="text-align:right;">
+            <div>${formatDuration(elapsed)}</div>
+            <button onclick="deleteTask('${task.id}')" style="font-size:0.6rem;margin-top:3px;">Del</button>
+        </div>
+    `;
+    container.appendChild(item);
+}
+
+function renderQuickWinTask(task, container) {
+    const elapsed = getElapsed(task);
+    const item = document.createElement('div');
+    item.className = 'done-item';
+    item.innerHTML = `
+        <div style="flex:1;">
+            <div style="font-weight:500;">${escHtml(task.text)}</div>
+            <span class="badge on-time">✓ On time</span>
+        </div>
+        <div>${formatDuration(elapsed)}</div>
+    `;
+    container.appendChild(item);
+}
+
+// ─────────────────────────────────────────────
+// Section toggles
+// ─────────────────────────────────────────────
+function toggleSection(id) {
+    document.getElementById(id).classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────
+// Global timer — FIX: throttled calls
+// ─────────────────────────────────────────────
+let _notifTick = 0;
+let _scoreTick = 0;
+
+function startGlobalTimer() {
+    setInterval(() => {
+        const newDate = new Date().toISOString().split('T')[0];
+        if (newDate !== today) {
+            today = newDate;
+            checkRollover();
+            document.getElementById('current-date-display').innerText = today;
+            loadNotifications();
+            render();
+        }
+
+        // Update active task timer only
+        if (activeTaskId) {
+            const task = tasks.find(t => t.id === activeTaskId);
+            if (task && task.status === 'in_progress') {
+                const el = document.getElementById(`timer-${task.id}`);
+                if (el) el.innerText = formatDuration(getElapsed(task));
+            }
+        }
+
+        updateFocusModeUI();
+
+        // Notifications every 30s
+        _notifTick++;
+        if (_notifTick >= 30) { checkNotifications(); _notifTick = 0; }
+
+        // Score every 5s
+        _scoreTick++;
+        if (_scoreTick >= 5) { updateProductivityScore(); _scoreTick = 0; }
+
+    }, 1000);
+}
+
+// ─────────────────────────────────────────────
+// Modal system
+// ─────────────────────────────────────────────
+function showModal(title, contentHtml) {
+    document.getElementById('modal-content').innerHTML = `<h2>${title}</h2>${contentHtml}`;
+    document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────
+// Summary
+// ─────────────────────────────────────────────
+function showSummary() {
+    const todayTasks = tasks.filter(t =>
+        t.date === today && ['pending','in_progress','done'].includes(t.status));
+    const prevUnfinished = tasks.filter(t => t.status === 'previous_unfinished');
+    const completed = todayTasks.filter(t => t.status === 'done');
+    const pending   = todayTasks.filter(t => t.status !== 'done');
+
+    let totalFocus = 0, totalBreak = 0;
+    todayTasks.forEach(t => { totalFocus += getElapsed(t); totalBreak += getBreakTime(t); });
+
+    showModal('End of Day Summary', `
+        <div style="margin-bottom:16px;">
+            <div class="summary-stat"><span>Tasks planned today</span><span>${todayTasks.length}</span></div>
+            <div class="summary-stat"><span>Completed</span><span>${completed.length}</span></div>
+            <div class="summary-stat"><span>Still pending</span><span>${pending.length}</span></div>
+            <div class="summary-stat"><span>Unfinished from previous days</span><span>${prevUnfinished.length}</span></div>
+            <div class="summary-stat" style="margin-top:8px;"><span>Total focused time</span><span>${formatDuration(totalFocus)}</span></div>
+            <div class="summary-stat"><span>Total break time</span><span>${formatDuration(totalBreak)}</span></div>
+            <div class="summary-stat" style="font-weight:500;"><span>Total session time</span><span>${formatDuration(totalFocus + totalBreak)}</span></div>
+        </div>
+        <div class="modal-actions"><button onclick="closeModal()">Close</button></div>
+    `);
+}
+
+// ─────────────────────────────────────────────
+// Reports
+// ─────────────────────────────────────────────
+function showReportsModal() {
+    document.getElementById('reports-modal-overlay').classList.add('open');
+    toggleReportView('daily');
+    generateDailyReport();
+}
+
+function closeReportsModal() {
+    document.getElementById('reports-modal-overlay').classList.remove('open');
+}
+
+function toggleReportView(view) {
+    document.getElementById('daily-report-view').style.display   = view === 'daily'   ? 'block' : 'none';
+    document.getElementById('weekly-report-view').style.display  = view === 'weekly'  ? 'block' : 'none';
+    document.getElementById('daily-report-toggle').classList.toggle('active',  view === 'daily');
+    document.getElementById('weekly-report-toggle').classList.toggle('active', view === 'weekly');
+    if (view === 'daily') generateDailyReport();
+    else generateWeeklyReport();
+}
+
+function generateDailyReport() {
+    const date = document.getElementById('daily-report-date').value;
+    if (!date) { document.getElementById('daily-report-content').innerHTML = '<p>Select a date.</p>'; return; }
+
+    const dayTasks = tasks.filter(t => t.date === date && ['pending','in_progress','done'].includes(t.status));
+    const done = dayTasks.filter(t => t.status === 'done');
+    const active = dayTasks.filter(t => t.status !== 'done');
+    let focus = 0, brk = 0;
+    dayTasks.forEach(t => { focus += getElapsed(t); brk += getBreakTime(t); });
+
+    let html = `
+        <div class="report-section">
+            <h4>Summary — ${date}</h4>
+            <div class="summary-stat"><span>Tasks planned</span><span>${dayTasks.length}</span></div>
+            <div class="summary-stat"><span>Completed</span><span>${done.length}</span></div>
+            <div class="summary-stat"><span>Pending / in progress</span><span>${active.length}</span></div>
+            <div class="summary-stat"><span>Focus time</span><span>${formatDuration(focus)}</span></div>
+            <div class="summary-stat"><span>Break time</span><span>${formatDuration(brk)}</span></div>
+        </div>
+        <div class="report-section">
+            <h4>Task Breakdown</h4>
+            <table><thead><tr>
+                <th>Task</th><th>Priority</th><th>Planned</th><th>Actual</th><th>Status</th><th>Delta</th>
+            </tr></thead><tbody>
+    `;
+
+    if (dayTasks.length === 0) {
+        html += `<tr><td colspan="6" style="text-align:center;opacity:.5;">No tasks for this date.</td></tr>`;
+    } else {
+        dayTasks.forEach(task => {
+            const pm = getPlannedMinutes(task);
+            const actual = formatDuration(getElapsed(task));
+            let delta = '—';
+            if (task.status === 'done' && pm !== null) {
+                const d = Math.round((getElapsed(task) - pm * 60000) / 60000);
+                delta = d >= 0 ? `+${d}m` : `${d}m`;
+            }
+            html += `<tr>
+                <td>${escHtml(task.text)}</td>
+                <td>${task.priority}</td>
+                <td>${task.plannedStart ? `${formatTime12Hour(task.plannedStart)} – ${formatTime12Hour(task.plannedEnd)}` : (pm ? pm+'m' : '—')}</td>
+                <td>${task.actualStart ? actual : '—'}</td>
+                <td>${task.status.replace('_',' ')}</td>
+                <td>${delta}</td>
+            </tr>`;
+        });
+    }
+
+    html += `</tbody></table></div>`;
+    document.getElementById('daily-report-content').innerHTML = html;
+}
+
+function generateWeeklyReport() {
+    const from = document.getElementById('weekly-report-from').value;
+    const to   = document.getElementById('weekly-report-to').value;
+    if (!from || !to) { document.getElementById('weekly-report-content').innerHTML = '<p>Select a date range.</p>'; return; }
+
+    const fromD = new Date(from + 'T00:00:00');
+    const toD   = new Date(to   + 'T23:59:59');
+    const weekTasks = tasks.filter(t => {
+        const d = new Date(t.date + 'T00:00:00');
+        return d >= fromD && d <= toD;
+    });
+
+    const done = weekTasks.filter(t => t.status === 'done');
+    let totalFocus = 0, totalBreak = 0;
+    weekTasks.forEach(t => { totalFocus += getElapsed(t); totalBreak += getBreakTime(t); });
+
+    // Day-by-day
+    const dailySummaries = {};
+    for (let d = new Date(fromD); d <= toD; d.setDate(d.getDate() + 1)) {
+        const ds = d.toISOString().split('T')[0];
+        dailySummaries[ds] = { done: 0, focus: 0, brk: 0 };
+    }
+
+    weekTasks.forEach(t => {
+        const ds = t.date;
+        if (!dailySummaries[ds]) return;
+        if (t.status === 'done') dailySummaries[ds].done++;
+        dailySummaries[ds].focus += getElapsed(t);
+        dailySummaries[ds].brk   += getBreakTime(t);
+    });
+
+    let html = `
+        <div class="report-section">
+            <h4>Summary — ${from} to ${to}</h4>
+            <div class="summary-stat"><span>Total tasks</span><span>${weekTasks.length}</span></div>
+            <div class="summary-stat"><span>Completed</span><span>${done.length}</span></div>
+            <div class="summary-stat"><span>Total focus time</span><span>${formatDuration(totalFocus)}</span></div>
+            <div class="summary-stat"><span>Total break time</span><span>${formatDuration(totalBreak)}</span></div>
+        </div>
+        <div class="report-section">
+            <h4>Day-by-Day</h4>
+            <table><thead><tr><th>Date</th><th>Done</th><th>Focus</th><th>Break</th></tr></thead><tbody>
+    `;
+
+    Object.keys(dailySummaries).sort().forEach(ds => {
+        const s = dailySummaries[ds];
+        html += `<tr><td>${ds}</td><td>${s.done}</td><td>${formatDuration(s.focus)}</td><td>${formatDuration(s.brk)}</td></tr>`;
+    });
+
+    html += `</tbody></table></div><div class="report-section"><h4>All Tasks</h4>
+        <table><thead><tr><th>Task</th><th>Priority</th><th>Actual</th><th>Status</th><th>Date</th></tr></thead><tbody>`;
+
+    if (weekTasks.length === 0) {
+        html += `<tr><td colspan="5" style="text-align:center;opacity:.5;">No tasks found.</td></tr>`;
+    } else {
+        weekTasks.sort((a,b) => a.date.localeCompare(b.date)).forEach(t => {
+            html += `<tr>
+                <td>${escHtml(t.text)}</td>
+                <td>${t.priority}</td>
+                <td>${t.actualStart ? formatDuration(getElapsed(t)) : '—'}</td>
+                <td>${t.status.replace('_',' ')}</td>
+                <td>${t.date}</td>
+            </tr>`;
+        });
+    }
+
+    html += `</tbody></table></div>`;
+    document.getElementById('weekly-report-content').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+function requestNotificationPermission() {
+    if (!('Notification' in window)) return;
+    Notification.requestPermission().then(p => {
+        notificationPermissionGranted = p === 'granted';
+    });
+}
+
+function showBrowserNotification(title, body) {
+    if (notificationPermissionGranted) new Notification(title, { body });
+}
+
+function loadNotifications() {
+    try {
+        currentDayNotifications = JSON.parse(safeGet(STORAGE_NOTIF + today, '[]'));
+    } catch { currentDayNotifications = []; }
+    renderNotificationPanel();
+}
+
+function saveNotifications() {
+    safeSet(STORAGE_NOTIF + today, JSON.stringify(currentDayNotifications));
+    renderNotificationPanel();
+    if (window.__firebaseSync && window.__firebaseSync.getUserId()) {
+        window.__firebaseSync.syncNotifs();
+    }
+}
+
+function addNotification(taskId, taskName, type, message) {
+    currentDayNotifications.push({
+        id: 'n_' + Date.now(), taskId, taskName, type, message,
+        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        dismissed: false
+    });
+    saveNotifications();
+    const el = document.getElementById('unread-notification-count');
+    el.innerText = parseInt(el.innerText) + 1;
+}
+
+function renderNotificationPanel() {
+    const list = document.getElementById('notification-list');
+    list.innerHTML = '';
+    const unread = currentDayNotifications.filter(n => !n.dismissed).length;
+    document.getElementById('unread-notification-count').innerText = unread;
+
+    const visible = [...currentDayNotifications].reverse().filter(n => !n.dismissed);
+    if (visible.length === 0) {
+        list.innerHTML = '<div class="empty-state" style="padding:12px;">No new notifications.</div>';
+        return;
+    }
+
+    visible.forEach(n => {
+        const el = document.createElement('div');
+        el.className = 'notification-entry';
+        el.innerHTML = `
+            <button class="dismiss-btn" onclick="dismissNotification('${n.id}')">×</button>
+            <div class="notif-time">${n.time}</div>
+            <div class="notif-task">${escHtml(n.taskName)}</div>
+            <div class="notif-type">${n.type}</div>
+        `;
+        list.appendChild(el);
+    });
+}
+
+function toggleNotificationPanel() {
+    const panel = document.getElementById('notification-panel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+        currentDayNotifications.forEach(n => n.dismissed = true);
+        saveNotifications();
+    }
+}
+
+function dismissNotification(id) {
+    const n = currentDayNotifications.find(n => n.id === id);
+    if (n) { n.dismissed = true; saveNotifications(); }
+}
+
+function clearAllNotifications() {
+    currentDayNotifications = [];
+    saveNotifications();
+}
+
+function checkNotifications() {
+    const now = Date.now();
+    tasks.filter(t => t.date === today || t.status === 'previous_unfinished').forEach(task => {
+        const effDate = task.status === 'previous_unfinished' ? today : task.date;
+        const startMs = task.plannedStart ? new Date(`${effDate}T${task.plannedStart}`).getTime() : null;
+        const endMs   = task.plannedEnd   ? new Date(`${effDate}T${task.plannedEnd}`).getTime()   : null;
+
+        if (task.status === 'pending' && startMs) {
+            const remaining = startMs - now;
+            if (remaining > 0 && remaining <= 10 * 60000) {
+                const key = `${task.id}-start-soon`;
+                if (!firedNotifications.has(key)) {
+                    showBrowserNotification('Starting soon', `${task.text} at ${formatTime12Hour(task.plannedStart)}`);
+                    addNotification(task.id, task.text, 'START REMINDER', `Starts at ${formatTime12Hour(task.plannedStart)}`);
+                    firedNotifications.add(key);
+                }
+            }
+            if (now > startMs + 5 * 60000 && !task.actualStart) {
+                const key = `${task.id}-overdue-start`;
+                if (!firedNotifications.has(key)) {
+                    showBrowserNotification('Overdue start', `${task.text} was due at ${formatTime12Hour(task.plannedStart)}`);
+                    addNotification(task.id, task.text, 'OVERDUE START', `Was due at ${formatTime12Hour(task.plannedStart)}`);
+                    firedNotifications.add(key);
+                }
+            }
+        }
+
+        if (task.status === 'in_progress' && endMs) {
+            const remaining = endMs - now;
+            if (remaining > 0 && remaining <= 10 * 60000) {
+                const key = `${task.id}-end-soon`;
+                if (!firedNotifications.has(key)) {
+                    showBrowserNotification('Wrapping up', `${task.text} due to end at ${formatTime12Hour(task.plannedEnd)}`);
+                    addNotification(task.id, task.text, 'END REMINDER', `Due to end at ${formatTime12Hour(task.plannedEnd)}`);
+                    firedNotifications.add(key);
+                }
+            }
+            if (now > endMs) {
+                const key = `${task.id}-overrun`;
+                if (!firedNotifications.has(key)) {
+                    showBrowserNotification('Overrunning', `${task.text} was supposed to end at ${formatTime12Hour(task.plannedEnd)}`);
+                    addNotification(task.id, task.text, 'OVERRUN', `Past end time ${formatTime12Hour(task.plannedEnd)}`);
+                    firedNotifications.add(key);
+                }
+            }
+        }
+    });
+
+    // ── 3-day project deadline reminders ──
+    checkProjectDeadlineNotifications();
+}
+
+const STORAGE_PROJ_NOTIF_FIRED = 'dooit_proj_notif_fired';
+let firedProjectNotifications = new Set(
+    JSON.parse(localStorage.getItem(STORAGE_PROJ_NOTIF_FIRED) || '[]')
+);
+
+function saveFiredProjectNotifs() {
+    try { localStorage.setItem(STORAGE_PROJ_NOTIF_FIRED, JSON.stringify([...firedProjectNotifications])); } catch {}
+}
+
+function checkProjectDeadlineNotifications() {
+    const todayISO = new Date().toISOString().split('T')[0];
+    calProjects.forEach(p => {
+        const projDate = new Date(p.date + 'T00:00:00');
+        const todayDate = new Date(todayISO + 'T00:00:00');
+        const daysUntil = Math.round((projDate - todayDate) / 86400000);
+
+        // Fire notifications at exactly 3 days, 2 days, 1 day, and 0 days (day-of)
+        [3, 2, 1, 0].forEach(d => {
+            if (daysUntil === d) {
+                const key = `proj-${p.id}-d${d}`;
+                if (!firedProjectNotifications.has(key)) {
+                    const label = d === 0 ? 'Today!' : d === 1 ? 'Tomorrow' : `In ${d} days`;
+                    const msg = d === 0
+                        ? `Project due today: "${p.name}"`
+                        : `"${p.name}" is due ${label}`;
+                    showBrowserNotification(`📅 Project ${label}`, msg);
+                    addNotification('proj_' + p.id, p.name,
+                        d === 0 ? 'PROJECT DUE TODAY' : `PROJECT IN ${d} DAY${d > 1 ? 'S' : ''}`,
+                        d === 0 ? 'This project is due today!' : `Due on ${new Date(p.date + 'T00:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })}`
+                    );
+                    firedProjectNotifications.add(key);
+                    saveFiredProjectNotifs();
+                }
+            }
+        });
+    });
+}
+
+// ─────────────────────────────────────────────
+// Focus Mode — FIX: overlay not dimmed, column fix
+// ─────────────────────────────────────────────
+function toggleFocusMode() {
+    const activeTask = tasks.find(t => t.id === activeTaskId && t.status === 'in_progress');
+    if (!activeTask) {
+        showModal('Focus Mode', `
+            <p>Start a task first to enter Focus Mode.</p>
+            <div class="modal-actions"><button onclick="closeModal()">OK</button></div>
+        `);
+        return;
+    }
+    isFocusMode = true;
+    document.querySelector('.container').classList.add('focus-mode-active');
+    document.getElementById('focus-mode-overlay').style.display = 'flex';
+    applyFocusModeStyling();
+    updateFocusModeUI();
+}
+
+function exitFocusMode() {
+    isFocusMode = false;
+    document.querySelector('.container').classList.remove('focus-mode-active');
+    document.getElementById('focus-mode-overlay').style.display = 'none';
+    document.querySelectorAll('.dimmed').forEach(el => el.classList.remove('dimmed'));
+}
+
+function applyFocusModeStyling() {
+    if (!isFocusMode) return;
+
+    // Dim all columns first
+    document.querySelectorAll('.column').forEach(col => {
+        col.classList.add('dimmed');
+    });
+
+    // Un-dim the column containing the active task card
+    if (activeTaskId) {
+        const activeCard = document.getElementById(`card-${activeTaskId}`);
+        if (activeCard) {
+            const parentCol = activeCard.closest('.column');
+            if (parentCol) {
+                parentCol.classList.remove('dimmed');
+                // Also remove dimmed from the card itself (just in case)
+                activeCard.classList.remove('dimmed');
+            }
+        }
+    }
+
+    // Dim other panel areas
+    document.querySelectorAll('.panels-grid, .collapsible-section, .analytics-section, .footer-summary')
+        .forEach(el => el.classList.add('dimmed'));
+
+    // Never dim the overlay itself
+    const overlay = document.getElementById('focus-mode-overlay');
+    overlay.classList.remove('dimmed');
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
+}
+
+function updateFocusModeUI() {
+    if (!isFocusMode) return;
+
+    const activeTask = tasks.find(t => t.id === activeTaskId && t.status === 'in_progress');
+    if (!activeTask) {
+        exitFocusMode();
+        return;
+    }
+
+    document.getElementById('focus-task-name').innerText = activeTask.text;
+    document.getElementById('focus-timer').innerText = formatDuration(getElapsed(activeTask));
+    document.getElementById('focus-planned-end').innerText = formatTime12Hour(activeTask.plannedEnd) || '--:--';
+
+    const effDate = activeTask.date === today ? today : activeTask.date;
+    const startMs = activeTask.plannedStart ? new Date(`${effDate}T${activeTask.plannedStart}`).getTime() : null;
+    const endMs   = activeTask.plannedEnd   ? new Date(`${effDate}T${activeTask.plannedEnd}`).getTime()   : null;
+    const bar = document.getElementById('focus-progress-bar');
+    const fill = document.getElementById('focus-progress-fill');
+    bar.classList.remove('overrun');
+    fill.classList.remove('overrun');
+
+    if (startMs && endMs && endMs > startMs) {
+        const pct = Math.min(((Date.now() - startMs) / (endMs - startMs)) * 100, 100);
+        fill.style.width = pct + '%';
+        if (pct >= 100) { bar.classList.add('overrun'); fill.classList.add('overrun'); }
+    } else {
+        fill.style.width = '100%';
+    }
+}
+
+// ─────────────────────────────────────────────
+// Productivity score — multi-factor, 0–100
+// ─────────────────────────────────────────────
+// Score breakdown (total 100 pts):
+//   Completion rate        40 pts  — what % of today's tasks are done
+//   On-time completion     25 pts  — done tasks finished within planned window
+//   Urgency handling       20 pts  — urgent tasks completed vs total urgent
+//   Consistency penalty   -15 pts  — deducted for unfinished rollover tasks
+//   Focus time bonus       15 pts  — bonus for ≥4h focused time today
+function updateProductivityScore() {
+    const todayTasks = tasks.filter(t =>
+        t.date === today && ['pending','in_progress','done'].includes(t.status));
+    const prevUnfinished = tasks.filter(t => t.status === 'previous_unfinished');
+
+    if (todayTasks.length === 0 && prevUnfinished.length === 0) {
+        setScoreDisplay(100, 'Excellent', 'No tasks yet — fresh start');
+        return;
+    }
+
+    const total  = todayTasks.length;
+    const done   = todayTasks.filter(t => t.status === 'done').length;
+    const doneTasks = todayTasks.filter(t => t.status === 'done');
+
+    // 1. Completion rate (40 pts)
+    const completionPts = total > 0 ? (done / total) * 40 : 40;
+
+    // 2. On-time completion (25 pts)
+    let onTimePts = 0;
+    if (doneTasks.length > 0) {
+        const onTimeCount = doneTasks.filter(isTaskOnTime).length;
+        onTimePts = (onTimeCount / doneTasks.length) * 25;
+    } else if (done === 0 && total === 0) {
+        onTimePts = 25;
+    }
+
+    // 3. Urgency handling (20 pts)
+    const urgentAll  = todayTasks.filter(t => t.priority === 'urgent').length;
+    const urgentDone = todayTasks.filter(t => t.priority === 'urgent' && t.status === 'done').length;
+    const urgencyPts = urgentAll > 0 ? (urgentDone / urgentAll) * 20 : 20;
+
+    // 4. Rollover penalty (up to -15 pts)
+    const rolloverPenalty = Math.min(prevUnfinished.length * 5, 15);
+
+    // 5. Focus time bonus (up to 15 pts) — reward ≥4h = full bonus
+    const totalFocusMs = todayTasks.reduce((s, t) => s + getElapsed(t), 0);
+    const focusGoalMs  = 4 * 3600000; // 4h goal
+    const focusBonusPts = Math.min((totalFocusMs / focusGoalMs) * 15, 15);
+
+    const raw   = completionPts + onTimePts + urgencyPts - rolloverPenalty + focusBonusPts;
+    const score = Math.round(Math.max(0, Math.min(100, raw)));
+
+    const grade = score >= 90 ? 'Excellent'
+                : score >= 75 ? 'Good'
+                : score >= 55 ? 'Fair'
+                : score >= 35 ? 'Needs focus'
+                : 'Off track';
+
+    // Build breakdown tooltip text
+    const breakdown = [
+        `Completion: ${Math.round(completionPts)}/40`,
+        `On-time: ${Math.round(onTimePts)}/25`,
+        `Urgency: ${Math.round(urgencyPts)}/20`,
+        `Focus time: +${Math.round(focusBonusPts)}/15`,
+        rolloverPenalty > 0 ? `Rollover penalty: -${rolloverPenalty}` : null
+    ].filter(Boolean).join(' · ');
+
+    setScoreDisplay(score, grade, breakdown);
+}
+
+function setScoreDisplay(score, grade, breakdown) {
+    // Footer display
+    document.getElementById('productivity-score-display').innerHTML =
+        `Score: ${score}/100 <span class="score-label">${grade}</span>`;
+
+    // Header widget
+    document.getElementById('header-score-num').textContent = score;
+    document.getElementById('header-score-grade').textContent = grade;
+    document.getElementById('header-score-bar').style.width = score + '%';
+    const widget = document.getElementById('header-score-widget');
+    if (breakdown) widget.title = `Score breakdown: ${breakdown}`;
+}
+
+function isTaskOnTime(task) {
+    if (task.status !== 'done' || !task.actualEnd || !task.plannedEnd) return false;
+    const compDate = new Date(task.actualEnd).toISOString().split('T')[0];
+    const plannedEndMs = new Date(`${compDate}T${task.plannedEnd}`).getTime();
+    return task.actualEnd <= plannedEndMs;
+}
+
+// ─────────────────────────────────────────────
+// Analytics — integrated + skipped ref removed
+// ─────────────────────────────────────────────
+function toggleAnalytics() {
+    const body = document.getElementById('analytics-body');
+    const icon = document.getElementById('analytics-toggle-icon');
+    const open = body.classList.toggle('open');
+    icon.textContent = open ? '▲' : '▼';
+    if (open) renderAnalytics();
+}
+
+function analyticsChangeWeek(dir) {
+    analyticsWeekOffset = Math.min(0, analyticsWeekOffset + dir);
+    renderAnalytics();
+}
+
+function getWeekDates(offset) {
+    const now = new Date();
+    const dow = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((dow + 6) % 7) + offset * 7);
+    monday.setHours(0,0,0,0);
+    return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        return d.toISOString().split('T')[0];
+    });
+}
+
+function fmtDate(iso) {
+    const [,m,d] = iso.split('-');
+    return `${d}/${m}`;
+}
+
+function fmtHours(ms) {
+    const h = ms / 3600000;
+    return h >= 1 ? h.toFixed(1) + 'h' : Math.round(ms / 60000) + 'm';
+}
+
+function computeWeekStats(weekDates) {
+    const weekTasks = tasks.filter(t => weekDates.includes(t.date));
+    const byDay = {};
+    weekDates.forEach(d => { byDay[d] = { focusMs:0, breakMs:0, done:0, total:0 }; });
+
+    weekTasks.forEach(t => {
+        const d = byDay[t.date];
+        if (!d) return;
+        d.total++;
+        if (t.status === 'done') d.done++;
+        d.focusMs += getElapsed(t);
+        d.breakMs += getBreakTime(t);
+    });
+
+    const totalFocus = Object.values(byDay).reduce((s,d) => s + d.focusMs, 0);
+    const totalDone  = Object.values(byDay).reduce((s,d) => s + d.done, 0);
+    const totalTasks = Object.values(byDay).reduce((s,d) => s + d.total, 0);
+    const totalBreak = Object.values(byDay).reduce((s,d) => s + d.breakMs, 0);
+    const completionRate = totalTasks > 0 ? Math.round((totalDone/totalTasks)*100) : 0;
+
+    let accSum = 0, accCount = 0;
+    weekTasks.forEach(t => {
+        const pm = getPlannedMinutes(t);
+        if (pm && t.status === 'done' && t.actualStart) {
+            accSum += Math.min(getElapsed(t) / 60000 / pm, 2);
+            accCount++;
+        }
+    });
+    const timeAccuracy = accCount > 0 ? Math.round((accSum/accCount)*100) : null;
+
+    const focusGoal5d = 6 * 3600000 * 5;
+    const focus5d = Object.entries(byDay)
+        .filter(([d]) => { const dow = new Date(d).getDay(); return dow!==0 && dow!==6; })
+        .reduce((s,[,d]) => s + d.focusMs, 0);
+    const hoursComp = Math.min((focus5d/focusGoal5d)*100, 100);
+    const accComp = timeAccuracy !== null ? Math.max(0, 100 - Math.abs(timeAccuracy - 100)) : 50;
+    const focusScore = Math.round(completionRate*0.5 + hoursComp*0.3 + accComp*0.2);
+
+    const byPriority = { urgent:0, important:0, later:0 };
+    weekTasks.filter(t => t.status === 'done').forEach(t => { byPriority[t.priority]++; });
+
+    const weekdays = Object.entries(byDay).filter(([d]) => { const dow=new Date(d).getDay(); return dow!==0&&dow!==6; });
+    const sorted = [...weekdays].sort((a,b) => b[1].focusMs - a[1].focusMs);
+    const bestDay  = sorted[0];
+    const worstDay = sorted[sorted.length-1];
+
+    const topTasks = weekTasks
+        .filter(t => getElapsed(t) > 60000)
+        .map(t => ({ text: t.text, ms: getElapsed(t) }))
+        .sort((a,b) => b.ms - a.ms)
+        .slice(0, 5);
+
+    return { byDay, totalFocus, totalDone, totalTasks, totalBreak,
+             completionRate, timeAccuracy, focusScore,
+             byPriority, bestDay, worstDay, topTasks };
+}
+
+function renderAnalytics() {
+    const weekDates = getWeekDates(analyticsWeekOffset);
+    const prevDates  = getWeekDates(analyticsWeekOffset - 1);
+    const s = computeWeekStats(weekDates);
+    const p = computeWeekStats(prevDates);
+    const todayISO = new Date().toISOString().split('T')[0];
+    const DAY = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+    document.getElementById('analytics-week-range').textContent =
+        `${fmtDate(weekDates[0])} – ${fmtDate(weekDates[6])}`;
+    document.getElementById('analytics-week-label').textContent =
+        analyticsWeekOffset === 0 ? 'This week' : analyticsWeekOffset === -1 ? 'Last week' : `${Math.abs(analyticsWeekOffset)}w ago`;
+    document.getElementById('analytics-next-btn').disabled = analyticsWeekOffset >= 0;
+
+    function delta(curr, prev, unit='') {
+        if (curr===0 && prev===0) return '';
+        const d = curr - prev;
+        if (d===0) return '<span style="opacity:.35">–</span>';
+        return `<span style="opacity:.55">${d>0?'+':''}${d}${unit} vs prev</span>`;
+    }
+
+    document.getElementById('analytics-kpis').innerHTML = `
+        <div class="kpi-card"><div class="kpi-value">${s.totalDone}</div><div class="kpi-label">Tasks done</div>
+            <div class="kpi-delta">${delta(s.totalDone, p.totalDone)}</div></div>
+        <div class="kpi-card"><div class="kpi-value">${fmtHours(s.totalFocus)}</div><div class="kpi-label">Focus time</div>
+            <div class="kpi-delta">${delta(Math.round(s.totalFocus/360000)/10, Math.round(p.totalFocus/360000)/10, 'h')}</div></div>
+        <div class="kpi-card"><div class="kpi-value">${s.completionRate}%</div><div class="kpi-label">Completion</div>
+            <div class="kpi-delta">${delta(s.completionRate, p.completionRate, '%')}</div></div>
+        <div class="kpi-card"><div class="kpi-value">${s.timeAccuracy !== null ? s.timeAccuracy+'%' : '—'}</div>
+            <div class="kpi-label">Time accuracy</div>
+            <div class="kpi-delta" style="font-size:.58rem;opacity:.45;">
+                ${s.timeAccuracy !== null ? (s.timeAccuracy<=110 ? 'Good estimator' : 'Underestimating') : 'Set planned times'}</div></div>
+    `;
+
+    const maxF = Math.max(...Object.values(s.byDay).map(d => d.focusMs), 1);
+    document.getElementById('analytics-heatmap').innerHTML = weekDates.map((date, i) => {
+        const d = s.byDay[date];
+        const pct = Math.round((d.focusMs / maxF) * 74);
+        const isFuture = date > todayISO;
+        const isToday  = date === todayISO;
+        const barCls = isFuture ? 'hm-bar empty' : isToday ? 'hm-bar today' : 'hm-bar';
+        const val = isFuture ? '' : d.focusMs > 0 ? fmtHours(d.focusMs) : '–';
+        return `<div class="hm-col">
+            <div class="hm-val">${val}</div>
+            <div class="${barCls}" style="height:${isFuture ? 4 : Math.max(pct, d.focusMs>0?4:1)}px"></div>
+            <div class="hm-day">${DAY[i]}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('analytics-score-val').textContent = s.focusScore + ' / 100';
+    document.getElementById('analytics-score-fill').style.width = s.focusScore + '%';
+    document.getElementById('analytics-score-note').textContent =
+        s.focusScore >= 80 ? 'Excellent week.' :
+        s.focusScore >= 60 ? 'Solid — keep the momentum.' :
+        s.focusScore >= 40 ? 'Room to grow. Try setting planned times.' :
+        'Light week. Even 2h of focused work beats 8h scattered.';
+
+    const maxP = Math.max(s.byPriority.urgent, s.byPriority.important, s.byPriority.later, 1);
+    document.getElementById('analytics-priority-bars').innerHTML =
+        ['urgent','important','later'].map(p => `
+            <div class="priority-bar-row">
+                <span style="text-transform:capitalize;opacity:.65;">${p}</span>
+                <div class="priority-bar-track"><div class="priority-bar-fill" style="width:${Math.round((s.byPriority[p]/maxP)*100)}%"></div></div>
+                <span>${s.byPriority[p]}</span>
+            </div>`).join('');
+
+    const bestLabel  = s.bestDay  ? `${DAY[weekDates.indexOf(s.bestDay[0])]} — ${fmtHours(s.bestDay[1].focusMs)}`  : '—';
+    const avgDay = s.totalFocus > 0 ? fmtHours(s.totalFocus / 5) : '—';
+    document.getElementById('analytics-insights').innerHTML = `
+        <div class="insight-card">
+            <div class="insight-card-label">Best day</div>
+            <div class="insight-card-value">${bestLabel}</div>
+            <div class="insight-card-sub">Avg/day: ${avgDay}</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-card-label">Completion rate</div>
+            <div class="insight-card-value">${s.completionRate}%</div>
+            <div class="insight-card-sub">${s.totalDone} of ${s.totalTasks} tasks</div>
+        </div>
+    `;
+
+    const maxMs = s.topTasks[0]?.ms || 1;
+    document.getElementById('analytics-top-tasks').innerHTML =
+        s.topTasks.length === 0
+            ? '<div style="font-size:.72rem;opacity:.45;padding:8px 0;">No completed tasks with tracked time this week.</div>'
+            : s.topTasks.map(t => `
+                <div class="top-task-row">
+                    <span style="flex:2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(t.text)}</span>
+                    <div class="top-task-bar-wrap"><div class="top-task-bar" style="width:${Math.round((t.ms/maxMs)*100)}%"></div></div>
+                    <span class="top-task-time">${fmtHours(t.ms)}</span>
+                </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// Progress Chart
+// ─────────────────────────────────────────────
+let activeProgressTab = 'day';
+
+function switchProgressTab(tab, btn) {
+    activeProgressTab = tab;
+    document.querySelectorAll('.progress-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.progress-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('progress-' + tab).classList.add('active');
+    renderProgressCharts();
+}
+
+function renderProgressCharts() {
+    renderDayProgress();
+    renderWeekProgress();
+    renderMonthProgress();
+}
+
+function makeSVGRing(pct, label, sublabel) {
+    const r = 30, cx = 38, cy = 38, size = 76;
+    const circ = 2 * Math.PI * r;
+    const dashOffset = circ * (1 - Math.min(pct, 1));
+    return `
+        <div class="ring-item">
+            <svg class="ring-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                <circle class="ring-track" cx="${cx}" cy="${cy}" r="${r}" stroke-width="5"/>
+                <circle class="ring-fill" cx="${cx}" cy="${cy}" r="${r}" stroke-width="5"
+                    stroke-dasharray="${circ.toFixed(2)}"
+                    stroke-dashoffset="${dashOffset.toFixed(2)}"/>
+            </svg>
+            <div class="ring-sub-label">${sublabel}</div>
+            <div style="font-size:0.7rem;font-weight:500;font-family:var(--font-serif);">${label}</div>
+        </div>`;
+}
+
+function renderDayProgress() {
+    const todayTasks = tasks.filter(t => t.date === today);
+    const total = todayTasks.length;
+    const done  = todayTasks.filter(t => t.status === 'done').length;
+    const inProg = todayTasks.filter(t => t.status === 'in-progress').length;
+
+    // Tasks done %
+    const taskPct = total > 0 ? done / total : 0;
+
+    // Focus time vs 6h goal
+    const focusMs = todayTasks.reduce((s, t) => s + getElapsed(t), 0);
+    const focusGoal = 6 * 3600000;
+    const focusPct = Math.min(focusMs / focusGoal, 1);
+
+    // Urgent tasks cleared
+    const urgentTotal = todayTasks.filter(t => t.priority === 'urgent').length;
+    const urgentDone  = todayTasks.filter(t => t.priority === 'urgent' && t.status === 'done').length;
+    const urgentPct   = urgentTotal > 0 ? urgentDone / urgentTotal : (total === 0 ? 0 : 1);
+
+    const rings = document.getElementById('day-rings');
+    rings.innerHTML =
+        makeSVGRing(taskPct, `${done}/${total}`, 'tasks') +
+        makeSVGRing(focusPct, fmtHours(focusMs), 'focus') +
+        makeSVGRing(urgentPct, `${urgentDone}/${urgentTotal || 0}`, 'urgent');
+
+    const summaryArr = [];
+    if (inProg > 0) summaryArr.push(`${inProg} in progress`);
+    if (total === 0) summaryArr.push('No tasks yet today');
+    else if (done === total) summaryArr.push('All done! 🎉');
+    document.getElementById('day-summary-line').textContent = summaryArr.join(' · ');
+}
+
+function renderWeekProgress() {
+    const weekDates = getWeekDates(0);
+    const DAY = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const todayISO = today;
+
+    const rowsEl = document.getElementById('week-bars');
+    let totalDone = 0, totalAll = 0;
+    rowsEl.innerHTML = weekDates.map((date, i) => {
+        const dayTasks = tasks.filter(t => t.date === date);
+        const all = dayTasks.length;
+        const done = dayTasks.filter(t => t.status === 'done').length;
+        totalDone += done; totalAll += all;
+        const pct = all > 0 ? Math.round((done / all) * 100) : 0;
+        const isFuture = date > todayISO;
+        const isToday  = date === todayISO;
+        const dayLabel = DAY[i] + (isToday ? ' ●' : '');
+        const fillStyle = isFuture ? 'width:0%;background:#ddd;' : `width:${pct}%;`;
+        return `<div class="prog-row">
+            <span class="prog-row-label" style="${isToday?'opacity:1;font-weight:500;':''}">${dayLabel}</span>
+            <div class="prog-track"><div class="prog-fill" style="${fillStyle}"></div></div>
+            <span class="prog-val">${isFuture ? '—' : (all === 0 ? '–' : done + '/' + all)}</span>
+        </div>`;
+    }).join('');
+
+    const weekPct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+    document.getElementById('week-summary-line').textContent =
+        totalAll === 0 ? 'No tasks this week yet'
+        : `${totalDone} of ${totalAll} tasks completed this week (${weekPct}%)`;
+}
+
+function renderMonthProgress() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    // Build 4-5 week buckets
+    const weeks = [];
+    let weekStart = 1;
+    while (weekStart <= totalDays) {
+        const weekEnd = Math.min(weekStart + 6, totalDays);
+        weeks.push({ start: weekStart, end: weekEnd });
+        weekStart = weekEnd + 1;
+    }
+
+    const monthName = now.toLocaleString('en-US', { month: 'long' });
+    const rowsEl = document.getElementById('month-bars');
+    let grandDone = 0, grandAll = 0;
+
+    rowsEl.innerHTML = weeks.map((w, wi) => {
+        let done = 0, all = 0;
+        for (let d = w.start; d <= w.end; d++) {
+            const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const dayTasks = tasks.filter(t => t.date === iso);
+            all += dayTasks.length;
+            done += dayTasks.filter(t => t.status === 'done').length;
+        }
+        grandDone += done; grandAll += all;
+        const pct = all > 0 ? Math.round((done / all) * 100) : 0;
+        const isFuture = new Date(year, month, w.start) > now;
+        const fillStyle = isFuture ? 'width:0%;background:#ddd;' : `width:${pct}%;`;
+        const label = `W${wi+1}`;
+        return `<div class="prog-row">
+            <span class="prog-row-label">${label}</span>
+            <div class="prog-track"><div class="prog-fill" style="${fillStyle}"></div></div>
+            <span class="prog-val">${isFuture ? '—' : (all === 0 ? '–' : done + '/' + all)}</span>
+        </div>`;
+    }).join('');
+
+    const monthPct = grandAll > 0 ? Math.round((grandDone / grandAll) * 100) : 0;
+    document.getElementById('month-summary-line').textContent =
+        grandAll === 0 ? `No tasks in ${monthName} yet`
+        : `${grandDone} of ${grandAll} tasks completed in ${monthName} (${monthPct}%)`;
+}
+
+// ─────────────────────────────────────────────
+// Calendar / Upcoming Projects
+// ─────────────────────────────────────────────
+const STORAGE_PROJECTS = 'dooit_cal_projects';
+let calProjects = [];
+let calViewDate = new Date(); // month being viewed
+let calSelectedDate = null;   // ISO date string
+
+function loadCalProjects() {
+    try { calProjects = JSON.parse(localStorage.getItem(STORAGE_PROJECTS) || '[]'); }
+    catch { calProjects = []; }
+}
+function saveCalProjects() {
+    try { localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(calProjects)); }
+    catch {}
+    if (window.__firebaseSync && window.__firebaseSync.getUserId()) {
+        window.__firebaseSync.syncProjects();
+    }
+}
+
+function renderCalendar() {
+    const year  = calViewDate.getFullYear();
+    const month = calViewDate.getMonth();
+    const monthName = calViewDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    document.getElementById('cal-month-label').textContent = monthName;
+
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const todayISO  = new Date().toISOString().split('T')[0];
+
+    // Dates with projects
+    const projectDates = new Set(calProjects.map(p => p.date));
+
+    let html = '';
+    // Leading blanks
+    for (let i = 0; i < firstDay; i++) {
+        const prevDate = new Date(year, month, 0 - (firstDay - i - 2));
+        const d = prevDate.getDate();
+        html += `<div class="cal-day other-month">${d}</div>`;
+    }
+    // Current month days
+    for (let d = 1; d <= totalDays; d++) {
+        const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let cls = 'cal-day';
+        if (iso === todayISO) cls += ' today';
+        if (iso === calSelectedDate) cls += ' selected';
+        if (projectDates.has(iso)) cls += ' has-project';
+        html += `<div class="${cls}" data-date="${iso}" onclick="selectCalDate('${iso}', event)">${d}</div>`;
+    }
+    // Trailing blanks
+    const remaining = 42 - (firstDay + totalDays);
+    for (let d = 1; d <= remaining; d++) {
+        html += `<div class="cal-day other-month">${d}</div>`;
+    }
+    document.getElementById('cal-days-grid').innerHTML = html;
+    renderCalProjectList();
+    updateCalBadge();
+}
+
+function selectCalDate(iso, event) {
+    if (event) event.stopPropagation();
+    calSelectedDate = iso;
+    const label = new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    document.getElementById('cal-selected-label').textContent = `Adding for: ${label}`;
+    document.getElementById('cal-add-project-btn').disabled = false;
+    renderCalendar();
+    // Keep focus on name input for quick entry
+    setTimeout(() => document.getElementById('cal-project-name').focus(), 50);
+}
+
+function renderCalProjectList() {
+    const list = document.getElementById('cal-project-list');
+    if (calProjects.length === 0) {
+        list.innerHTML = '<div class="cal-empty-state">No upcoming projects yet.</div>';
+        return;
+    }
+    const sorted = [...calProjects].sort((a, b) => a.date.localeCompare(b.date));
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    // Group into upcoming vs past
+    const upcoming = sorted.filter(p => p.date >= todayISO);
+    const past     = sorted.filter(p => p.date < todayISO);
+
+    let html = '';
+    if (upcoming.length) {
+        html += '<div class="cal-section-label">Upcoming</div>';
+        html += upcoming.map(p => calProjectHTML(p)).join('');
+    }
+    if (past.length) {
+        html += '<div class="cal-section-label">Past</div>';
+        html += past.map(p => calProjectHTML(p)).join('');
+    }
+    list.innerHTML = html;
+}
+
+function calProjectHTML(p) {
+    const dateLabel = new Date(p.date + 'T00:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const noteHTML  = p.note ? `<div class="cal-proj-note">${escHtml(p.note)}</div>` : '';
+    return `<div class="cal-project-entry">
+        <div class="cal-proj-name">${escHtml(p.name)}</div>
+        <div class="cal-proj-date">${dateLabel}</div>
+        ${noteHTML}
+        <button class="cal-dismiss-btn" onclick="removeCalProject('${p.id}')" title="Remove">×</button>
+    </div>`;
+}
+
+function addCalProject() {
+    const name = document.getElementById('cal-project-name').value.trim();
+    if (!name || !calSelectedDate) return;
+    const note = document.getElementById('cal-project-note').value.trim();
+    calProjects.push({ id: Date.now().toString(), date: calSelectedDate, name, note });
+    saveCalProjects();
+    document.getElementById('cal-project-name').value = '';
+    document.getElementById('cal-project-note').value = '';
+    renderCalendar();
+}
+
+function removeCalProject(id) {
+    calProjects = calProjects.filter(p => p.id !== id);
+    saveCalProjects();
+    renderCalendar();
+}
+
+function clearAllCalProjects() {
+    if (calProjects.length === 0) return;
+    if (!confirm('Clear all upcoming projects?')) return;
+    calProjects = [];
+    saveCalProjects();
+    renderCalendar();
+}
+
+function updateCalBadge() {
+    const todayISO = new Date().toISOString().split('T')[0];
+    const upcoming = calProjects.filter(p => p.date >= todayISO).length;
+    const badge = document.getElementById('calendar-project-count');
+    if (upcoming > 0) {
+        badge.textContent = upcoming;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Toggle calendar panel
+document.getElementById('calendar-panel-toggle').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const panel = document.getElementById('calendar-panel');
+    const notifPanel = document.getElementById('notification-panel');
+    notifPanel.classList.remove('open');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) renderCalendar();
+});
+
+// Stop ALL clicks inside calendar panel from bubbling to document
+document.getElementById('calendar-panel').addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+
+// Close calendar when clicking outside
+document.addEventListener('click', function(e) {
+    const panel  = document.getElementById('calendar-panel');
+    const toggle = document.getElementById('calendar-panel-toggle');
+    if (panel.classList.contains('open') && !panel.contains(e.target) && !toggle.contains(e.target)) {
+        panel.classList.remove('open');
+    }
+});
+
+document.getElementById('cal-prev-month').addEventListener('click', function(e) {
+    e.stopPropagation();
+    calViewDate.setMonth(calViewDate.getMonth() - 1);
+    renderCalendar();
+});
+document.getElementById('cal-next-month').addEventListener('click', function(e) {
+    e.stopPropagation();
+    calViewDate.setMonth(calViewDate.getMonth() + 1);
+    renderCalendar();
+});
+document.getElementById('cal-add-project-btn').addEventListener('click', addCalProject);
+document.getElementById('cal-project-name').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addCalProject();
+});
+document.getElementById('clear-all-projects').addEventListener('click', clearAllCalProjects);
+
+// Init calendar data
+loadCalProjects();
+updateCalBadge();
+// Check project deadlines immediately on load
+checkProjectDeadlineNotifications();
+
+// ─────────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────────
+init();
+</script>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, writeBatch, deleteDoc }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ─────────────────────────────────────────────
+// Firebase config
+// ─────────────────────────────────────────────
+const firebaseConfig = {
+    apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
+    authDomain:        "letsdooit---final-edition.firebaseapp.com",
+    projectId:         "letsdooit---final-edition",
+    storageBucket:     "letsdooit---final-edition.firebasestorage.app",
+    messagingSenderId: "162170588177",
+    appId:             "1:162170588177:web:152261bfc17674451df5b0",
+    measurementId:     "G-YD3F1JNEY1"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+
+// ─────────────────────────────────────────────
+// Sync helpers  — write to Firestore keyed by Google user ID
+// ─────────────────────────────────────────────
+
+let unsubscribeTasks    = null;
+let unsubscribeProjects = null;
+let unsubscribeNotifs   = null;
+let _syncUserId         = null;
+let _isSyncing          = false; // prevent write-loops during remote pull
+
+// Show a small sync indicator in the header
+function setSyncStatus(state) {
+    // state: 'syncing' | 'saved' | 'error' | ''
+    let el = document.getElementById('sync-status');
+    if (!el) return;
+    const msgs = { syncing: '↑ syncing…', saved: '✓ synced', error: '⚠ sync error', '': '' };
+    el.textContent = msgs[state] || '';
+    el.style.opacity = state === 'saved' ? '0.45' : '0.75';
+    if (state === 'saved') setTimeout(() => { if (el.textContent === '✓ synced') el.textContent = ''; }, 2500);
+}
+
+// ── Tasks ──
+async function syncTasksToCloud(uid) {
+    if (!uid) return;
+    setSyncStatus('syncing');
+    try {
+        const batch = writeBatch(db);
+        // Delete all existing task docs for this user then rewrite
+        // (simpler than diffing; tasks array is usually < 200 items)
+        const colRef = collection(db, 'users', uid, 'tasks');
+        const snap   = await getDocs(colRef);
+        snap.forEach(d => batch.delete(d.ref));
+        // Write current tasks
+        const currentTasks = JSON.parse(localStorage.getItem('dooit_tasks') || '[]');
+        currentTasks.forEach(t => {
+            batch.set(doc(db, 'users', uid, 'tasks', t.id), t);
+        });
+        await batch.commit();
+        setSyncStatus('saved');
+    } catch(e) {
+        console.error('Task sync error', e);
+        setSyncStatus('error');
+    }
+}
+
+function subscribeToTasks(uid) {
+    if (unsubscribeTasks) unsubscribeTasks();
+    const colRef = collection(db, 'users', uid, 'tasks');
+    unsubscribeTasks = onSnapshot(colRef, snap => {
+        if (_isSyncing) return;
+        const remoteTasks = [];
+        snap.forEach(d => remoteTasks.push(d.data()));
+        // Merge remote into local — remote wins
+        _isSyncing = true;
+        try {
+            localStorage.setItem('dooit_tasks', JSON.stringify(remoteTasks));
+            // Reload the app's in-memory task list and re-render
+            if (typeof tasks !== 'undefined') {
+                tasks.length = 0;
+                remoteTasks.forEach(t => tasks.push(t));
+                if (typeof render === 'function') render();
+                if (typeof updateProductivityScore === 'function') updateProductivityScore();
+            }
+        } finally {
+            _isSyncing = false;
+        }
+    }, err => console.error('Tasks listener error', err));
+}
+
+// ── Calendar Projects ──
+async function syncProjectsToCloud(uid) {
+    if (!uid) return;
+    try {
+        const projects = JSON.parse(localStorage.getItem('dooit_cal_projects') || '[]');
+        await setDoc(doc(db, 'users', uid, 'meta', 'calProjects'), { projects });
+    } catch(e) { console.error('Projects sync error', e); }
+}
+
+function subscribeToProjects(uid) {
+    if (unsubscribeProjects) unsubscribeProjects();
+    const docRef = doc(db, 'users', uid, 'meta', 'calProjects');
+    unsubscribeProjects = onSnapshot(docRef, snap => {
+        if (!snap.exists()) return;
+        if (_isSyncing) return;
+        _isSyncing = true;
+        try {
+            const projects = snap.data().projects || [];
+            localStorage.setItem('dooit_cal_projects', JSON.stringify(projects));
+            if (typeof calProjects !== 'undefined') {
+                calProjects.length = 0;
+                projects.forEach(p => calProjects.push(p));
+                if (typeof renderCalendar === 'function') renderCalendar();
+                if (typeof updateCalBadge === 'function') updateCalBadge();
+            }
+        } finally {
+            _isSyncing = false;
+        }
+    }, err => console.error('Projects listener error', err));
+}
+
+// ── Notifications ──
+async function syncNotificationsToCloud(uid) {
+    if (!uid) return;
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const notifs = JSON.parse(localStorage.getItem('dooit_notifications_' + today) || '[]');
+        await setDoc(doc(db, 'users', uid, 'meta', 'notifications_' + today), { notifs });
+    } catch(e) { console.error('Notif sync error', e); }
+}
+
+function subscribeToNotifications(uid) {
+    if (unsubscribeNotifs) unsubscribeNotifs();
+    const today = new Date().toISOString().split('T')[0];
+    const docRef = doc(db, 'users', uid, 'meta', 'notifications_' + today);
+    unsubscribeNotifs = onSnapshot(docRef, snap => {
+        if (!snap.exists() || _isSyncing) return;
+        _isSyncing = true;
+        try {
+            const notifs = snap.data().notifs || [];
+            localStorage.setItem('dooit_notifications_' + today, JSON.stringify(notifs));
+            if (typeof currentDayNotifications !== 'undefined') {
+                currentDayNotifications.length = 0;
+                notifs.forEach(n => currentDayNotifications.push(n));
+                if (typeof renderNotificationPanel === 'function') renderNotificationPanel();
+                if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+            }
+        } finally {
+            _isSyncing = false;
+        }
+    }, err => console.error('Notif listener error', err));
+}
+
+// ── Pull all data on first sign-in ──
+async function pullAllFromCloud(uid) {
+    setSyncStatus('syncing');
+    try {
+        // Tasks
+        const taskSnap = await getDocs(collection(db, 'users', uid, 'tasks'));
+        if (!taskSnap.empty) {
+            const remoteTasks = [];
+            taskSnap.forEach(d => remoteTasks.push(d.data()));
+            _isSyncing = true;
+            localStorage.setItem('dooit_tasks', JSON.stringify(remoteTasks));
+            if (typeof tasks !== 'undefined') {
+                tasks.length = 0;
+                remoteTasks.forEach(t => tasks.push(t));
+            }
+            _isSyncing = false;
+        }
+        // Projects
+        const projSnap = await getDoc(doc(db, 'users', uid, 'meta', 'calProjects'));
+        if (projSnap.exists()) {
+            const projects = projSnap.data().projects || [];
+            _isSyncing = true;
+            localStorage.setItem('dooit_cal_projects', JSON.stringify(projects));
+            if (typeof calProjects !== 'undefined') {
+                calProjects.length = 0;
+                projects.forEach(p => calProjects.push(p));
+            }
+            _isSyncing = false;
+        }
+        setSyncStatus('saved');
+        // Re-render everything
+        if (typeof render === 'function') render();
+        if (typeof renderCalendar === 'function') renderCalendar();
+        if (typeof updateCalBadge === 'function') updateCalBadge();
+        if (typeof updateProductivityScore === 'function') updateProductivityScore();
+    } catch(e) {
+        console.error('Pull error', e);
+        setSyncStatus('error');
+    }
+}
+
+// ── Start real-time listeners after sign-in ──
+async function startSync(uid) {
+    _syncUserId = uid;
+    await pullAllFromCloud(uid);
+    subscribeToTasks(uid);
+    subscribeToProjects(uid);
+    subscribeToNotifications(uid);
+}
+
+function stopSync() {
+    if (unsubscribeTasks)    { unsubscribeTasks();    unsubscribeTasks    = null; }
+    if (unsubscribeProjects) { unsubscribeProjects(); unsubscribeProjects = null; }
+    if (unsubscribeNotifs)   { unsubscribeNotifs();   unsubscribeNotifs   = null; }
+    _syncUserId = null;
+}
+
+// Expose sync functions globally so the existing saveTasks / saveCalProjects hooks can call them
+window.__firebaseSync = {
+    syncTasks:    uid => syncTasksToCloud(uid || _syncUserId),
+    syncProjects: uid => syncProjectsToCloud(uid || _syncUserId),
+    syncNotifs:   uid => syncNotificationsToCloud(uid || _syncUserId),
+    getUserId:    ()  => _syncUserId,
+    startSync,
+    stopSync,
+};
+
+// ─────────────────────────────────────────────
+// Google Sign-In
+// ─────────────────────────────────────────────
+const GOOGLE_CLIENT_ID  = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.googleusercontent.com';
+const STORAGE_AUTH_USER = 'dooit_auth_user';
+
+window.currentUser = null;
+
+function handleCredentialResponse(response) {
+    const idToken = response.credential;
+    const payload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const profile  = JSON.parse(atob(payload));
+
+    window.currentUser = {
+        id:      profile.sub,
+        name:    profile.name,
+        email:   profile.email,
+        picture: profile.picture,
+    };
+
+    try { localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(window.currentUser)); } catch(e) {}
+
+    showUserUI();
+    startSync(window.currentUser.id);
+}
+
+function showUserUI() {
+    if (!window.currentUser) return;
+    document.getElementById('google-signin-button').style.display = 'none';
+    document.getElementById('auth-status-note').style.display = 'none';
+    const info = document.getElementById('user-info');
+    info.style.display = 'flex';
+    document.getElementById('user-name').textContent = window.currentUser.name || window.currentUser.email;
+    const avatar = document.getElementById('user-avatar');
+    if (window.currentUser.picture) { avatar.src = window.currentUser.picture; avatar.style.display = 'block'; }
+    else { avatar.style.display = 'none'; }
+}
+
+window.signOut = function() {
+    if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+    stopSync();
+    window.currentUser = null;
+    try { localStorage.removeItem(STORAGE_AUTH_USER); } catch(e) {}
+    document.getElementById('user-info').style.display = 'none';
+    document.getElementById('google-signin-button').style.display = 'flex';
+    document.getElementById('auth-status-note').style.display = 'inline';
+    setSyncStatus('');
+};
+
+function initGoogleSignIn() {
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        setTimeout(initGoogleSignIn, 150);
+        return;
+    }
+
+    // Restore session from localStorage
+    try {
+        const saved = localStorage.getItem(STORAGE_AUTH_USER);
+        if (saved) {
+            window.currentUser = JSON.parse(saved);
+            showUserUI();
+            startSync(window.currentUser.id);
+            return;
+        }
+    } catch(e) {}
+
+    google.accounts.id.initialize({
+        client_id:   GOOGLE_CLIENT_ID,
+        callback:    handleCredentialResponse,
+        auto_select: true,
+    });
+
+    google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        { theme: 'outline', size: 'large', shape: 'rectangular', text: 'signin_with' }
+    );
+
+    google.accounts.id.prompt();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGoogleSignIn);
+} else {
+    initGoogleSignIn();
+}
+</script>
+</body>
+</html>
