@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "dooitnow",
+    "target": "dooitnow",
     "public": ".",
     "ignore": [
       "firebase.json",
