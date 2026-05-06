@@ -229,48 +229,6 @@
       border-radius: 0 !important;
     }
 
-    .or-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 20px 0;
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      opacity: 0.35;
-    }
-
-    .or-divider::before,
-    .or-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--light);
-    }
-
-    .skip-btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--light);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      text-align: center;
-      cursor: pointer;
-      background: transparent;
-      color: var(--mid);
-      transition: background 0.12s, color 0.12s, border-color 0.12s;
-      text-transform: uppercase;
-      text-decoration: none;
-    }
-
-    .skip-btn:hover {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-    }
-
     .signin-card-footer {
       margin-top: 24px;
       font-size: 0.62rem;
@@ -535,12 +493,6 @@
         <div class="google-btn-wrap">
           <div id="google-signin-btn"></div>
         </div>
-
-        <div class="or-divider">or</div>
-
-        <a href="app.html" class="skip-btn" id="skip-btn">
-          Continue without signing in →
-        </a>
 
         <div class="signin-card-footer">
           By signing in, you agree to store your task data in Google Firestore linked to your Google account. You can delete your data any time by contacting us.
