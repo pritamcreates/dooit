@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — dooit</title>
+  <meta name="description" content="Sign in to dooit to sync your tasks and time across all your devices.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg:     #fafaf8;
+      --text:   #111110;
+      --border: #111110;
+      --mid:    #555553;
+      --light:  #e8e8e4;
+      --font-mono:  'DM Mono', 'Courier New', monospace;
+      --font-serif: 'DM Serif Display', Georgia, serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Top bar ── */
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-name {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .brand-tag {
+      font-size: 0.6rem;
+      opacity: 0.4;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      opacity: 0.55;
+      border: 1px solid var(--light);
+      padding: 6px 13px;
+      transition: opacity 0.12s, background 0.12s, color 0.12s;
+      text-transform: uppercase;
+    }
+
+    .back-link:hover {
+      opacity: 1;
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    /* ── Main layout ── */
+    .page-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* ── Left panel ── */
+    .left-panel {
+      padding: 64px 56px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .left-top { flex: 1; }
+
+    .panel-eyebrow {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      opacity: 0.4;
+      margin-bottom: 28px;
+      display: block;
+    }
+
+    .panel-headline {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 36px;
+    }
+
+    .panel-headline em {
+      font-style: italic;
+      opacity: 0.45;
+    }
+
+    .perks {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .perk {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px 0;
+      border-top: 1px dashed var(--light);
+    }
+
+    .perk:last-child { border-bottom: 1px dashed var(--light); }
+
+    .perk-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .perk-text strong {
+      display: block;
+      font-weight: 500;
+      font-size: 0.78rem;
+      margin-bottom: 2px;
+    }
+
+    .perk-text span {
+      font-size: 0.7rem;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    .left-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--light);
+      font-size: 0.65rem;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    /* ── Right panel ── */
+    .right-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 40px;
+      background: var(--bg);
+    }
+
+    .signin-card {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .signin-card-header {
+      margin-bottom: 36px;
+    }
+
+    .signin-card-header h2 {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .signin-card-header p {
+      font-size: 0.73rem;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    /* ── Google button ── */
+    .google-btn-wrap {
+      border: 1px solid var(--border);
+      padding: 14px;
+      margin-bottom: 16px;
+      background: var(--bg);
+    }
+
+    /* Override Google's button to fit our style */
+    #google-signin-btn {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* The real Google button is injected here; we style the container */
+    .google-btn-wrap iframe {
+      border-radius: 0 !important;
+    }
+
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.35;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--light);
+    }
+
+    .skip-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--light);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-align: center;
+      cursor: pointer;
+      background: transparent;
+      color: var(--mid);
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .skip-btn:hover {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    .signin-card-footer {
+      margin-top: 24px;
+      font-size: 0.62rem;
+      color: var(--mid);
+      opacity: 0.6;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    /* ── Loading state ── */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 28px 0;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--light);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-state p {
+      font-size: 0.7rem;
+      color: var(--mid);
+    }
+
+    /* ── Success state ── */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-icon {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      background: var(--text);
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      margin: 0 auto 16px;
+    }
+
+    .success-state h3 {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+
+    .success-state p {
+      font-size: 0.72rem;
+      color: var(--mid);
+      margin-bottom: 20px;
+    }
+
+    .go-btn {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      background: var(--text);
+      color: var(--bg);
+      cursor: pointer;
+      transition: background 0.12s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .go-btn:hover { background: #333331; }
+
+    .progress-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--light);
+      margin-top: 16px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--text);
+      width: 0%;
+      transition: width 2.5s ease;
+    }
+
+    /* ── Mini app preview strip ── */
+    .preview-strip {
+      margin-top: 32px;
+      border: 1px solid var(--light);
+      padding: 12px;
+      background: var(--lighter, #f2f2ee);
+    }
+
+    .preview-strip-label {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.4;
+      margin-bottom: 8px;
+    }
+
+    .preview-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .preview-task {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.65rem;
+      padding: 5px 8px;
+      border: 1px solid var(--light);
+      background: var(--bg);
+    }
+
+    .preview-dot {
+      width: 6px; height: 6px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .preview-dot.active { background: var(--text); }
+
+    .preview-task-name { flex: 1; opacity: 0.7; }
+
+    .preview-task-time {
+      font-size: 0.58rem;
+      opacity: 0.4;
+      white-space: nowrap;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-body { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 48px 24px; align-items: flex-start; padding-top: 40px; }
+      .signin-card { max-width: 100%; }
+    }
+
+    @media (max-width: 440px) {
+      .topbar { padding: 14px 16px; }
+      .back-link span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="topbar">
+  <a href="landing.html" class="brand">
+    <span class="brand-name">dooit</span>
+    <span class="brand-tag">task &amp; time</span>
+  </a>
+  <a href="landing.html" class="back-link">
+    ← <span>Back to homepage</span>
+  </a>
+</div>
+
+<!-- ── Main ── -->
+<div class="page-body">
+
+  <!-- Left: value prop -->
+  <div class="left-panel">
+    <div class="left-top">
+      <span class="panel-eyebrow">Why sign in?</span>
+      <h1 class="panel-headline">
+        Your work,<br>
+        everywhere<br>
+        <em>you are.</em>
+      </h1>
+
+      <ul class="perks">
+        <li class="perk">
+          <div class="perk-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1" width="12" height="12" stroke="#111110" stroke-width="1.1"/>
+              <path d="M3.5 7L6 9.5L10.5 4.5" stroke="#111110" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="perk-text">
+            <strong>Sync across all devices</strong>
+            <span>Start a task on your laptop, check progress on your phone. Everything stays in sync automatically via Firestore.</span>
+          </div>
+        </li>
+        <li class="perk">
+          <div class="perk-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1.5C7 1.5 2.5 3.5 2.5 7.5V11H11.5V7.5C11.5 3.5 7 1.5 7 1.5Z" stroke="#111110" stroke-width="1.1" fill="none"/>
+              <line x1="1.5" y1="11" x2="12.5" y2="11" stroke="#111110" stroke-width="1.1"/>
+            </svg>
+          </div>
+          <div class="perk-text">
+            <strong>Never lose your data</strong>
+            <span>Without sign-in, data lives only in your browser. One cleared cache and it's gone. Signed in means it's safe, always.</span>
+          </div>
+        </li>
+        <li class="perk">
+          <div class="perk-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="3" width="12" height="10" stroke="#111110" stroke-width="1.1"/>
+              <line x1="1" y1="6" x2="13" y2="6" stroke="#111110" stroke-width="1.1"/>
+              <line x1="4.5" y1="1.5" x2="4.5" y2="4" stroke="#111110" stroke-width="1.1"/>
+              <line x1="9.5" y1="1.5" x2="9.5" y2="4" stroke="#111110" stroke-width="1.1"/>
+            </svg>
+          </div>
+          <div class="perk-text">
+            <strong>Full history &amp; analytics</strong>
+            <span>Access your weekly analytics, daily reports, and productivity scores going back as far as you've been using dooit.</span>
+          </div>
+        </li>
+        <li class="perk">
+          <div class="perk-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="5.5" stroke="#111110" stroke-width="1.1"/>
+              <line x1="7" y1="7" x2="7" y2="3.5" stroke="#111110" stroke-width="1.1"/>
+              <line x1="7" y1="7" x2="9.5" y2="7" stroke="#111110" stroke-width="1.1"/>
+            </svg>
+          </div>
+          <div class="perk-text">
+            <strong>Early access to Pro features</strong>
+            <span>Signed-in users get first access to upcoming Pro features — advanced reports, team projects, and more.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="left-footer">
+      Your data is stored securely in Google Firestore.<br>
+      We only store what you create inside dooit.<br>
+      No tracking. No ads. Ever.
+    </div>
+  </div>
+
+  <!-- Right: sign-in card -->
+  <div class="right-panel">
+    <div class="signin-card">
+
+      <!-- Default state -->
+      <div id="default-state">
+        <div class="signin-card-header">
+          <h2>Welcome to dooit</h2>
+          <p>Sign in with Google to sync your tasks and time across all your devices. Free, always.</p>
+        </div>
+
+        <!-- Google Sign-In button -->
+        <div class="google-btn-wrap">
+          <div id="google-signin-btn"></div>
+        </div>
+
+        <div class="or-divider">or</div>
+
+        <a href="app.html" class="skip-btn" id="skip-btn">
+          Continue without signing in →
+        </a>
+
+        <div class="signin-card-footer">
+          By signing in, you agree to store your task data in Google Firestore linked to your Google account. You can delete your data any time by contacting us.
+        </div>
+
+        <!-- Mini app preview -->
+        <div class="preview-strip">
+          <div class="preview-strip-label">Your tasks are waiting</div>
+          <div class="preview-tasks">
+            <div class="preview-task">
+              <div class="preview-dot active"></div>
+              <span class="preview-task-name">Client proposal draft</span>
+              <span class="preview-task-time">10:00 – 11:30am</span>
+            </div>
+            <div class="preview-task">
+              <div class="preview-dot"></div>
+              <span class="preview-task-name">Review invoice #047</span>
+              <span class="preview-task-time">2:00 – 2:30pm</span>
+            </div>
+            <div class="preview-task">
+              <div class="preview-dot"></div>
+              <span class="preview-task-name">Update portfolio</span>
+              <span class="preview-task-time">4:00 – 5:00pm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div class="loading-state" id="loading-state">
+        <div class="spinner"></div>
+        <p>Signing you in &amp; syncing your data…</p>
+      </div>
+
+      <!-- Success state -->
+      <div class="success-state" id="success-state">
+        <div class="success-icon">✓</div>
+        <h3 id="success-name">Welcome back.</h3>
+        <p id="success-sub">Syncing your tasks now. You'll be redirected automatically.</p>
+        <a href="app.html" class="go-btn" id="go-btn">Open dooit →</a>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  // ── Config ──
+  const GOOGLE_CLIENT_ID  = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.googleusercontent.com';
+  const STORAGE_AUTH_USER = 'dooit_auth_user';
+  const APP_URL           = 'app.html'; // main dooit app
+
+  // ── State machine helpers ──
+  function showState(id) {
+    ['default-state', 'loading-state', 'success-state'].forEach(s => {
+      document.getElementById(s).style.display = s === id ? (id === 'default-state' ? 'block' : 'block') : 'none';
+    });
+  }
+
+  // ── Check if already signed in ──
+  try {
+    const saved = localStorage.getItem(STORAGE_AUTH_USER);
+    if (saved) {
+      const user = JSON.parse(saved);
+      // Already signed in — go straight to app
+      showSuccessAndRedirect(user);
+    }
+  } catch(e) {}
+
+  // ── Handle Google credential response ──
+  window.handleCredentialResponse = function(response) {
+    showState('loading-state');
+
+    try {
+      const idToken = response.credential;
+      const payload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const profile = JSON.parse(atob(payload));
+
+      const user = {
+        id:      profile.sub,
+        name:    profile.name,
+        email:   profile.email,
+        picture: profile.picture,
+        token:   idToken,
+      };
+
+      localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(user));
+
+      // Small delay to feel intentional, not jarring
+      setTimeout(() => showSuccessAndRedirect(user), 800);
+
+    } catch(err) {
+      console.error('Auth error', err);
+      showState('default-state');
+      alert('Something went wrong during sign in. Please try again.');
+    }
+  };
+
+  function showSuccessAndRedirect(user) {
+    showState('success-state');
+
+    const firstName = (user.name || 'back').split(' ')[0];
+    document.getElementById('success-name').textContent = `Welcome, ${firstName}.`;
+    document.getElementById('success-sub').textContent =
+      `Signed in as ${user.email}. Redirecting you to dooit…`;
+
+    // Animate progress bar then redirect
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('progress-fill').style.width = '100%';
+      });
+    });
+
+    setTimeout(() => {
+      window.location.href = APP_URL;
+    }, 2800);
+  }
+
+  // ── Init Google Sign-In ──
+  function initGoogle() {
+    if (typeof google === 'undefined' || !google.accounts?.id) {
+      setTimeout(initGoogle, 150);
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id:   GOOGLE_CLIENT_ID,
+      callback:    window.handleCredentialResponse,
+      auto_select: false,
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById('google-signin-btn'),
+      {
+        theme:     'outline',
+        size:      'large',
+        width:     '100%',
+        text:      'signin_with',
+        shape:     'rectangular',
+        logo_alignment: 'left',
+      }
+    );
+  }
+
+  // Wait for Google script to load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGoogle);
+  } else {
+    initGoogle();
+  }
+</script>
+
+</body>
+</html>
