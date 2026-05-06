@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "letsdooit---final-edition"
+  },
+  "targets": {
+    "letsdooit---final-edition": {
+      "hosting": {
+        "dooitnow": [
+          "dooitnow"
+        ]
+      }
+    }
+  }
+}
