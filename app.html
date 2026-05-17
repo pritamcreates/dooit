@@ -141,10 +141,24 @@
         .column {
             border: 1px solid var(--border);
             padding: 14px;
-            min-height: 380px;
+            height: 560px;
             display: flex;
             flex-direction: column;
         }
+
+        .column .task-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+            /* Subtle scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--light) transparent;
+        }
+
+        .column .task-list::-webkit-scrollbar { width: 4px; }
+        .column .task-list::-webkit-scrollbar-track { background: transparent; }
+        .column .task-list::-webkit-scrollbar-thumb { background: var(--light); border-radius: 0; }
 
         .column h2 {
             text-align: center;
@@ -169,6 +183,67 @@
             border-bottom-style: dashed;
             opacity: 0.7;
         }
+
+        /* ── Unfinished priority group dividers ── */
+        .unfinished-group-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.45;
+            padding: 6px 2px 4px;
+            border-bottom: 1px dashed var(--light);
+            margin-bottom: 6px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .unfinished-group-label:first-child { margin-top: 0; }
+
+        .unfinished-group-label .group-count {
+            font-size: 0.6rem;
+            opacity: 0.6;
+        }
+
+        /* ── Quick Move button & dropdown ── */
+        .quick-move-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .quick-move-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 200;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.08);
+            min-width: 130px;
+        }
+
+        .quick-move-dropdown.open { display: block; }
+
+        .quick-move-option {
+            display: block;
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 0.65rem;
+            text-align: left;
+            border: none;
+            border-bottom: 1px solid var(--light);
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            letter-spacing: 0.04em;
+            color: var(--text);
+            text-transform: uppercase;
+        }
+
+        .quick-move-option:last-child { border-bottom: none; }
+        .quick-move-option:hover { background: var(--text); color: var(--bg); }
 
         .empty-state {
             text-align: center;
@@ -2121,8 +2196,32 @@ function render() {
     let quickWinsCount = 0;
 
     prevUnfinished.forEach(task => {
-        renderBoardTask(task, lists.previous_unfinished);
-        activeCounts.previous_unfinished++;
+        totalBreakToday += getBreakTime(task);
+    });
+
+    // Group unfinished tasks by their original priority
+    const unfinishedGroups = { urgent: [], important: [], later: [] };
+    prevUnfinished.forEach(task => {
+        const p = task.priority || 'later';
+        if (unfinishedGroups[p]) unfinishedGroups[p].push(task);
+        else unfinishedGroups.later.push(task);
+    });
+
+    const groupLabels = { urgent: '🔴 Urgent', important: '🟡 Important', later: '🔵 Later' };
+    let unfinishedRendered = 0;
+    ['urgent','important','later'].forEach(priority => {
+        const group = unfinishedGroups[priority];
+        if (group.length === 0) return;
+        // Group sub-header
+        const divider = document.createElement('div');
+        divider.className = 'unfinished-group-label';
+        divider.innerHTML = `<span>${groupLabels[priority]}</span><span class="group-count">${group.length}</span>`;
+        lists.previous_unfinished.appendChild(divider);
+        group.forEach(task => {
+            renderBoardTask(task, lists.previous_unfinished);
+        });
+        unfinishedRendered += group.length;
+        activeCounts.previous_unfinished += group.length;
     });
 
     currentTasks.forEach(task => {
@@ -2194,6 +2293,15 @@ function renderBoardTask(task, container) {
                 : `<button onclick="pauseTask('${task.id}')">Break</button>`
             }
             <button onclick="completeTask('${task.id}')">Done</button>
+            <div class="quick-move-wrap">
+                <button onclick="toggleQuickMove(event, '${task.id}')">Move →</button>
+                <div class="quick-move-dropdown" id="qm-${task.id}">
+                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','urgent')">🔴 Urgent</button>
+                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','important')">🟡 Important</button>
+                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','later')">🔵 Later</button>
+                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','done')">✓ Done</button>
+                </div>
+            </div>
             <button onclick="editTask('${task.id}')">Edit</button>
             <button onclick="deleteTask('${task.id}')">Delete</button>
         </div>
@@ -2241,11 +2349,58 @@ function renderQuickWinTask(task, container) {
 }
 
 // ─────────────────────────────────────────────
+// Quick Move
+// ─────────────────────────────────────────────
+function toggleQuickMove(e, id) {
+    e.stopPropagation();
+    // Close any other open dropdowns
+    document.querySelectorAll('.quick-move-dropdown.open').forEach(el => {
+        if (el.id !== 'qm-' + id) el.classList.remove('open');
+    });
+    const dd = document.getElementById('qm-' + id);
+    if (dd) dd.classList.toggle('open');
+}
+
+function quickMoveTask(id, destination) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    if (destination === 'done') {
+        completeTask(id);
+        return;
+    }
+
+    // Move to a priority column — update status and priority
+    task.priority = destination;
+    // If it was unfinished, bring it to today
+    if (task.status === 'previous_unfinished') {
+        task.status = 'pending';
+        task.rolledOver = true;
+        task.rolledOverFrom = task.date;
+        task.date = today;
+    }
+
+    // Close dropdown
+    const dd = document.getElementById('qm-' + id);
+    if (dd) dd.classList.remove('open');
+
+    saveTasks();
+    render();
+    updateProductivityScore();
+}
+
+// Close quick-move dropdowns when clicking outside
+document.addEventListener('click', function() {
+    document.querySelectorAll('.quick-move-dropdown.open').forEach(el => el.classList.remove('open'));
+});
+
+// ─────────────────────────────────────────────
 // Section toggles
 // ─────────────────────────────────────────────
 function toggleSection(id) {
     document.getElementById(id).classList.toggle('open');
 }
+
 
 // ─────────────────────────────────────────────
 // Global timer — FIX: throttled calls
