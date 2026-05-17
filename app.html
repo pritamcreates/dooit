@@ -339,7 +339,7 @@
         /* ── Panels ── */
         .panels-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.6fr 1.4fr 1fr;
             gap: 16px;
         }
 
@@ -354,13 +354,16 @@
             letter-spacing: 0.1em;
             font-family: var(--font-mono);
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         /* ── Progress Chart Panel ── */
         .progress-tabs {
             display: flex;
             gap: 0;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             border: 1px solid var(--border);
         }
 
@@ -386,57 +389,105 @@
         .progress-view { display: none; }
         .progress-view.active { display: block; }
 
-        /* Ring chart */
-        .progress-rings {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-around;
-            margin-bottom: 12px;
+        /* ── Day progress: stat cards + big bar ── */
+        .day-stat-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
         }
 
-        .ring-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+        .day-stat-card {
+            border: 1px solid var(--border);
+            padding: 10px 8px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .ring-svg { transform: rotate(-90deg); }
-
-        .ring-track { fill: none; stroke: var(--light); }
-        .ring-fill {
-            fill: none;
-            stroke: var(--text);
-            stroke-linecap: square;
-            transition: stroke-dashoffset 0.6s ease;
+        .day-stat-card-fill {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            background: var(--text);
+            transition: width 0.7s ease;
         }
 
-        .ring-label-group {
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
-        .ring-pct {
+        .day-stat-value {
             font-family: var(--font-serif);
-            font-size: 13px;
-            fill: var(--text);
+            font-size: 1.5rem;
+            line-height: 1;
+            margin-bottom: 3px;
         }
 
-        .ring-sub-label {
+        .day-stat-label {
             font-size: 0.58rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            opacity: 0.45;
+        }
+
+        .day-stat-sub {
+            font-size: 0.62rem;
+            opacity: 0.55;
+            margin-top: 3px;
+        }
+
+        /* Momentum bar */
+        .momentum-wrap {
+            margin-bottom: 12px;
+        }
+
+        .momentum-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
             opacity: 0.5;
-            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 5px;
+        }
+
+        .momentum-track {
+            height: 8px;
+            background: var(--light);
+            border: 1px solid #ddd;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .momentum-fill {
+            height: 100%;
+            background: var(--text);
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .momentum-fill::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 2px;
+            background: rgba(255,255,255,0.6);
+        }
+
+        /* Streak & insight line */
+        .day-insight-line {
+            font-size: 0.68rem;
+            font-family: var(--font-serif);
+            font-style: italic;
+            text-align: center;
+            opacity: 0.55;
+            margin-top: 10px;
+            min-height: 18px;
         }
 
         /* Bar rows for week/month */
-        .progress-bar-rows { display: flex; flex-direction: column; gap: 7px; }
+        .progress-bar-rows { display: flex; flex-direction: column; gap: 9px; }
 
         .prog-row {
             display: grid;
-            grid-template-columns: 38px 1fr 38px;
+            grid-template-columns: 42px 1fr 46px;
             align-items: center;
             gap: 8px;
             font-size: 0.68rem;
@@ -445,19 +496,46 @@
         .prog-row-label { opacity: 0.55; font-size: 0.62rem; }
 
         .prog-track {
-            height: 5px;
+            height: 7px;
             background: var(--light);
             border: 1px solid #ddd;
             overflow: hidden;
+            position: relative;
         }
 
         .prog-fill {
             height: 100%;
             background: var(--text);
-            transition: width 0.5s ease;
+            transition: width 0.6s ease;
         }
 
         .prog-val { text-align: right; opacity: 0.7; font-size: 0.65rem; }
+
+        .week-kpi-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--light);
+        }
+
+        .week-kpi {
+            text-align: center;
+        }
+
+        .week-kpi-val {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+        }
+
+        .week-kpi-lbl {
+            font-size: 0.56rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.45;
+            margin-top: 2px;
+        }
 
         .progress-summary-line {
             font-size: 0.65rem;
@@ -475,6 +553,152 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
+        }
+
+        /* ── Upcoming Events Panel ── */
+        .events-add-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .events-add-row input,
+        .events-add-row textarea,
+        .events-add-row select {
+            width: 100%;
+            font-size: 0.72rem;
+            padding: 5px 8px;
+        }
+
+        .events-add-row textarea {
+            min-height: 48px;
+            resize: vertical;
+        }
+
+        .events-field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .events-add-btn {
+            width: 100%;
+            font-size: 0.68rem;
+            padding: 6px;
+            margin-top: 2px;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-height: 320px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--light) transparent;
+        }
+
+        .event-card {
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--light);
+            position: relative;
+        }
+
+        .event-card:last-child { border-bottom: none; }
+
+        .event-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .event-card-title {
+            font-weight: 500;
+            font-size: 0.82rem;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .event-card-countdown {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border: 1px solid var(--border);
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+
+        .event-card-countdown.today-badge {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .event-card-countdown.soon-badge {
+            border-style: dashed;
+        }
+
+        .event-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-bottom: 3px;
+        }
+
+        .event-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .event-card-note {
+            font-size: 0.7rem;
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--mid);
+            border-left: 2px solid var(--light);
+            padding-left: 6px;
+            margin-top: 4px;
+        }
+
+        .event-card-del {
+            position: absolute;
+            top: 8px; right: 0;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 3px;
+            opacity: 0.3;
+            line-height: 1;
+            font-family: var(--font-mono);
+        }
+
+        .event-card-del:hover { opacity: 1; background: var(--text); color: var(--bg); }
+
+        .events-empty {
+            font-size: 0.75rem;
+            font-style: italic;
+            opacity: 0.4;
+            text-align: center;
+            padding: 18px 0;
+        }
+
+        @media (max-width: 960px) {
+            .panels-grid { grid-template-columns: 1fr 1fr; }
+            .panels-grid .panel:last-child { grid-column: 1 / -1; }
+        }
+        @media (max-width: 540px) {
+            .panels-grid { grid-template-columns: 1fr; }
+            .panels-grid .panel:last-child { grid-column: auto; }
+            .day-stat-row { grid-template-columns: repeat(3, 1fr); }
         }
 
         /* ── Collapsible sections ── */
@@ -1514,7 +1738,7 @@
         </div>
     </div>
 
-    <!-- Progress Chart + Done -->
+    <!-- Progress Chart + Upcoming Events + Done -->
     <div class="panels-grid">
         <div class="panel">
             <h3>Progress</h3>
@@ -1524,17 +1748,27 @@
                 <button class="progress-tab" onclick="switchProgressTab('month', this)">Month</button>
             </div>
 
-            <!-- DAY view: 3 rings -->
+            <!-- DAY view: stat cards + momentum bar -->
             <div class="progress-view active" id="progress-day">
-                <div class="progress-rings" id="day-rings">
+                <div class="day-stat-row" id="day-stat-row">
                     <!-- rendered by JS -->
                 </div>
-                <div class="progress-summary-line" id="day-summary-line"></div>
+                <div class="momentum-wrap">
+                    <div class="momentum-header">
+                        <span>Day momentum</span>
+                        <span id="momentum-pct">0%</span>
+                    </div>
+                    <div class="momentum-track">
+                        <div class="momentum-fill" id="momentum-fill" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="day-insight-line" id="day-insight-line"></div>
             </div>
 
-            <!-- WEEK view: bar rows per day -->
+            <!-- WEEK view: bar rows per day + KPIs -->
             <div class="progress-view" id="progress-week">
                 <div class="progress-bar-rows" id="week-bars"></div>
+                <div class="week-kpi-row" id="week-kpi-row"></div>
                 <div class="progress-summary-line" id="week-summary-line"></div>
             </div>
 
@@ -1544,6 +1778,28 @@
                 <div class="progress-summary-line" id="month-summary-line"></div>
             </div>
         </div>
+
+        <!-- Upcoming Events Panel -->
+        <div class="panel" id="events-panel">
+            <h3>
+                <span>Upcoming Events</span>
+                <span id="events-count-badge" style="font-size:0.65rem;opacity:0.5;font-weight:normal;letter-spacing:0;text-transform:none;"></span>
+            </h3>
+            <div class="events-add-row">
+                <input type="text" id="ev-title" placeholder="Meeting / event title..." maxlength="60">
+                <div class="events-field-row">
+                    <input type="date" id="ev-date">
+                    <input type="time" id="ev-time" placeholder="Time">
+                </div>
+                <input type="text" id="ev-location" placeholder="📍 Location (optional)">
+                <textarea id="ev-note" placeholder="Notes (optional)..."></textarea>
+                <button class="events-add-btn" onclick="addEvent()">+ Add Event</button>
+            </div>
+            <div class="events-list" id="events-list">
+                <div class="events-empty">No upcoming events. Add one above.</div>
+            </div>
+        </div>
+
         <div class="panel">
             <h3>Done Today</h3>
             <div id="done-list"></div>
@@ -3184,53 +3440,63 @@ function renderProgressCharts() {
     renderMonthProgress();
 }
 
-function makeSVGRing(pct, label, sublabel) {
-    const r = 30, cx = 38, cy = 38, size = 76;
-    const circ = 2 * Math.PI * r;
-    const dashOffset = circ * (1 - Math.min(pct, 1));
-    return `
-        <div class="ring-item">
-            <svg class="ring-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-                <circle class="ring-track" cx="${cx}" cy="${cy}" r="${r}" stroke-width="5"/>
-                <circle class="ring-fill" cx="${cx}" cy="${cy}" r="${r}" stroke-width="5"
-                    stroke-dasharray="${circ.toFixed(2)}"
-                    stroke-dashoffset="${dashOffset.toFixed(2)}"/>
-            </svg>
-            <div class="ring-sub-label">${sublabel}</div>
-            <div style="font-size:0.7rem;font-weight:500;font-family:var(--font-serif);">${label}</div>
-        </div>`;
-}
-
 function renderDayProgress() {
     const todayTasks = tasks.filter(t => t.date === today);
-    const total = todayTasks.length;
-    const done  = todayTasks.filter(t => t.status === 'done').length;
-    const inProg = todayTasks.filter(t => t.status === 'in-progress').length;
+    const total   = todayTasks.length;
+    const done    = todayTasks.filter(t => t.status === 'done').length;
+    const inProg  = todayTasks.filter(t => t.status === 'in_progress').length;
+    const pending = todayTasks.filter(t => t.status === 'pending').length;
 
-    // Tasks done %
-    const taskPct = total > 0 ? done / total : 0;
-
-    // Focus time vs 6h goal
-    const focusMs = todayTasks.reduce((s, t) => s + getElapsed(t), 0);
-    const focusGoal = 6 * 3600000;
-    const focusPct = Math.min(focusMs / focusGoal, 1);
-
-    // Urgent tasks cleared
     const urgentTotal = todayTasks.filter(t => t.priority === 'urgent').length;
     const urgentDone  = todayTasks.filter(t => t.priority === 'urgent' && t.status === 'done').length;
-    const urgentPct   = urgentTotal > 0 ? urgentDone / urgentTotal : (total === 0 ? 0 : 1);
+    const urgentPct   = urgentTotal > 0 ? Math.round((urgentDone / urgentTotal) * 100) : (total === 0 ? 0 : 100);
 
-    const rings = document.getElementById('day-rings');
-    rings.innerHTML =
-        makeSVGRing(taskPct, `${done}/${total}`, 'tasks') +
-        makeSVGRing(focusPct, fmtHours(focusMs), 'focus') +
-        makeSVGRing(urgentPct, `${urgentDone}/${urgentTotal || 0}`, 'urgent');
+    const focusMs   = todayTasks.reduce((s, t) => s + getElapsed(t), 0);
+    const focusGoal = 6 * 3600000;
+    const focusPct  = Math.min(Math.round((focusMs / focusGoal) * 100), 100);
 
-    const summaryArr = [];
-    if (inProg > 0) summaryArr.push(`${inProg} in progress`);
-    if (total === 0) summaryArr.push('No tasks yet today');
-    else if (done === total) summaryArr.push('All done! 🎉');
-    document.getElementById('day-summary-line').textContent = summaryArr.join(' · ');
+    const taskPct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    // Momentum = weighted blend: 50% task completion + 30% focus + 20% urgent
+    const momentum = Math.round(taskPct * 0.5 + focusPct * 0.3 + urgentPct * 0.2);
+
+    // Stat cards
+    document.getElementById('day-stat-row').innerHTML = `
+        <div class="day-stat-card">
+            <div class="day-stat-value">${done}<span style="font-size:0.9rem;opacity:0.4;">/${total}</span></div>
+            <div class="day-stat-label">Tasks Done</div>
+            <div class="day-stat-sub">${inProg > 0 ? inProg + ' in progress' : pending > 0 ? pending + ' pending' : total === 0 ? 'Add tasks' : 'All clear!'}</div>
+            <div class="day-stat-card-fill" style="width:${taskPct}%"></div>
+        </div>
+        <div class="day-stat-card">
+            <div class="day-stat-value">${fmtHours(focusMs)}</div>
+            <div class="day-stat-label">Focus Time</div>
+            <div class="day-stat-sub">Goal: 6h &nbsp;·&nbsp; ${focusPct}%</div>
+            <div class="day-stat-card-fill" style="width:${focusPct}%"></div>
+        </div>
+        <div class="day-stat-card">
+            <div class="day-stat-value">${urgentDone}<span style="font-size:0.9rem;opacity:0.4;">/${urgentTotal}</span></div>
+            <div class="day-stat-label">Urgent Done</div>
+            <div class="day-stat-sub">${urgentPct}% cleared</div>
+            <div class="day-stat-card-fill" style="width:${urgentPct}%"></div>
+        </div>
+    `;
+
+    // Momentum bar
+    document.getElementById('momentum-fill').style.width = momentum + '%';
+    document.getElementById('momentum-pct').textContent = momentum + '%';
+
+    // Insight line
+    const lines = total === 0
+        ? ['Start your day — add your first task.']
+        : done === total && total > 0
+        ? ['Everything done. Outstanding work. ✦']
+        : momentum >= 80 ? ['Excellent momentum — keep it up.']
+        : momentum >= 55 ? [`${total - done} task${total - done > 1 ? 's' : ''} to go — you're on track.`]
+        : momentum >= 30 ? ['Midway there. Push through the next one.']
+        : inProg > 0 ? ['One task in progress — finish before starting another.']
+        : ['Start your first task to build momentum.'];
+    document.getElementById('day-insight-line').textContent = lines[0];
 }
 
 function renderWeekProgress() {
@@ -3239,28 +3505,43 @@ function renderWeekProgress() {
     const todayISO = today;
 
     const rowsEl = document.getElementById('week-bars');
-    let totalDone = 0, totalAll = 0;
+    let totalDone = 0, totalAll = 0, totalFocusMs = 0;
     rowsEl.innerHTML = weekDates.map((date, i) => {
         const dayTasks = tasks.filter(t => t.date === date);
         const all = dayTasks.length;
         const done = dayTasks.filter(t => t.status === 'done').length;
-        totalDone += done; totalAll += all;
+        const focusMs = dayTasks.reduce((s, t) => s + getElapsed(t), 0);
+        totalDone += done; totalAll += all; totalFocusMs += focusMs;
         const pct = all > 0 ? Math.round((done / all) * 100) : 0;
         const isFuture = date > todayISO;
         const isToday  = date === todayISO;
         const dayLabel = DAY[i] + (isToday ? ' ●' : '');
         const fillStyle = isFuture ? 'width:0%;background:#ddd;' : `width:${pct}%;`;
+        const focusLabel = focusMs > 0 ? `<span style="opacity:0.4;font-size:0.58rem;"> · ${fmtHours(focusMs)}</span>` : '';
         return `<div class="prog-row">
             <span class="prog-row-label" style="${isToday?'opacity:1;font-weight:500;':''}">${dayLabel}</span>
             <div class="prog-track"><div class="prog-fill" style="${fillStyle}"></div></div>
-            <span class="prog-val">${isFuture ? '—' : (all === 0 ? '–' : done + '/' + all)}</span>
+            <span class="prog-val">${isFuture ? '—' : (all === 0 ? '–' : done + '/' + all)}${isFuture ? '' : focusLabel}</span>
         </div>`;
     }).join('');
 
     const weekPct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+    const avgFocusPerDay = totalFocusMs > 0 ? fmtHours(totalFocusMs / 5) : '—';
+
+    document.getElementById('week-kpi-row').innerHTML = `
+        <div class="week-kpi">
+            <div class="week-kpi-val">${weekPct}%</div>
+            <div class="week-kpi-lbl">Completion</div>
+        </div>
+        <div class="week-kpi">
+            <div class="week-kpi-val">${avgFocusPerDay}</div>
+            <div class="week-kpi-lbl">Avg Focus/Day</div>
+        </div>
+    `;
+
     document.getElementById('week-summary-line').textContent =
         totalAll === 0 ? 'No tasks this week yet'
-        : `${totalDone} of ${totalAll} tasks completed this week (${weekPct}%)`;
+        : `${totalDone} of ${totalAll} tasks done · ${fmtHours(totalFocusMs)} focused`;
 }
 
 function renderMonthProgress() {
@@ -3500,6 +3781,145 @@ checkProjectDeadlineNotifications();
 
 // Init projects
 loadProjectDefs();
+
+// ─────────────────────────────────────────────
+// Upcoming Events
+// ─────────────────────────────────────────────
+const STORAGE_EVENTS = 'dooit_events';
+let upcomingEvents = [];
+
+function loadEvents() {
+    try { upcomingEvents = JSON.parse(localStorage.getItem(STORAGE_EVENTS) || '[]'); }
+    catch { upcomingEvents = []; }
+    renderEvents();
+}
+
+function saveEvents() {
+    try { localStorage.setItem(STORAGE_EVENTS, JSON.stringify(upcomingEvents)); } catch(e) {}
+}
+
+function addEvent() {
+    const title    = document.getElementById('ev-title').value.trim();
+    const date     = document.getElementById('ev-date').value;
+    const time     = document.getElementById('ev-time').value;
+    const location = document.getElementById('ev-location').value.trim();
+    const note     = document.getElementById('ev-note').value.trim();
+
+    if (!title || !date) {
+        document.getElementById('ev-title').focus();
+        return;
+    }
+
+    upcomingEvents.push({
+        id: 'ev_' + Date.now(),
+        title, date, time, location, note,
+        createdAt: new Date().toISOString()
+    });
+
+    saveEvents();
+    renderEvents();
+
+    // Clear inputs
+    document.getElementById('ev-title').value = '';
+    document.getElementById('ev-date').value = '';
+    document.getElementById('ev-time').value = '';
+    document.getElementById('ev-location').value = '';
+    document.getElementById('ev-note').value = '';
+    document.getElementById('ev-title').focus();
+}
+
+function deleteEvent(id) {
+    upcomingEvents = upcomingEvents.filter(e => e.id !== id);
+    saveEvents();
+    renderEvents();
+}
+
+function renderEvents() {
+    const list = document.getElementById('events-list');
+    if (!list) return;
+
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    // Sort by date ascending, put past at bottom
+    const upcoming = upcomingEvents
+        .filter(e => e.date >= todayISO)
+        .sort((a, b) => a.date.localeCompare(b.date) || (a.time||'').localeCompare(b.time||''));
+    const past = upcomingEvents
+        .filter(e => e.date < todayISO)
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+    // Badge
+    const badge = document.getElementById('events-count-badge');
+    if (badge) badge.textContent = upcoming.length > 0 ? `${upcoming.length} upcoming` : '';
+
+    if (upcomingEvents.length === 0) {
+        list.innerHTML = '<div class="events-empty">No upcoming events. Add one above.</div>';
+        return;
+    }
+
+    function countdownLabel(dateISO, timeStr) {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const diffDays = Math.round(
+            (new Date(dateISO + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000
+        );
+        if (diffDays < 0) return { text: `${Math.abs(diffDays)}d ago`, cls: '' };
+        if (diffDays === 0) return { text: 'Today!', cls: 'today-badge' };
+        if (diffDays === 1) return { text: 'Tomorrow', cls: 'soon-badge' };
+        if (diffDays <= 3) return { text: `In ${diffDays} days`, cls: 'soon-badge' };
+        return { text: `In ${diffDays}d`, cls: '' };
+    }
+
+    function fmtEventDate(dateISO) {
+        return new Date(dateISO + 'T00:00:00').toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric'
+        });
+    }
+
+    function fmtEventTime(timeStr) {
+        if (!timeStr) return '';
+        const [h, m] = timeStr.split(':').map(Number);
+        const d = new Date(); d.setHours(h, m);
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function eventCardHTML(ev) {
+        const cd = countdownLabel(ev.date, ev.time);
+        const metaItems = [
+            `<span class="event-meta-item">📅 ${fmtEventDate(ev.date)}</span>`,
+            ev.time ? `<span class="event-meta-item">🕐 ${fmtEventTime(ev.time)}</span>` : '',
+            ev.location ? `<span class="event-meta-item">📍 ${escHtml(ev.location)}</span>` : ''
+        ].filter(Boolean).join('');
+        return `<div class="event-card">
+            <div class="event-card-top">
+                <span class="event-card-title">${escHtml(ev.title)}</span>
+                <span class="event-card-countdown ${cd.cls}">${cd.text}</span>
+            </div>
+            <div class="event-card-meta">${metaItems}</div>
+            ${ev.note ? `<div class="event-card-note">${escHtml(ev.note)}</div>` : ''}
+            <button class="event-card-del" onclick="deleteEvent('${ev.id}')" title="Remove">×</button>
+        </div>`;
+    }
+
+    let html = '';
+    if (upcoming.length) html += upcoming.map(eventCardHTML).join('');
+    if (past.length) {
+        html += `<div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.35;padding:10px 0 4px;border-top:1px solid var(--light);margin-top:6px;">Past</div>`;
+        html += past.map(eventCardHTML).join('');
+    }
+    list.innerHTML = html;
+}
+
+// Prefill today's date in the event date input
+(function() {
+    const inp = document.getElementById('ev-date');
+    if (inp) inp.value = new Date().toISOString().split('T')[0];
+    // Also allow Enter key on title to add
+    const titleInp = document.getElementById('ev-title');
+    if (titleInp) titleInp.addEventListener('keydown', e => { if (e.key === 'Enter') addEvent(); });
+})();
+
+loadEvents();
 
 // ─────────────────────────────────────────────
 // Boot
