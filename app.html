@@ -206,6 +206,45 @@
             opacity: 0.6;
         }
 
+        /* ── Slim unfinished row ── */
+        .unfinished-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 7px 4px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .unfinished-row:last-child { border-bottom: none; }
+
+        .unfinished-row-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            flex: 1;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .unfinished-row-date {
+            font-size: 0.58rem;
+            opacity: 0.45;
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+        }
+
+        .unfinished-row-actions {
+            display: flex;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        .unfinished-row-actions button {
+            font-size: 0.58rem;
+            padding: 2px 6px;
+            letter-spacing: 0.03em;
+        }
+
         /* ── Quick Move button & dropdown ── */
         .quick-move-wrap {
             position: relative;
@@ -1634,7 +1673,236 @@
             #projects-panel { width: 260px; right: 10px; bottom: 64px; }
             #projects-panel-toggle { right: 106px; bottom: 12px; }
         }
+
+        /* ── PRODUCTIVITY SYSTEM ENHANCEMENTS ── */
+
+        /* Daily Rhythm Banner */
+        #rhythm-banner {
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--bg);
+        }
+
+        .rhythm-phases {
+            display: flex;
+            gap: 0;
+            flex: 1;
+            max-width: 560px;
+        }
+
+        .rhythm-phase {
+            flex: 1;
+            text-align: center;
+            padding: 5px 4px;
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid var(--light);
+            border-right: none;
+            opacity: 0.35;
+            transition: opacity 0.3s, background 0.3s;
+        }
+        .rhythm-phase:last-child { border-right: 1px solid var(--light); }
+        .rhythm-phase.active {
+            background: var(--text);
+            color: var(--bg);
+            opacity: 1;
+            border-color: var(--text);
+        }
+        .rhythm-phase.past { opacity: 0.6; }
+
+        .rhythm-phase-label { font-size: 0.62rem; margin-bottom: 1px; }
+        .rhythm-phase-time { font-size: 0.52rem; opacity: 0.6; }
+
+        #rhythm-coaching {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 0.8rem;
+            opacity: 0.65;
+            max-width: 340px;
+            text-align: right;
+        }
+
+        /* Daily Intention Panel */
+        #intention-banner {
+            margin-bottom: 16px;
+            border: 2px solid var(--border);
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .intention-frog-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .intention-content { flex: 1; min-width: 0; }
+
+        .intention-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.45;
+            margin-bottom: 3px;
+        }
+
+        #intention-frog-text {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-style: italic;
+            word-break: break-word;
+        }
+
+        #intention-frog-text.placeholder { opacity: 0.35; font-style: italic; }
+
+        .intention-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+
+        /* Rollover age badges in unfinished column */
+        .age-badge {
+            display: inline-block;
+            font-size: 0.55rem;
+            padding: 1px 5px;
+            border: 1px solid;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .age-badge.age-1 { border-color: #bbb; color: #888; }
+        .age-badge.age-2 { border-color: #aaa; color: #555; background: #f5f5f2; font-weight: 500; }
+        .age-badge.age-3plus { border-color: var(--text); color: var(--bg); background: var(--text); font-weight: 500; }
+
+        .unfinished-age-hint {
+            font-size: 0.6rem;
+            font-family: var(--font-serif);
+            font-style: italic;
+            opacity: 0.55;
+            padding: 4px 4px 0;
+            border-top: 1px dashed var(--light);
+            margin-top: 8px;
+        }
+
+        /* Identity Streak Widget */
+        #streak-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+        }
+        .streak-dots {
+            display: flex;
+            gap: 3px;
+        }
+        .streak-dot {
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+        }
+        .streak-dot.filled { background: var(--text); border-color: var(--text); }
+        .streak-dot.today-unfilled { border-style: dashed; }
+
+        /* Coaching Panel */
+        #coaching-panel {
+            margin-top: 16px;
+            border: 1px dashed var(--border);
+            padding: 12px 16px;
+            background: #fafaf6;
+        }
+
+        .coaching-panel-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.4;
+            margin-bottom: 7px;
+        }
+
+        #coaching-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-bottom: 5px;
+        }
+
+        #coaching-source {
+            font-size: 0.6rem;
+            opacity: 0.45;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* Plan Tomorrow prompt in End of Day */
+        .plan-tomorrow-prompt {
+            border: 2px solid var(--border);
+            padding: 14px;
+            margin-top: 16px;
+            background: #f7f7f4;
+        }
+        .plan-tomorrow-prompt h4 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .plan-tomorrow-prompt textarea {
+            width: 100%;
+            min-height: 60px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            background: transparent;
+            resize: vertical;
+        }
+
+        /* Weekly Review banner */
+        #weekly-review-prompt {
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--light);
+            display: none;
+        }
+        #weekly-review-prompt.visible { display: flex; }
+        .weekly-review-text { font-size: 0.78rem; font-family: var(--font-serif); font-style: italic; }
+
+        /* Deep work block indicator on urgent column header */
+        .deep-work-badge {
+            display: inline-block;
+            font-size: 0.52rem;
+            padding: 1px 4px;
+            border: 1px solid var(--border);
+            background: var(--text);
+            color: var(--bg);
+            margin-left: 5px;
+            vertical-align: middle;
+            letter-spacing: 0.06em;
+        }
+
+        /* Frog task highlight */
+        .task-card.is-frog {
+            border-left: 3px solid var(--text);
+        }
+        .task-card.is-frog .task-name::before {
+            content: '🐸 ';
+            font-size: 0.75rem;
+        }
+
     </style>
+</head>
 <body>
 <div class="container">
 
@@ -1703,6 +1971,44 @@
             <button id="add-task-btn">+ Add</button>
         </div>
     </header>
+
+    <!-- Weekly Review Prompt (Sundays) -->
+    <div id="weekly-review-prompt">
+        <span class="weekly-review-text">It's Sunday — Allen's cornerstone: 20 minutes of weekly review closes open loops and resets your system.</span>
+        <button onclick="showWeeklyReviewModal()">Start Review →</button>
+        <button onclick="document.getElementById('weekly-review-prompt').classList.remove('visible')" style="border:none;background:transparent;opacity:0.4;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Daily Intention Banner -->
+    <div id="intention-banner">
+        <span class="intention-frog-icon">🐸</span>
+        <div class="intention-content">
+            <div class="intention-label">Today's Frog — your single most important task (Tracy · Keller)</div>
+            <div id="intention-frog-text" class="placeholder">No frog set. Set your #1 task for today →</div>
+        </div>
+        <div class="intention-actions">
+            <button onclick="showSetFrogModal()" id="set-frog-btn">Set Frog</button>
+            <div id="streak-widget">
+                <span style="font-size:0.62rem;opacity:0.5;letter-spacing:0.06em;text-transform:uppercase;">Streak</span>
+                <div class="streak-dots" id="streak-dots"></div>
+                <span id="streak-count" style="font-size:0.68rem;font-family:var(--font-serif);"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Rhythm Banner -->
+    <div id="rhythm-banner">
+        <div class="rhythm-phases" id="rhythm-phases">
+            <div class="rhythm-phase" data-phase="0"><div class="rhythm-phase-label">Deep Block I</div><div class="rhythm-phase-time">Morning · 90m</div></div>
+            <div class="rhythm-phase" data-phase="1"><div class="rhythm-phase-label">Break</div><div class="rhythm-phase-time">Recovery · 15m</div></div>
+            <div class="rhythm-phase" data-phase="2"><div class="rhythm-phase-label">Deep Block II</div><div class="rhythm-phase-time">Urgent · 60m</div></div>
+            <div class="rhythm-phase" data-phase="3"><div class="rhythm-phase-label">Shallow Work</div><div class="rhythm-phase-time">Email · comms</div></div>
+            <div class="rhythm-phase" data-phase="4"><div class="rhythm-phase-label">Break</div><div class="rhythm-phase-time">Walk · not scroll</div></div>
+            <div class="rhythm-phase" data-phase="5"><div class="rhythm-phase-label">Later Tasks</div><div class="rhythm-phase-time">Remaining work</div></div>
+            <div class="rhythm-phase" data-phase="6"><div class="rhythm-phase-label">Plan Tomorrow</div><div class="rhythm-phase-time">15m · non-neg.</div></div>
+        </div>
+        <div id="rhythm-coaching"></div>
+    </div>
 
     <!-- Focus Mode Overlay -->
     <div id="focus-mode-overlay">
@@ -1849,6 +2155,13 @@
             <div class="analytics-chart-label" style="margin-top:16px;">Most focused tasks this week</div>
             <div id="analytics-top-tasks"></div>
         </div>
+    </div>
+
+    <!-- Coaching Panel: rotating book insights -->
+    <div id="coaching-panel">
+        <div class="coaching-panel-label">From the library</div>
+        <div id="coaching-quote"></div>
+        <div id="coaching-source"></div>
     </div>
 
     <!-- Footer -->
@@ -2003,6 +2316,8 @@ const STORAGE_ACTIVE   = 'dooit_active_task';
 const STORAGE_LAST_DATE = 'dooit_last_date';
 const STORAGE_NOTIF    = 'dooit_notifications_';
 const STORAGE_PROJECT_DEFS = 'dooit_project_defs';
+const STORAGE_FROG     = 'dooit_frog_';       // per-day frog task id
+const STORAGE_STREAK   = 'dooit_streak';       // {count, lastDate}
 
 let tasks = [];
 let activeTaskId = null;
@@ -2089,6 +2404,9 @@ function init() {
     render();
     startGlobalTimer();
     requestNotificationPermission();
+    updateRhythmBanner();
+    updateCoachingPanel();
+    loadFrog();
 
     // Event listeners
     document.getElementById('add-task-btn').addEventListener('click', addTask);
@@ -2123,6 +2441,17 @@ function init() {
     // Focus mode
     document.getElementById('focus-mode-btn').addEventListener('click', toggleFocusMode);
     document.getElementById('exit-focus-btn').addEventListener('click', exitFocusMode);
+
+    // New project Enter key
+    const newProjInput = document.getElementById('new-project-name');
+    if (newProjInput) newProjInput.addEventListener('keydown', e => { if (e.key === 'Enter') createProjectFromInput(); });
+}
+
+// Bootstrap on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
 }
 
 // ─────────────────────────────────────────────
@@ -2463,7 +2792,7 @@ function render() {
         else unfinishedGroups.later.push(task);
     });
 
-    const groupLabels = { urgent: '🔴 Urgent', important: '🟡 Important', later: '🔵 Later' };
+    const groupLabels = { urgent: 'U — Urgent', important: 'I — Important', later: 'L — Later' };
     let unfinishedRendered = 0;
     ['urgent','important','later'].forEach(priority => {
         const group = unfinishedGroups[priority];
@@ -2474,7 +2803,7 @@ function render() {
         divider.innerHTML = `<span>${groupLabels[priority]}</span><span class="group-count">${group.length}</span>`;
         lists.previous_unfinished.appendChild(divider);
         group.forEach(task => {
-            renderBoardTask(task, lists.previous_unfinished);
+            renderUnfinishedRow(task, lists.previous_unfinished);
         });
         unfinishedRendered += group.length;
         activeCounts.previous_unfinished += group.length;
@@ -2564,6 +2893,37 @@ function renderBoardTask(task, container) {
     `;
 
     container.appendChild(card);
+}
+
+function renderUnfinishedRow(task, container) {
+    const row = document.createElement('div');
+    row.className = 'unfinished-row';
+    row.id = `unfinished-row-${task.id}`;
+    row.innerHTML = `
+        <div style="flex:1;min-width:0;">
+            <div class="unfinished-row-name">${escHtml(task.text)}</div>
+            <div class="unfinished-row-date">from ${task.date}</div>
+        </div>
+        <div class="unfinished-row-actions">
+            <button onclick="quickMoveTask('${task.id}','urgent')" title="Move to Urgent">U</button>
+            <button onclick="quickMoveTask('${task.id}','important')" title="Move to Important">I</button>
+            <button onclick="quickMoveTask('${task.id}','later')" title="Move to Later">L</button>
+            <button onclick="moveToNextDay('${task.id}')" title="Keep for next day">→ Next</button>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function moveToNextDay(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    // Parse as local date to avoid UTC timezone shift
+    const [y, m, d] = task.date.split('-').map(Number);
+    const date = new Date(y, m - 1, d + 1);
+    task.date = date.toISOString().split('T')[0];
+    saveTasks();
+    render();
+    updateProductivityScore();
 }
 
 function renderDoneTask(task, container) {
@@ -3922,9 +4282,173 @@ function renderEvents() {
 loadEvents();
 
 // ─────────────────────────────────────────────
-// Boot
+// Frog (Most Important Task) + Streak
 // ─────────────────────────────────────────────
-init();
+function getFrogKey() { return STORAGE_FROG + today; }
+
+function loadFrog() {
+    const frogId = safeGet(getFrogKey(), 'null');
+    const id = JSON.parse(frogId);
+    const el = document.getElementById('intention-frog-text');
+    if (id) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            el.textContent = task.text;
+            el.classList.remove('placeholder');
+        } else {
+            // Task was deleted — clear stale frog
+            safeSet(getFrogKey(), 'null');
+            el.textContent = 'No frog set. Set your #1 task for today →';
+            el.classList.add('placeholder');
+        }
+    } else {
+        el.textContent = 'No frog set. Set your #1 task for today →';
+        el.classList.add('placeholder');
+    }
+    renderStreakWidget();
+}
+
+function showSetFrogModal() {
+    const todayTasks = tasks.filter(t =>
+        t.date === today && ['pending','in_progress'].includes(t.status));
+    if (todayTasks.length === 0) {
+        showModal('Set Frog 🐸', `
+            <p style="margin-bottom:14px;font-family:var(--font-serif);font-style:italic;">
+                No pending tasks for today. Add a task first, then set it as your Frog.
+            </p>
+            <div class="modal-actions"><button onclick="closeModal()">OK</button></div>
+        `);
+        return;
+    }
+    const options = todayTasks.map(t =>
+        `<option value="${t.id}">${t.text} (${t.priority})</option>`
+    ).join('');
+    const currentFrogId = JSON.parse(safeGet(getFrogKey(), 'null'));
+    showModal('Set Frog 🐸', `
+        <p style="margin-bottom:12px;font-size:0.8rem;opacity:0.65;">
+            Your "Frog" is your single most important task — the one you eat first (Brian Tracy).
+        </p>
+        <div class="form-group">
+            <label>Select today's #1 task</label>
+            <select id="frog-select" style="width:100%;">${options}</select>
+        </div>
+        <div class="modal-actions">
+            <button onclick="saveFrog()">Set as Frog</button>
+            <button onclick="clearFrog()">Clear Frog</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    `);
+    if (currentFrogId) {
+        const sel = document.getElementById('frog-select');
+        if (sel) sel.value = currentFrogId;
+    }
+}
+
+function saveFrog() {
+    const sel = document.getElementById('frog-select');
+    if (!sel) return;
+    const id = sel.value;
+    safeSet(getFrogKey(), JSON.stringify(id));
+    // Update streak
+    updateStreak();
+    closeModal();
+    loadFrog();
+    render(); // re-render to show 🐸 on the correct task card
+}
+
+function clearFrog() {
+    safeSet(getFrogKey(), 'null');
+    closeModal();
+    loadFrog();
+    render();
+}
+
+function updateStreak() {
+    try {
+        const raw = localStorage.getItem(STORAGE_STREAK);
+        let streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
+        const yesterday = (() => {
+            const [y, m, d] = today.split('-').map(Number);
+            const yest = new Date(y, m - 1, d - 1);
+            return yest.toISOString().split('T')[0];
+        })();
+        if (streak.lastDate === yesterday) {
+            streak.count++;
+        } else if (streak.lastDate !== today) {
+            streak.count = 1;
+        }
+        streak.lastDate = today;
+        localStorage.setItem(STORAGE_STREAK, JSON.stringify(streak));
+    } catch(e) {}
+}
+
+function renderStreakWidget() {
+    try {
+        const raw = localStorage.getItem(STORAGE_STREAK);
+        const streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
+        const count = streak.lastDate === today ? streak.count : 0;
+        document.getElementById('streak-count').textContent = count > 0 ? `${count}d` : '—';
+        const dots = document.getElementById('streak-dots');
+        if (dots) {
+            const show = Math.min(count, 7);
+            dots.innerHTML = Array.from({ length: 7 }, (_, i) => {
+                let cls = 'streak-dot';
+                if (i < show) cls += ' filled';
+                else if (i === show && count < 7) cls += ' today-unfilled';
+                return `<div class="${cls}"></div>`;
+            }).join('');
+        }
+    } catch(e) {}
+}
+
+// Mark frog task card with is-frog class after render
+const _origRender = render;
+render = function() {
+    _origRender();
+    // Apply frog highlight
+    try {
+        const frogId = JSON.parse(safeGet(getFrogKey(), 'null'));
+        if (frogId) {
+            const card = document.getElementById(`card-${frogId}`);
+            if (card) card.classList.add('is-frog');
+        }
+    } catch(e) {}
+};
+
+// ─────────────────────────────────────────────
+// Weekly Review Modal
+// ─────────────────────────────────────────────
+function showWeeklyReviewModal() {
+    const weekDates = getWeekDates(0);
+    const weekTasks = tasks.filter(t => weekDates.includes(t.date));
+    const done = weekTasks.filter(t => t.status === 'done').length;
+    const total = weekTasks.length;
+    const completionPct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const rollover = tasks.filter(t => t.status === 'previous_unfinished').length;
+    showModal('Weekly Review 📋', `
+        <p style="font-family:var(--font-serif);font-style:italic;font-size:0.88rem;opacity:0.65;margin-bottom:16px;">
+            "Your mind is for having ideas, not holding them." — David Allen
+        </p>
+        <div class="summary-stat"><span>Tasks this week</span><span>${total}</span></div>
+        <div class="summary-stat"><span>Completed</span><span>${done} (${completionPct}%)</span></div>
+        <div class="summary-stat"><span>Still open (rollover)</span><span>${rollover}</span></div>
+        <div style="margin-top:14px;margin-bottom:6px;font-size:0.72rem;font-weight:500;">Capture loose ends:</div>
+        <textarea id="weekly-review-notes" style="width:100%;min-height:80px;font-family:var(--font-mono);font-size:0.78rem;border:1px solid var(--border);padding:8px;background:transparent;resize:vertical;" placeholder="What's still open? What went well? What to change next week?"></textarea>
+        <div class="modal-actions" style="margin-top:14px;">
+            <button onclick="closeModal();document.getElementById('weekly-review-prompt').classList.remove('visible');">Done — Close Review</button>
+        </div>
+    `);
+    document.getElementById('weekly-review-prompt').classList.remove('visible');
+}
+
+// Show weekly review prompt on Sundays
+(function checkWeeklyReviewPrompt() {
+    if (new Date().getDay() === 0) {
+        document.getElementById('weekly-review-prompt').classList.add('visible');
+    }
+})();
+
+
 
 // ─────────────────────────────────────────────
 // Projects Feature
@@ -4366,8 +4890,10 @@ window.currentUser = null;
 
 function handleCredentialResponse(response) {
     const idToken = response.credential;
-    const payload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const profile  = JSON.parse(atob(payload));
+    const rawPayload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    // Pad base64 to a multiple of 4 to avoid atob() errors
+    const padded = rawPayload + '=='.slice(0, (4 - rawPayload.length % 4) % 4);
+    const profile  = JSON.parse(atob(padded));
 
     window.currentUser = {
         id:      profile.sub,
