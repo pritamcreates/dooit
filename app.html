@@ -1736,7 +1736,42 @@
             text-align: right;
         }
 
-        /* Daily Intention Panel — removed */
+        /* Daily Intention Panel */
+        #intention-banner {
+            margin-bottom: 16px;
+            border: 2px solid var(--border);
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .intention-frog-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .intention-content { flex: 1; min-width: 0; }
+
+        .intention-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.45;
+            margin-bottom: 3px;
+        }
+
+        #intention-frog-text {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-style: italic;
+            word-break: break-word;
+        }
+
+        #intention-frog-text.placeholder { opacity: 0.35; font-style: italic; }
+
+        .intention-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
 
         /* Rollover age badges in unfinished column */
         .age-badge {
@@ -1763,7 +1798,25 @@
             margin-top: 8px;
         }
 
-        /* Streak widget — removed */
+        /* Identity Streak Widget */
+        #streak-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+        }
+        .streak-dots {
+            display: flex;
+            gap: 3px;
+        }
+        .streak-dot {
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+        }
+        .streak-dot.filled { background: var(--text); border-color: var(--text); }
+        .streak-dot.today-unfilled { border-style: dashed; }
 
         /* Coaching Panel */
         #coaching-panel {
@@ -1846,294 +1899,13 @@
             letter-spacing: 0.06em;
         }
 
-        /* Frog task highlight — removed */
-
-        /* ── Plan Tomorrow Section ── */
-        #plan-tomorrow-section {
-            margin-top: 28px;
-            border: 2px solid var(--border);
+        /* Frog task highlight */
+        .task-card.is-frog {
+            border-left: 3px solid var(--text);
         }
-
-        #plan-tomorrow-header {
-            padding: 11px 16px;
-            background: var(--text);
-            color: var(--bg);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            user-select: none;
-        }
-
-        .plan-tmrw-header-left {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-        }
-
-        .plan-tmrw-title {
-            font-family: var(--font-serif);
-            font-size: 1rem;
-            letter-spacing: 0.02em;
-        }
-
-        .plan-tmrw-subtitle {
-            font-size: 0.58rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            opacity: 0.55;
-        }
-
-        .plan-tmrw-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.65rem;
-            letter-spacing: 0.04em;
-        }
-
-        #plan-tmrw-task-count {
-            opacity: 0.65;
-        }
-
-        #plan-tomorrow-toggle-icon {
-            font-size: 0.7rem;
-            opacity: 0.7;
-        }
-
-        #plan-tomorrow-body {
-            display: none;
-            padding: 16px;
-            background: #fafaf6;
-        }
-
-        #plan-tomorrow-body.open { display: block; }
-
-        .plan-tmrw-layout {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 16px;
-        }
-
-        @media (max-width: 760px) {
-            .plan-tmrw-layout { grid-template-columns: 1fr; }
-        }
-
-        /* Task list side */
-        .plan-tmrw-tasks-pane {}
-
-        .plan-tmrw-add-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .plan-tmrw-add-row input[type="text"] {
-            flex: 1;
-            min-width: 160px;
-            font-size: 0.78rem;
-            padding: 6px 10px;
-            background: var(--bg);
-        }
-
-        .plan-tmrw-add-row select {
-            font-size: 0.72rem;
-            padding: 6px 9px;
-            background: var(--bg);
-        }
-
-        .plan-tmrw-add-row button {
-            font-size: 0.72rem;
-            padding: 6px 11px;
-            white-space: nowrap;
-        }
-
-        .plan-tmrw-column-label {
-            font-size: 0.58rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            opacity: 0.45;
-            margin-bottom: 7px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
-
-        .plan-tmrw-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            min-height: 60px;
-        }
-
-        .plan-tmrw-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 8px;
-            border-bottom: 1px solid var(--light);
-            background: var(--bg);
-            cursor: grab;
-            transition: box-shadow 0.1s, background 0.1s;
-            position: relative;
-        }
-
-        .plan-tmrw-item:last-child { border-bottom: none; }
-        .plan-tmrw-item:active { cursor: grabbing; }
-        .plan-tmrw-item.dragging { box-shadow: 2px 2px 0 var(--border); opacity: 0.85; background: #f0ede6; }
-        .plan-tmrw-item.drag-over { border-top: 2px solid var(--text); }
-
-        .plan-tmrw-drag-handle {
-            font-size: 0.7rem;
-            opacity: 0.25;
-            flex-shrink: 0;
-            line-height: 1;
-            cursor: grab;
-            letter-spacing: -2px;
-        }
-
-        .plan-tmrw-item-num {
-            font-size: 0.6rem;
-            opacity: 0.35;
-            flex-shrink: 0;
-            width: 14px;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .plan-tmrw-item-text {
-            flex: 1;
-            font-size: 0.82rem;
-            font-weight: 500;
-            word-break: break-word;
-        }
-
-        .plan-tmrw-item-priority {
-            font-size: 0.55rem;
-            padding: 1px 5px;
-            border: 1px solid var(--border);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            flex-shrink: 0;
-        }
-
-        .plan-tmrw-item-priority.urgent { background: var(--text); color: var(--bg); border-color: var(--text); }
-        .plan-tmrw-item-priority.important { background: var(--light); }
-        .plan-tmrw-item-priority.later { opacity: 0.5; }
-
-        .plan-tmrw-item-time {
-            font-size: 0.62rem;
-            opacity: 0.5;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-
-        .plan-tmrw-del {
-            border: none;
-            background: transparent;
-            font-size: 0.9rem;
-            cursor: pointer;
-            padding: 0 3px;
-            opacity: 0.2;
-            line-height: 1;
-            flex-shrink: 0;
-            font-family: var(--font-mono);
-        }
-        .plan-tmrw-del:hover { opacity: 1; background: var(--text); color: var(--bg); }
-
-        .plan-tmrw-empty {
-            text-align: center;
+        .task-card.is-frog .task-name::before {
+            content: '🐸 ';
             font-size: 0.75rem;
-            font-style: italic;
-            opacity: 0.35;
-            padding: 16px 0;
-        }
-
-        /* Notes + intention side */
-        .plan-tmrw-notes-pane {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .plan-tmrw-block {
-            border: 1px solid var(--border);
-            padding: 12px;
-            background: var(--bg);
-        }
-
-        .plan-tmrw-block-label {
-            font-size: 0.58rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            opacity: 0.45;
-            margin-bottom: 7px;
-        }
-
-        .plan-tmrw-block textarea {
-            width: 100%;
-            min-height: 68px;
-            resize: vertical;
-            font-size: 0.78rem;
-            font-family: var(--font-mono);
-            background: transparent;
-            border: 1px solid var(--light);
-            padding: 6px 8px;
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.15s;
-        }
-
-        .plan-tmrw-block textarea:focus { border-color: var(--border); }
-
-        /* frog input CSS removed */
-
-        .plan-tmrw-time-budget {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-        }
-
-        .plan-tmrw-time-cell {
-            border: 1px solid var(--light);
-            padding: 8px 10px;
-            text-align: center;
-        }
-
-        .plan-tmrw-time-cell-val {
-            font-family: var(--font-serif);
-            font-size: 1.2rem;
-            line-height: 1;
-            margin-bottom: 2px;
-        }
-
-        .plan-tmrw-time-cell-label {
-            font-size: 0.55rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.45;
-        }
-
-        .plan-tmrw-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-
-        .plan-tmrw-actions button { font-size: 0.72rem; padding: 5px 11px; }
-        #plan-tmrw-clear-btn { opacity: 0.45; }
-        #plan-tmrw-clear-btn:hover { opacity: 1; }
-
-        /* Tomorrow date display */
-        #plan-tmrw-date-label {
-            font-size: 0.65rem;
-            opacity: 0.5;
-            letter-spacing: 0.06em;
         }
 
     </style>
@@ -2171,6 +1943,7 @@
                 <button id="show-summary-btn-header">End of Day</button>
                 <button id="show-reports-btn">Reports</button>
                 <button id="projects-header-btn" onclick="toggleProjectsPanel()">Projects</button>
+                <button id="calendar-page-btn" onclick="window.location.href='calendar.html'" title="Open Calendar &amp; Availability">&#128197; Calendar</button>
                 <button id="focus-mode-btn">Focus Mode</button>
             </div>
         </div>
@@ -2214,6 +1987,22 @@
         <button onclick="document.getElementById('weekly-review-prompt').classList.remove('visible')" style="border:none;background:transparent;opacity:0.4;cursor:pointer;">✕</button>
     </div>
 
+    <!-- Daily Intention Banner -->
+    <div id="intention-banner">
+        <span class="intention-frog-icon">🐸</span>
+        <div class="intention-content">
+            <div class="intention-label">Today's Frog — your single most important task (Tracy · Keller)</div>
+            <div id="intention-frog-text" class="placeholder">No frog set. Set your #1 task for today →</div>
+        </div>
+        <div class="intention-actions">
+            <button onclick="showSetFrogModal()" id="set-frog-btn">Set Frog</button>
+            <div id="streak-widget">
+                <span style="font-size:0.62rem;opacity:0.5;letter-spacing:0.06em;text-transform:uppercase;">Streak</span>
+                <div class="streak-dots" id="streak-dots"></div>
+                <span id="streak-count" style="font-size:0.68rem;font-family:var(--font-serif);"></span>
+            </div>
+        </div>
+    </div>
 
     <!-- Daily Rhythm Banner -->
     <div id="rhythm-banner">
@@ -2381,88 +2170,6 @@
         <div class="coaching-panel-label">From the library</div>
         <div id="coaching-quote"></div>
         <div id="coaching-source"></div>
-    </div>
-
-    <!-- Plan Tomorrow Section -->
-    <div id="plan-tomorrow-section">
-        <div id="plan-tomorrow-header" onclick="togglePlanTomorrow()">
-            <div class="plan-tmrw-header-left">
-                <span class="plan-tmrw-title">Plan Tomorrow</span>
-                <span class="plan-tmrw-subtitle">close today's loop · Allen · Covey</span>
-            </div>
-            <div class="plan-tmrw-meta">
-                <span id="plan-tmrw-date-label"></span>
-                <span id="plan-tmrw-task-count">0 tasks</span>
-                <span id="plan-tomorrow-toggle-icon">▼</span>
-            </div>
-        </div>
-        <div id="plan-tomorrow-body">
-            <div class="plan-tmrw-layout">
-
-                <!-- Left: task list -->
-                <div class="plan-tmrw-tasks-pane">
-                    <div class="plan-tmrw-add-row">
-                        <input type="text" id="plan-tmrw-input" placeholder="Task for tomorrow..." maxlength="80"
-                               onkeydown="if(event.key==='Enter')addPlanTmrwTask()">
-                        <select id="plan-tmrw-priority">
-                            <option value="urgent">Urgent</option>
-                            <option value="important" selected>Important</option>
-                            <option value="later">Later</option>
-                        </select>
-                        <input type="text" id="plan-tmrw-time" placeholder="e.g. 9–10am" maxlength="20"
-                               style="max-width:110px;" onkeydown="if(event.key==='Enter')addPlanTmrwTask()">
-                        <button onclick="addPlanTmrwTask()">+ Add</button>
-                    </div>
-                    <div class="plan-tmrw-column-label">
-                        <span>Tasks · drag to reprioritise</span>
-                        <span id="plan-tmrw-hours-total"></span>
-                    </div>
-                    <div class="plan-tmrw-list" id="plan-tmrw-list">
-                        <div class="plan-tmrw-empty" id="plan-tmrw-empty">No tasks planned yet. Add one above.</div>
-                    </div>
-                </div>
-
-                <!-- Right: notes, time budget -->
-                <div class="plan-tmrw-notes-pane">
-
-                    <div class="plan-tmrw-block">
-                        <div class="plan-tmrw-block-label">Notes &amp; context</div>
-                        <textarea id="plan-tmrw-notes" placeholder="Key context, blockers, reminders for tomorrow..."
-                                  oninput="savePlanTmrw()"></textarea>
-                    </div>
-
-                    <div class="plan-tmrw-block">
-                        <div class="plan-tmrw-block-label">Time budget</div>
-                        <div class="plan-tmrw-time-budget">
-                            <div class="plan-tmrw-time-cell">
-                                <div class="plan-tmrw-time-cell-val" id="plan-tmrw-urgent-count">0</div>
-                                <div class="plan-tmrw-time-cell-label">Urgent tasks</div>
-                            </div>
-                            <div class="plan-tmrw-time-cell">
-                                <div class="plan-tmrw-time-cell-val" id="plan-tmrw-important-count">0</div>
-                                <div class="plan-tmrw-time-cell-label">Important tasks</div>
-                            </div>
-                            <div class="plan-tmrw-time-cell">
-                                <div class="plan-tmrw-time-cell-val" id="plan-tmrw-later-count">0</div>
-                                <div class="plan-tmrw-time-cell-label">Later tasks</div>
-                            </div>
-                            <div class="plan-tmrw-time-cell">
-                                <div class="plan-tmrw-time-cell-val" id="plan-tmrw-total-count">0</div>
-                                <div class="plan-tmrw-time-cell-label">Total planned</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="plan-tmrw-actions">
-                <button onclick="promotePlanTmrwToToday()" id="plan-tmrw-promote-btn" title="Move all planned tasks into today's board">↑ Promote to Today's Board</button>
-                <button onclick="clearPlanTmrw()" id="plan-tmrw-clear-btn">Clear All</button>
-                <span style="flex:1;"></span>
-                <span style="font-size:0.62rem;opacity:0.45;font-style:italic;align-self:center;">✓ Tasks auto-promote to board when tomorrow becomes today · ↑ Planned badge shown · incomplete tasks move to Unfinished</span>
-            </div>
-        </div>
     </div>
 
     <!-- Footer -->
@@ -2788,7 +2495,7 @@ function init() {
     requestNotificationPermission();
     updateRhythmBanner();
     updateCoachingPanel();
-    // loadFrog() — frog feature removed
+    loadFrog();
 
     // Event listeners
     document.getElementById('add-task-btn').addEventListener('click', addTask);
@@ -2849,7 +2556,6 @@ function checkRollover() {
         currentDayNotifications = [];
         safeSet(STORAGE_NOTIF + today, '[]');
 
-        // 1. Move any pending/in-progress tasks from past dates → previous_unfinished
         tasks.forEach(t => {
             if (t.date < today && (t.status === 'pending' || t.status === 'in_progress')) {
                 t.status = 'previous_unfinished';
@@ -2857,40 +2563,6 @@ function checkRollover() {
                 t.breaks = [];
             }
         });
-
-        // 2. Auto-promote "Plan Tomorrow" tasks → today's board
-        //    These were planned yesterday (or any past date) and should now live on the board
-        //    with the priority the user chose, dated today.
-        try {
-            const planData = JSON.parse(localStorage.getItem(PLAN_TMRW_KEY) || 'null');
-            if (planData && Array.isArray(planData.tasks) && planData.tasks.length > 0) {
-                planData.tasks.forEach(t => {
-                    const newTask = {
-                        id:           Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                        text:         t.text,
-                        priority:     t.priority || 'important',
-                        status:       'pending',
-                        date:         today,
-                        note:         t.time ? ('Planned time: ' + t.time) : '',
-                        plannedStart: t.plannedStart || null,
-                        plannedEnd:   t.plannedEnd   || null,
-                        plannedMs:    0,
-                        breaks:       [],
-                        actualStart:  null,
-                        actualEnd:    null,
-                        rolledOver:   false,
-                        promotedFromPlan: true,
-                    };
-                    tasks.push(newTask);
-                });
-                // Clear the promoted tasks list (keep notes/frog for reference)
-                planData.tasks = [];
-                localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(planData));
-            }
-        } catch (e) {
-            console.error('Plan Tomorrow promotion error', e);
-        }
-
         saveTasks();
     }
     today = currentDate;
@@ -3285,7 +2957,6 @@ function renderBoardTask(task, container) {
             ${task.status === 'previous_unfinished' ? `<span class="badge rollover">From ${task.date}</span>` : ''}
             ${isPaused ? `<span class="badge paused">Paused</span>` : ''}
             ${task.rolledOver && task.date === today ? `<span class="badge rollover">Rolled from ${task.rolledOverFrom}</span>` : ''}
-            ${task.promotedFromPlan ? `<span class="badge" title="Auto-promoted from yesterday's plan">↑ Planned</span>` : ''}
         </div>
         ${task.note ? `<div class="task-note-snippet">${escHtml(task.note)}</div>` : ''}
         <div class="task-timer" id="timer-${task.id}">${formatDuration(elapsed)}</div>
@@ -4743,16 +4414,138 @@ function renderEvents() {
 loadEvents();
 
 // ─────────────────────────────────────────────
-// Frog / Streak — removed (feature disabled)
+// Frog (Most Important Task) + Streak
 // ─────────────────────────────────────────────
-function loadFrog() { /* frog feature removed */ }
-function showSetFrogModal() { /* frog feature removed */ }
-function saveFrog() { /* frog feature removed */ }
-function clearFrog() { /* frog feature removed */ }
-function updateStreak() { /* frog feature removed */ }
-function renderStreakWidget() { /* frog feature removed */ }
+function getFrogKey() { return STORAGE_FROG + today; }
 
-// (Frog highlight overlay removed)
+function loadFrog() {
+    const frogId = safeGet(getFrogKey(), 'null');
+    const id = JSON.parse(frogId);
+    const el = document.getElementById('intention-frog-text');
+    if (id) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            el.textContent = task.text;
+            el.classList.remove('placeholder');
+        } else {
+            // Task was deleted — clear stale frog
+            safeSet(getFrogKey(), 'null');
+            el.textContent = 'No frog set. Set your #1 task for today →';
+            el.classList.add('placeholder');
+        }
+    } else {
+        el.textContent = 'No frog set. Set your #1 task for today →';
+        el.classList.add('placeholder');
+    }
+    renderStreakWidget();
+}
+
+function showSetFrogModal() {
+    const todayTasks = tasks.filter(t =>
+        t.date === today && ['pending','in_progress'].includes(t.status));
+    if (todayTasks.length === 0) {
+        showModal('Set Frog 🐸', `
+            <p style="margin-bottom:14px;font-family:var(--font-serif);font-style:italic;">
+                No pending tasks for today. Add a task first, then set it as your Frog.
+            </p>
+            <div class="modal-actions"><button onclick="closeModal()">OK</button></div>
+        `);
+        return;
+    }
+    const options = todayTasks.map(t =>
+        `<option value="${t.id}">${t.text} (${t.priority})</option>`
+    ).join('');
+    const currentFrogId = JSON.parse(safeGet(getFrogKey(), 'null'));
+    showModal('Set Frog 🐸', `
+        <p style="margin-bottom:12px;font-size:0.8rem;opacity:0.65;">
+            Your "Frog" is your single most important task — the one you eat first (Brian Tracy).
+        </p>
+        <div class="form-group">
+            <label>Select today's #1 task</label>
+            <select id="frog-select" style="width:100%;">${options}</select>
+        </div>
+        <div class="modal-actions">
+            <button onclick="saveFrog()">Set as Frog</button>
+            <button onclick="clearFrog()">Clear Frog</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    `);
+    if (currentFrogId) {
+        const sel = document.getElementById('frog-select');
+        if (sel) sel.value = currentFrogId;
+    }
+}
+
+function saveFrog() {
+    const sel = document.getElementById('frog-select');
+    if (!sel) return;
+    const id = sel.value;
+    safeSet(getFrogKey(), JSON.stringify(id));
+    // Update streak
+    updateStreak();
+    closeModal();
+    loadFrog();
+    render(); // re-render to show 🐸 on the correct task card
+}
+
+function clearFrog() {
+    safeSet(getFrogKey(), 'null');
+    closeModal();
+    loadFrog();
+    render();
+}
+
+function updateStreak() {
+    try {
+        const raw = localStorage.getItem(STORAGE_STREAK);
+        let streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
+        const yesterday = (() => {
+            const [y, m, d] = today.split('-').map(Number);
+            const yest = new Date(y, m - 1, d - 1);
+            return yest.toISOString().split('T')[0];
+        })();
+        if (streak.lastDate === yesterday) {
+            streak.count++;
+        } else if (streak.lastDate !== today) {
+            streak.count = 1;
+        }
+        streak.lastDate = today;
+        localStorage.setItem(STORAGE_STREAK, JSON.stringify(streak));
+    } catch(e) {}
+}
+
+function renderStreakWidget() {
+    try {
+        const raw = localStorage.getItem(STORAGE_STREAK);
+        const streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
+        const count = streak.lastDate === today ? streak.count : 0;
+        document.getElementById('streak-count').textContent = count > 0 ? `${count}d` : '—';
+        const dots = document.getElementById('streak-dots');
+        if (dots) {
+            const show = Math.min(count, 7);
+            dots.innerHTML = Array.from({ length: 7 }, (_, i) => {
+                let cls = 'streak-dot';
+                if (i < show) cls += ' filled';
+                else if (i === show && count < 7) cls += ' today-unfilled';
+                return `<div class="${cls}"></div>`;
+            }).join('');
+        }
+    } catch(e) {}
+}
+
+// Mark frog task card with is-frog class after render
+const _origRender = render;
+render = function() {
+    _origRender();
+    // Apply frog highlight
+    try {
+        const frogId = JSON.parse(safeGet(getFrogKey(), 'null'));
+        if (frogId) {
+            const card = document.getElementById(`card-${frogId}`);
+            if (card) card.classList.add('is-frog');
+        }
+    } catch(e) {}
+};
 
 // ─────────────────────────────────────────────
 // Weekly Review Modal
@@ -4996,230 +4789,6 @@ function toggleProjectsPanel() {
         if (headerBtn) { headerBtn.style.background = ''; headerBtn.style.color = ''; }
     }
 }
-
-// ─────────────────────────────────────────────
-// Plan Tomorrow
-// ─────────────────────────────────────────────
-const PLAN_TMRW_KEY = 'dooit_plan_tomorrow';
-
-let planTmrwOpen = false;
-let planTmrwDragSrcIdx = null;
-
-function getPlanTmrwData() {
-    try { return JSON.parse(localStorage.getItem(PLAN_TMRW_KEY)) || { tasks: [], notes: '' }; }
-    catch(e) { return { tasks: [], notes: '' }; }
-}
-
-function savePlanTmrw() {
-    const data = {
-        tasks: getPlanTmrwData().tasks,
-        notes: (document.getElementById('plan-tmrw-notes') || {}).value || '',
-    };
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
-    renderPlanTmrwStats(data.tasks);
-}
-
-function getTomorrowLabel() {
-    const d = new Date(); d.setDate(d.getDate() + 1);
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-}
-
-function initPlanTomorrow() {
-    const lbl = document.getElementById('plan-tmrw-date-label');
-    if (lbl) lbl.textContent = getTomorrowLabel();
-    loadPlanTmrw();
-}
-
-function togglePlanTomorrow() {
-    planTmrwOpen = !planTmrwOpen;
-    const body = document.getElementById('plan-tomorrow-body');
-    const icon = document.getElementById('plan-tomorrow-toggle-icon');
-    if (planTmrwOpen) {
-        body.classList.add('open');
-        icon.textContent = '▲';
-    } else {
-        body.classList.remove('open');
-        icon.textContent = '▼';
-    }
-}
-
-function loadPlanTmrw() {
-    const data = getPlanTmrwData();
-    const notesEl = document.getElementById('plan-tmrw-notes');
-    if (notesEl) notesEl.value = data.notes || '';
-    renderPlanTmrwList(data.tasks);
-    renderPlanTmrwStats(data.tasks);
-}
-
-function renderPlanTmrwList(tasks) {
-    const list  = document.getElementById('plan-tmrw-list');
-    const empty = document.getElementById('plan-tmrw-empty');
-    const countEl = document.getElementById('plan-tmrw-task-count');
-    if (!list) return;
-
-    if (countEl) countEl.textContent = tasks.length + ' task' + (tasks.length !== 1 ? 's' : '');
-
-    if (tasks.length === 0) {
-        if (empty) empty.style.display = 'block';
-        // Remove all task items but keep empty placeholder
-        Array.from(list.querySelectorAll('.plan-tmrw-item')).forEach(el => el.remove());
-        return;
-    }
-    if (empty) empty.style.display = 'none';
-
-    // Re-render all items
-    Array.from(list.querySelectorAll('.plan-tmrw-item')).forEach(el => el.remove());
-
-    tasks.forEach((task, idx) => {
-        const item = document.createElement('div');
-        item.className = 'plan-tmrw-item';
-        item.draggable = true;
-        item.dataset.idx = idx;
-
-        const prioClass = task.priority === 'urgent' ? 'urgent' : task.priority === 'important' ? 'important' : 'later';
-
-        item.innerHTML = `
-            <span class="plan-tmrw-drag-handle" title="Drag to reorder">⠿</span>
-            <span class="plan-tmrw-item-num">${idx + 1}</span>
-            <span class="plan-tmrw-item-text">${escapeHtml(task.text)}</span>
-            ${task.time ? `<span class="plan-tmrw-item-time">${escapeHtml(task.time)}</span>` : ''}
-            <span class="plan-tmrw-item-priority ${prioClass}">${task.priority}</span>
-            <button class="plan-tmrw-del" onclick="deletePlanTmrwTask(${idx})" title="Remove">×</button>
-        `;
-
-        // Drag events
-        item.addEventListener('dragstart', e => {
-            planTmrwDragSrcIdx = idx;
-            setTimeout(() => item.classList.add('dragging'), 0);
-            e.dataTransfer.effectAllowed = 'move';
-        });
-        item.addEventListener('dragend', () => {
-            item.classList.remove('dragging');
-            document.querySelectorAll('.plan-tmrw-item').forEach(el => el.classList.remove('drag-over'));
-        });
-        item.addEventListener('dragover', e => {
-            e.preventDefault();
-            document.querySelectorAll('.plan-tmrw-item').forEach(el => el.classList.remove('drag-over'));
-            item.classList.add('drag-over');
-        });
-        item.addEventListener('drop', e => {
-            e.preventDefault();
-            item.classList.remove('drag-over');
-            const targetIdx = parseInt(item.dataset.idx);
-            if (planTmrwDragSrcIdx === null || planTmrwDragSrcIdx === targetIdx) return;
-            const data = getPlanTmrwData();
-            const moved = data.tasks.splice(planTmrwDragSrcIdx, 1)[0];
-            data.tasks.splice(targetIdx, 0, moved);
-            localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
-            renderPlanTmrwList(data.tasks);
-            renderPlanTmrwStats(data.tasks);
-            planTmrwDragSrcIdx = null;
-        });
-
-        list.appendChild(item);
-    });
-}
-
-function renderPlanTmrwStats(tasks) {
-    const urgent    = tasks.filter(t => t.priority === 'urgent').length;
-    const important = tasks.filter(t => t.priority === 'important').length;
-    const later     = tasks.filter(t => t.priority === 'later').length;
-    const total     = tasks.length;
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('plan-tmrw-urgent-count',    urgent);
-    set('plan-tmrw-important-count', important);
-    set('plan-tmrw-later-count',     later);
-    set('plan-tmrw-total-count',     total);
-    set('plan-tmrw-task-count',      total + ' task' + (total !== 1 ? 's' : ''));
-}
-
-function addPlanTmrwTask() {
-    const input    = document.getElementById('plan-tmrw-input');
-    const priSel   = document.getElementById('plan-tmrw-priority');
-    const timeInp  = document.getElementById('plan-tmrw-time');
-    const text     = (input ? input.value.trim() : '');
-    if (!text) { if (input) { input.style.borderColor = 'var(--text)'; setTimeout(() => input.style.borderColor = '', 700); } return; }
-
-    const data = getPlanTmrwData();
-    data.tasks.push({
-        id:       Date.now().toString(36),
-        text:     text,
-        priority: priSel ? priSel.value : 'important',
-        time:     timeInp ? timeInp.value.trim() : '',
-    });
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
-    renderPlanTmrwList(data.tasks);
-    renderPlanTmrwStats(data.tasks);
-
-    if (input)   { input.value = ''; input.focus(); }
-    if (timeInp) timeInp.value = '';
-}
-
-function deletePlanTmrwTask(idx) {
-    const data = getPlanTmrwData();
-    data.tasks.splice(idx, 1);
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
-    renderPlanTmrwList(data.tasks);
-    renderPlanTmrwStats(data.tasks);
-}
-
-function clearPlanTmrw() {
-    if (!confirm('Clear all planned tasks and notes for tomorrow?')) return;
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify({ tasks: [], notes: '' }));
-    loadPlanTmrw();
-}
-
-function promotePlanTmrwToToday() {
-    const data = getPlanTmrwData();
-    if (data.tasks.length === 0) { alert('No tasks to promote. Add some tasks first.'); return; }
-    if (!confirm(`Move ${data.tasks.length} planned task${data.tasks.length > 1 ? 's' : ''} into today's board?`)) return;
-
-    data.tasks.forEach(t => {
-        const newTask = {
-            id:        Date.now().toString(36) + Math.random().toString(36).slice(2,5),
-            text:      t.text,
-            priority:  t.priority,
-            status:    'pending',
-            date:      today,
-            note:      t.time ? ('Planned time: ' + t.time) : '',
-            plannedMs: 0,
-            breaks:    [],
-            promotedFromPlan: true,
-        };
-        tasks.push(newTask);
-    });
-    saveTasks();
-    render();
-
-    // Clear promoted tasks but keep notes/frog for reference
-    data.tasks = [];
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
-    renderPlanTmrwList([]);
-    renderPlanTmrwStats([]);
-
-    // Flash confirmation
-    const btn = document.getElementById('plan-tmrw-promote-btn');
-    if (btn) { btn.textContent = '✓ Promoted to board!'; setTimeout(() => { btn.textContent = '↑ Promote to Today\'s Board'; }, 2500); }
-}
-
-// Helper: escape HTML for safe rendering
-function escapeHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Auto-open if there are tasks planned
-(function() {
-    const data = getPlanTmrwData();
-    if (data.tasks.length > 0) {
-        planTmrwOpen = true;
-        const body = document.getElementById('plan-tomorrow-body');
-        const icon = document.getElementById('plan-tomorrow-toggle-icon');
-        if (body) body.classList.add('open');
-        if (icon) icon.textContent = '▲';
-    }
-    initPlanTomorrow();
-})();
 </script>
 
 <!-- Firebase SDKs -->
