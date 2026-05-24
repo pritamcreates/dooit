@@ -1736,42 +1736,7 @@
             text-align: right;
         }
 
-        /* Daily Intention Panel */
-        #intention-banner {
-            margin-bottom: 16px;
-            border: 2px solid var(--border);
-            padding: 13px 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        .intention-frog-icon {
-            font-size: 1.4rem;
-            flex-shrink: 0;
-        }
-
-        .intention-content { flex: 1; min-width: 0; }
-
-        .intention-label {
-            font-size: 0.58rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            opacity: 0.45;
-            margin-bottom: 3px;
-        }
-
-        #intention-frog-text {
-            font-family: var(--font-serif);
-            font-size: 1rem;
-            font-style: italic;
-            word-break: break-word;
-        }
-
-        #intention-frog-text.placeholder { opacity: 0.35; font-style: italic; }
-
-        .intention-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+        /* Daily Intention Panel — removed */
 
         /* Rollover age badges in unfinished column */
         .age-badge {
@@ -1798,25 +1763,7 @@
             margin-top: 8px;
         }
 
-        /* Identity Streak Widget */
-        #streak-widget {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.72rem;
-        }
-        .streak-dots {
-            display: flex;
-            gap: 3px;
-        }
-        .streak-dot {
-            width: 8px;
-            height: 8px;
-            border: 1px solid var(--border);
-            background: transparent;
-        }
-        .streak-dot.filled { background: var(--text); border-color: var(--text); }
-        .streak-dot.today-unfilled { border-style: dashed; }
+        /* Streak widget — removed */
 
         /* Coaching Panel */
         #coaching-panel {
@@ -1899,14 +1846,7 @@
             letter-spacing: 0.06em;
         }
 
-        /* Frog task highlight */
-        .task-card.is-frog {
-            border-left: 3px solid var(--text);
-        }
-        .task-card.is-frog .task-name::before {
-            content: '🐸 ';
-            font-size: 0.75rem;
-        }
+        /* Frog task highlight — removed */
 
         /* ── Plan Tomorrow Section ── */
         #plan-tomorrow-section {
@@ -2148,20 +2088,7 @@
 
         .plan-tmrw-block textarea:focus { border-color: var(--border); }
 
-        #plan-tmrw-frog-input {
-            width: 100%;
-            font-size: 0.85rem;
-            font-family: var(--font-serif);
-            font-style: italic;
-            background: transparent;
-            border: 1px solid var(--light);
-            padding: 7px 10px;
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.15s;
-        }
-
-        #plan-tmrw-frog-input:focus { border-color: var(--border); }
+        /* frog input CSS removed */
 
         .plan-tmrw-time-budget {
             display: grid;
@@ -2287,22 +2214,6 @@
         <button onclick="document.getElementById('weekly-review-prompt').classList.remove('visible')" style="border:none;background:transparent;opacity:0.4;cursor:pointer;">✕</button>
     </div>
 
-    <!-- Daily Intention Banner -->
-    <div id="intention-banner">
-        <span class="intention-frog-icon">🐸</span>
-        <div class="intention-content">
-            <div class="intention-label">Today's Frog — your single most important task (Tracy · Keller)</div>
-            <div id="intention-frog-text" class="placeholder">No frog set. Set your #1 task for today →</div>
-        </div>
-        <div class="intention-actions">
-            <button onclick="showSetFrogModal()" id="set-frog-btn">Set Frog</button>
-            <div id="streak-widget">
-                <span style="font-size:0.62rem;opacity:0.5;letter-spacing:0.06em;text-transform:uppercase;">Streak</span>
-                <div class="streak-dots" id="streak-dots"></div>
-                <span id="streak-count" style="font-size:0.68rem;font-family:var(--font-serif);"></span>
-            </div>
-        </div>
-    </div>
 
     <!-- Daily Rhythm Banner -->
     <div id="rhythm-banner">
@@ -2511,14 +2422,8 @@
                     </div>
                 </div>
 
-                <!-- Right: notes, frog, time budget -->
+                <!-- Right: notes, time budget -->
                 <div class="plan-tmrw-notes-pane">
-
-                    <div class="plan-tmrw-block">
-                        <div class="plan-tmrw-block-label">🐸 Tomorrow's frog — the #1 must-do</div>
-                        <input type="text" id="plan-tmrw-frog-input" placeholder="What's the one thing that matters most tomorrow?"
-                               oninput="savePlanTmrw()" maxlength="100">
-                    </div>
 
                     <div class="plan-tmrw-block">
                         <div class="plan-tmrw-block-label">Notes &amp; context</div>
@@ -2555,7 +2460,7 @@
                 <button onclick="promotePlanTmrwToToday()" id="plan-tmrw-promote-btn" title="Move all planned tasks into today's board">↑ Promote to Today's Board</button>
                 <button onclick="clearPlanTmrw()" id="plan-tmrw-clear-btn">Clear All</button>
                 <span style="flex:1;"></span>
-                <span style="font-size:0.62rem;opacity:0.35;font-style:italic;align-self:center;">Auto-saved · persists across sessions</span>
+                <span style="font-size:0.62rem;opacity:0.45;font-style:italic;align-self:center;">✓ Tasks auto-promote to board when tomorrow becomes today · ↑ Planned badge shown · incomplete tasks move to Unfinished</span>
             </div>
         </div>
     </div>
@@ -2883,7 +2788,7 @@ function init() {
     requestNotificationPermission();
     updateRhythmBanner();
     updateCoachingPanel();
-    loadFrog();
+    // loadFrog() — frog feature removed
 
     // Event listeners
     document.getElementById('add-task-btn').addEventListener('click', addTask);
@@ -2944,6 +2849,7 @@ function checkRollover() {
         currentDayNotifications = [];
         safeSet(STORAGE_NOTIF + today, '[]');
 
+        // 1. Move any pending/in-progress tasks from past dates → previous_unfinished
         tasks.forEach(t => {
             if (t.date < today && (t.status === 'pending' || t.status === 'in_progress')) {
                 t.status = 'previous_unfinished';
@@ -2951,6 +2857,40 @@ function checkRollover() {
                 t.breaks = [];
             }
         });
+
+        // 2. Auto-promote "Plan Tomorrow" tasks → today's board
+        //    These were planned yesterday (or any past date) and should now live on the board
+        //    with the priority the user chose, dated today.
+        try {
+            const planData = JSON.parse(localStorage.getItem(PLAN_TMRW_KEY) || 'null');
+            if (planData && Array.isArray(planData.tasks) && planData.tasks.length > 0) {
+                planData.tasks.forEach(t => {
+                    const newTask = {
+                        id:           Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                        text:         t.text,
+                        priority:     t.priority || 'important',
+                        status:       'pending',
+                        date:         today,
+                        note:         t.time ? ('Planned time: ' + t.time) : '',
+                        plannedStart: t.plannedStart || null,
+                        plannedEnd:   t.plannedEnd   || null,
+                        plannedMs:    0,
+                        breaks:       [],
+                        actualStart:  null,
+                        actualEnd:    null,
+                        rolledOver:   false,
+                        promotedFromPlan: true,
+                    };
+                    tasks.push(newTask);
+                });
+                // Clear the promoted tasks list (keep notes/frog for reference)
+                planData.tasks = [];
+                localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(planData));
+            }
+        } catch (e) {
+            console.error('Plan Tomorrow promotion error', e);
+        }
+
         saveTasks();
     }
     today = currentDate;
@@ -3345,6 +3285,7 @@ function renderBoardTask(task, container) {
             ${task.status === 'previous_unfinished' ? `<span class="badge rollover">From ${task.date}</span>` : ''}
             ${isPaused ? `<span class="badge paused">Paused</span>` : ''}
             ${task.rolledOver && task.date === today ? `<span class="badge rollover">Rolled from ${task.rolledOverFrom}</span>` : ''}
+            ${task.promotedFromPlan ? `<span class="badge" title="Auto-promoted from yesterday's plan">↑ Planned</span>` : ''}
         </div>
         ${task.note ? `<div class="task-note-snippet">${escHtml(task.note)}</div>` : ''}
         <div class="task-timer" id="timer-${task.id}">${formatDuration(elapsed)}</div>
@@ -4802,138 +4743,16 @@ function renderEvents() {
 loadEvents();
 
 // ─────────────────────────────────────────────
-// Frog (Most Important Task) + Streak
+// Frog / Streak — removed (feature disabled)
 // ─────────────────────────────────────────────
-function getFrogKey() { return STORAGE_FROG + today; }
+function loadFrog() { /* frog feature removed */ }
+function showSetFrogModal() { /* frog feature removed */ }
+function saveFrog() { /* frog feature removed */ }
+function clearFrog() { /* frog feature removed */ }
+function updateStreak() { /* frog feature removed */ }
+function renderStreakWidget() { /* frog feature removed */ }
 
-function loadFrog() {
-    const frogId = safeGet(getFrogKey(), 'null');
-    const id = JSON.parse(frogId);
-    const el = document.getElementById('intention-frog-text');
-    if (id) {
-        const task = tasks.find(t => t.id === id);
-        if (task) {
-            el.textContent = task.text;
-            el.classList.remove('placeholder');
-        } else {
-            // Task was deleted — clear stale frog
-            safeSet(getFrogKey(), 'null');
-            el.textContent = 'No frog set. Set your #1 task for today →';
-            el.classList.add('placeholder');
-        }
-    } else {
-        el.textContent = 'No frog set. Set your #1 task for today →';
-        el.classList.add('placeholder');
-    }
-    renderStreakWidget();
-}
-
-function showSetFrogModal() {
-    const todayTasks = tasks.filter(t =>
-        t.date === today && ['pending','in_progress'].includes(t.status));
-    if (todayTasks.length === 0) {
-        showModal('Set Frog 🐸', `
-            <p style="margin-bottom:14px;font-family:var(--font-serif);font-style:italic;">
-                No pending tasks for today. Add a task first, then set it as your Frog.
-            </p>
-            <div class="modal-actions"><button onclick="closeModal()">OK</button></div>
-        `);
-        return;
-    }
-    const options = todayTasks.map(t =>
-        `<option value="${t.id}">${t.text} (${t.priority})</option>`
-    ).join('');
-    const currentFrogId = JSON.parse(safeGet(getFrogKey(), 'null'));
-    showModal('Set Frog 🐸', `
-        <p style="margin-bottom:12px;font-size:0.8rem;opacity:0.65;">
-            Your "Frog" is your single most important task — the one you eat first (Brian Tracy).
-        </p>
-        <div class="form-group">
-            <label>Select today's #1 task</label>
-            <select id="frog-select" style="width:100%;">${options}</select>
-        </div>
-        <div class="modal-actions">
-            <button onclick="saveFrog()">Set as Frog</button>
-            <button onclick="clearFrog()">Clear Frog</button>
-            <button onclick="closeModal()">Cancel</button>
-        </div>
-    `);
-    if (currentFrogId) {
-        const sel = document.getElementById('frog-select');
-        if (sel) sel.value = currentFrogId;
-    }
-}
-
-function saveFrog() {
-    const sel = document.getElementById('frog-select');
-    if (!sel) return;
-    const id = sel.value;
-    safeSet(getFrogKey(), JSON.stringify(id));
-    // Update streak
-    updateStreak();
-    closeModal();
-    loadFrog();
-    render(); // re-render to show 🐸 on the correct task card
-}
-
-function clearFrog() {
-    safeSet(getFrogKey(), 'null');
-    closeModal();
-    loadFrog();
-    render();
-}
-
-function updateStreak() {
-    try {
-        const raw = localStorage.getItem(STORAGE_STREAK);
-        let streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
-        const yesterday = (() => {
-            const [y, m, d] = today.split('-').map(Number);
-            const yest = new Date(y, m - 1, d - 1);
-            return yest.toISOString().split('T')[0];
-        })();
-        if (streak.lastDate === yesterday) {
-            streak.count++;
-        } else if (streak.lastDate !== today) {
-            streak.count = 1;
-        }
-        streak.lastDate = today;
-        localStorage.setItem(STORAGE_STREAK, JSON.stringify(streak));
-    } catch(e) {}
-}
-
-function renderStreakWidget() {
-    try {
-        const raw = localStorage.getItem(STORAGE_STREAK);
-        const streak = raw ? JSON.parse(raw) : { count: 0, lastDate: null };
-        const count = streak.lastDate === today ? streak.count : 0;
-        document.getElementById('streak-count').textContent = count > 0 ? `${count}d` : '—';
-        const dots = document.getElementById('streak-dots');
-        if (dots) {
-            const show = Math.min(count, 7);
-            dots.innerHTML = Array.from({ length: 7 }, (_, i) => {
-                let cls = 'streak-dot';
-                if (i < show) cls += ' filled';
-                else if (i === show && count < 7) cls += ' today-unfilled';
-                return `<div class="${cls}"></div>`;
-            }).join('');
-        }
-    } catch(e) {}
-}
-
-// Mark frog task card with is-frog class after render
-const _origRender = render;
-render = function() {
-    _origRender();
-    // Apply frog highlight
-    try {
-        const frogId = JSON.parse(safeGet(getFrogKey(), 'null'));
-        if (frogId) {
-            const card = document.getElementById(`card-${frogId}`);
-            if (card) card.classList.add('is-frog');
-        }
-    } catch(e) {}
-};
+// (Frog highlight overlay removed)
 
 // ─────────────────────────────────────────────
 // Weekly Review Modal
@@ -5187,15 +5006,14 @@ let planTmrwOpen = false;
 let planTmrwDragSrcIdx = null;
 
 function getPlanTmrwData() {
-    try { return JSON.parse(localStorage.getItem(PLAN_TMRW_KEY)) || { tasks: [], notes: '', frog: '' }; }
-    catch(e) { return { tasks: [], notes: '', frog: '' }; }
+    try { return JSON.parse(localStorage.getItem(PLAN_TMRW_KEY)) || { tasks: [], notes: '' }; }
+    catch(e) { return { tasks: [], notes: '' }; }
 }
 
 function savePlanTmrw() {
     const data = {
         tasks: getPlanTmrwData().tasks,
         notes: (document.getElementById('plan-tmrw-notes') || {}).value || '',
-        frog:  (document.getElementById('plan-tmrw-frog-input') || {}).value || '',
     };
     localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify(data));
     renderPlanTmrwStats(data.tasks);
@@ -5228,9 +5046,7 @@ function togglePlanTomorrow() {
 function loadPlanTmrw() {
     const data = getPlanTmrwData();
     const notesEl = document.getElementById('plan-tmrw-notes');
-    const frogEl  = document.getElementById('plan-tmrw-frog-input');
     if (notesEl) notesEl.value = data.notes || '';
-    if (frogEl)  frogEl.value  = data.frog  || '';
     renderPlanTmrwList(data.tasks);
     renderPlanTmrwStats(data.tasks);
 }
@@ -5350,7 +5166,7 @@ function deletePlanTmrwTask(idx) {
 
 function clearPlanTmrw() {
     if (!confirm('Clear all planned tasks and notes for tomorrow?')) return;
-    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify({ tasks: [], notes: '', frog: '' }));
+    localStorage.setItem(PLAN_TMRW_KEY, JSON.stringify({ tasks: [], notes: '' }));
     loadPlanTmrw();
 }
 
@@ -5369,6 +5185,7 @@ function promotePlanTmrwToToday() {
             note:      t.time ? ('Planned time: ' + t.time) : '',
             plannedMs: 0,
             breaks:    [],
+            promotedFromPlan: true,
         };
         tasks.push(newTask);
     });
@@ -5394,7 +5211,7 @@ function escapeHtml(str) {
 // Auto-open if there are tasks planned
 (function() {
     const data = getPlanTmrwData();
-    if (data.tasks.length > 0 || data.frog) {
+    if (data.tasks.length > 0) {
         planTmrwOpen = true;
         const body = document.getElementById('plan-tomorrow-body');
         const icon = document.getElementById('plan-tomorrow-toggle-icon');
