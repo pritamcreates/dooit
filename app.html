@@ -312,6 +312,37 @@
             background: #f5f5f2;
         }
 
+        /* ── Collapsed card ── */
+        .task-card.collapsed .task-body {
+            display: none;
+        }
+
+        .task-card.collapsed {
+            padding: 8px 11px;
+        }
+
+        .task-card.collapsed .task-header {
+            margin-bottom: 0;
+        }
+
+        /* Expand hint on collapsed hover */
+        .task-card.collapsed:hover {
+            background: var(--light);
+            cursor: pointer;
+        }
+
+        .task-expand-hint {
+            font-size: 0.58rem;
+            opacity: 0.35;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+
+        .task-card.collapsed .task-expand-hint { display: inline; }
+        .task-card:not(.collapsed) .task-expand-hint { display: none; }
+
         .task-header {
             display: flex;
             justify-content: space-between;
@@ -2937,7 +2968,9 @@ function renderBoardTask(task, container) {
     const isJustAdded = task._justAdded;
     if (isJustAdded) { delete task._justAdded; }
 
-    card.className = `task-card ${task.status === 'in_progress' ? 'in-progress' : ''} ${isPaused ? 'paused' : ''} ${isJustAdded ? 'just-added' : ''}`;
+    // Collapsed unless actively running (not paused)
+    const isExpanded = task.status === 'in_progress' && !isPaused;
+    card.className = `task-card ${task.status === 'in_progress' ? 'in-progress' : ''} ${isPaused ? 'paused' : ''} ${isJustAdded ? 'just-added' : ''} ${isExpanded ? '' : 'collapsed'}`.trim().replace(/  +/g,' ');
     card.id = `card-${task.id}`;
 
     const elapsed   = getElapsed(task);
@@ -2949,39 +2982,55 @@ function renderBoardTask(task, container) {
     const isStartable = task.status === 'pending' || task.status === 'previous_unfinished' || isPaused;
 
     card.innerHTML = `
-        <div class="task-header">
+        <div class="task-header" onclick="toggleCardExpand(event, '${task.id}')">
             <span class="task-name">${escHtml(task.text)}</span>
+            <span class="task-expand-hint">tap to expand</span>
             ${timeDisplay ? `<span class="task-time-planned">${timeDisplay}</span>` : ''}
         </div>
-        <div class="badge-container">
-            ${task.status === 'previous_unfinished' ? `<span class="badge rollover">From ${task.date}</span>` : ''}
-            ${isPaused ? `<span class="badge paused">Paused</span>` : ''}
-            ${task.rolledOver && task.date === today ? `<span class="badge rollover">Rolled from ${task.rolledOverFrom}</span>` : ''}
-        </div>
-        ${task.note ? `<div class="task-note-snippet">${escHtml(task.note)}</div>` : ''}
-        <div class="task-timer" id="timer-${task.id}">${formatDuration(elapsed)}</div>
-        <div class="task-planned-label">Planned: ${plannedMin !== null ? plannedMin + 'm' : '—'}</div>
-        <div class="task-controls">
-            ${isStartable
-                ? `<button onclick="startTask('${task.id}')">Start</button>`
-                : `<button onclick="pauseTask('${task.id}')">Break</button>`
-            }
-            <button onclick="completeTask('${task.id}')">Done</button>
-            <div class="quick-move-wrap">
-                <button onclick="toggleQuickMove(event, '${task.id}')">Move →</button>
-                <div class="quick-move-dropdown" id="qm-${task.id}">
-                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','urgent')">🔴 Urgent</button>
-                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','important')">🟡 Important</button>
-                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','later')">🔵 Later</button>
-                    <button class="quick-move-option" onclick="quickMoveTask('${task.id}','done')">✓ Done</button>
-                </div>
+        <div class="task-body">
+            <div class="badge-container">
+                ${task.status === 'previous_unfinished' ? `<span class="badge rollover">From ${task.date}</span>` : ''}
+                ${isPaused ? `<span class="badge paused">Paused</span>` : ''}
+                ${task.rolledOver && task.date === today ? `<span class="badge rollover">Rolled from ${task.rolledOverFrom}</span>` : ''}
             </div>
-            <button onclick="editTask('${task.id}')">Edit</button>
-            <button onclick="deleteTask('${task.id}')">Delete</button>
+            ${task.note ? `<div class="task-note-snippet">${escHtml(task.note)}</div>` : ''}
+            <div class="task-timer" id="timer-${task.id}">${formatDuration(elapsed)}</div>
+            <div class="task-planned-label">Planned: ${plannedMin !== null ? plannedMin + 'm' : '—'}</div>
+            <div class="task-controls">
+                ${isStartable
+                    ? `<button onclick="startTask('${task.id}')">Start</button>`
+                    : `<button onclick="pauseTask('${task.id}')">Break</button>`
+                }
+                <button onclick="completeTask('${task.id}')">Done</button>
+                <div class="quick-move-wrap">
+                    <button onclick="toggleQuickMove(event, '${task.id}')">Move →</button>
+                    <div class="quick-move-dropdown" id="qm-${task.id}">
+                        <button class="quick-move-option" onclick="quickMoveTask('${task.id}','urgent')">🔴 Urgent</button>
+                        <button class="quick-move-option" onclick="quickMoveTask('${task.id}','important')">🟡 Important</button>
+                        <button class="quick-move-option" onclick="quickMoveTask('${task.id}','later')">🔵 Later</button>
+                        <button class="quick-move-option" onclick="quickMoveTask('${task.id}','done')">✓ Done</button>
+                    </div>
+                </div>
+                <button onclick="editTask('${task.id}')">Edit</button>
+                <button onclick="deleteTask('${task.id}')">Delete</button>
+            </div>
         </div>
     `;
 
     container.appendChild(card);
+}
+
+// Toggle card expand/collapse manually
+function toggleCardExpand(event, id) {
+    if (event.target.tagName === 'BUTTON' || event.target.tagName === 'SELECT') return;
+    const card = document.getElementById(`card-${id}`);
+    if (!card) return;
+    const task = tasks.find(t => t.id === id);
+    if (task && task.status === 'in_progress') {
+        const isPaused = task.breaks.length > 0 && !task.breaks[task.breaks.length - 1].end;
+        if (!isPaused) return;
+    }
+    card.classList.toggle('collapsed');
 }
 
 function renderUnfinishedRow(task, container) {
