@@ -1,14 +1,16 @@
 {
-  "projects": {
-    "default": "letsdooit---final-edition"
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": false,
+    "trailingSlash": false
   },
-  "targets": {
-    "letsdooit---final-edition": {
-      "hosting": {
-        "dooitnow": [
-          "dooitnow"
-        ]
-      }
-    }
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }
