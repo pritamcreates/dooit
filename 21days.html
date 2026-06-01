@@ -910,10 +910,31 @@
     </div>
   </header>
 
+
+  <!-- Inline boot: show correct view immediately, before DOMContentLoaded -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('dooit_21days');
+        var hasChallenge = raw && JSON.parse(raw).challenge;
+        document.addEventListener('DOMContentLoaded', function() {
+          // DOMContentLoaded will handle full init via loadState()
+        });
+        // Pre-show to avoid blank: show empty unless we have data
+        // Full render happens in loadState() on DOMContentLoaded
+        if (!hasChallenge) {
+          document.getElementById('empty-view').style.display = '';
+        }
+      } catch(e) {
+        document.getElementById('empty-view').style.display = '';
+      }
+    })();
+  </script>
+
   <!-- ══════════════════════════════════════
        EMPTY STATE
   ══════════════════════════════════════ -->
-  <div id="empty-view">
+  <div id="empty-view" style="display:none;">
     <div class="empty-strip">
       <div class="empty-strip-title">No challenge running.</div>
       <p class="empty-strip-sub">Pick one habit. Commit to 21 days. Don't break the chain.</p>
@@ -924,7 +945,7 @@
   <!-- ══════════════════════════════════════
        SETUP VIEW
   ══════════════════════════════════════ -->
-  <div id="setup-view">
+  <div id="setup-view" style="display:none;">
     <div class="setup-header">
       <h2 id="setup-title">Set your challenge</h2>
       <span class="sub">One habit · 21 days</span>
@@ -982,7 +1003,7 @@
   <!-- ══════════════════════════════════════
        DASHBOARD VIEW
   ══════════════════════════════════════ -->
-  <div id="dashboard-view">
+  <div id="dashboard-view" style="display:none;">
 
     <!-- Complete Banner (shown when all 21 days done) -->
     <div class="complete-banner" id="complete-banner" style="display:none;">
@@ -1174,6 +1195,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Global safety net
+window.onerror = function(msg, src, line, col, err) {
+  console.error("JS Error:", msg, "Line:", line, err);
+  try { showEmpty(); } catch(e) {}
+  return false;
+};
+
 // ════════════════════════════════════
 // CONSTANTS
 // ════════════════════════════════════
@@ -1267,7 +1295,12 @@ function loadState() {
           date:   d.date   || null
         }));
         showDashboard();
-        renderDashboard();
+        try { renderDashboard(); }
+        catch(err) {
+          console.error('renderDashboard failed:', err);
+          // State may be corrupt — show empty so user isn't stuck
+          showEmpty();
+        }
       } else {
         showEmpty();
       }
