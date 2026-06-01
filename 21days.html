@@ -1245,12 +1245,39 @@ function loadState() {
     const raw = localStorage.getItem('dooit_21days');
     if (raw) {
       S = JSON.parse(raw);
-      if (S.challenge) { showDashboard(); renderDashboard(); }
-      else showEmpty();
+      if (S.challenge) {
+        // ── Migrate old field names from previous version ──
+        const c = S.challenge;
+        if (c.description !== undefined && c.desc === undefined) c.desc = c.description;
+        if (c.category   !== undefined && c.cat  === undefined) c.cat  = c.category;
+        if (!c.cat)  c.cat  = 'Other';
+        if (!c.desc) c.desc = '';
+        if (!c.name) c.name = '';
+        if (!Array.isArray(c.whys)) c.whys = [];
+        // ── Ensure days array is always 21 well-formed items ──
+        if (!Array.isArray(S.days) || S.days.length < 21) {
+          S.days = Array.from({length: 21}, (_, i) =>
+            (S.days && S.days[i]) ? S.days[i] : { status: 'pending', note: '', mood: null, date: null }
+          );
+        }
+        S.days = S.days.slice(0, 21).map(d => ({
+          status: d.status || 'pending',
+          note:   d.note   || '',
+          mood:   d.mood   || null,
+          date:   d.date   || null
+        }));
+        showDashboard();
+        renderDashboard();
+      } else {
+        showEmpty();
+      }
     } else {
       showEmpty();
     }
-  } catch(e) { showEmpty(); }
+  } catch(e) {
+    console.error('State load error:', e);
+    showEmpty();
+  }
 }
 
 function save() { localStorage.setItem('dooit_21days', JSON.stringify(S)); }
@@ -1388,6 +1415,7 @@ function renderDashboard() {
   if (!S.challenge) return;
   const c = S.challenge;
   const todayStr = today();
+  if (!c.startDate) { showEmpty(); return; }
   const startDate = new Date(c.startDate + 'T00:00:00');
   const todayDt = new Date(todayStr + 'T00:00:00');
   const todayIdx = Math.round((todayDt - startDate) / 86400000);
@@ -1412,8 +1440,8 @@ function renderDashboard() {
 
   // Left panel
   document.getElementById('today-big-num').textContent = todayIdx >= 0 && todayIdx < 21 ? todayIdx + 1 : '—';
-  document.getElementById('today-ch-name').textContent = c.name;
-  document.getElementById('today-cat').textContent = c.cat;
+  document.getElementById('today-ch-name').textContent = c.name || '—';
+  document.getElementById('today-cat').textContent = c.cat || c.category || '';
   document.getElementById('today-date-tag').textContent = fmtDate(todayStr, 'short');
 
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -1464,7 +1492,7 @@ function renderDashboard() {
   }
 
   // Chain panel title
-  document.getElementById('chain-panel-title').textContent = c.name;
+  document.getElementById('chain-panel-title').textContent = c.name || '21-day chain';
 
   // Chain progress bar
   document.getElementById('chain-bar').style.width = Math.round((done / 21) * 100) + '%';
@@ -1498,7 +1526,7 @@ function renderDashboard() {
 
   // Meta
   document.getElementById('meta-started').textContent = fmtDate(c.startDate, 'short');
-  document.getElementById('meta-cat').textContent = c.cat;
+  document.getElementById('meta-cat').textContent = c.cat || c.category || '—';
   const endDt = new Date(startDate); endDt.setDate(startDate.getDate() + 20);
   document.getElementById('meta-ends').textContent = fmtDate(endDt.toISOString().split('T')[0], 'short');
 
