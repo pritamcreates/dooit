@@ -911,30 +911,10 @@
   </header>
 
 
-  <!-- Inline boot: show correct view immediately, before DOMContentLoaded -->
-  <script>
-    (function() {
-      try {
-        var raw = localStorage.getItem('dooit_21days');
-        var hasChallenge = raw && JSON.parse(raw).challenge;
-        document.addEventListener('DOMContentLoaded', function() {
-          // DOMContentLoaded will handle full init via loadState()
-        });
-        // Pre-show to avoid blank: show empty unless we have data
-        // Full render happens in loadState() on DOMContentLoaded
-        if (!hasChallenge) {
-          document.getElementById('empty-view').style.display = '';
-        }
-      } catch(e) {
-        document.getElementById('empty-view').style.display = '';
-      }
-    })();
-  </script>
-
   <!-- ══════════════════════════════════════
        EMPTY STATE
   ══════════════════════════════════════ -->
-  <div id="empty-view" style="display:none;">
+  <div id="empty-view">
     <div class="empty-strip">
       <div class="empty-strip-title">No challenge running.</div>
       <p class="empty-strip-sub">Pick one habit. Commit to 21 days. Don't break the chain.</p>
