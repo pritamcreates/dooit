@@ -88,7 +88,6 @@
 
     /* === EMPTY STATE — NEW CHALLENGE SETUP === */
     #setup-view {
-      display: none;
     }
 
     .setup-header {
@@ -242,7 +241,6 @@
 
     /* === DASHBOARD VIEW === */
     #dashboard-view {
-      display: none;
     }
 
     /* ── Top stat bar ── */
@@ -1299,10 +1297,10 @@ function save() { localStorage.setItem('dooit_21days', JSON.stringify(S)); }
 // VIEW SWITCHING
 // ════════════════════════════════════
 function showEmpty() {
-  document.getElementById('empty-view').style.display = '';
+  document.getElementById('empty-view').style.display = 'block';
   document.getElementById('setup-view').style.display = 'none';
   document.getElementById('dashboard-view').style.display = 'none';
-  document.getElementById('btn-new').style.display = '';
+  document.getElementById('btn-new').style.display = 'inline-block';
   document.getElementById('btn-export').style.display = 'none';
   document.getElementById('btn-edit').style.display = 'none';
   document.getElementById('btn-reset').style.display = 'none';
@@ -1310,7 +1308,7 @@ function showEmpty() {
 
 function showSetup() {
   document.getElementById('empty-view').style.display = 'none';
-  document.getElementById('setup-view').style.display = '';
+  document.getElementById('setup-view').style.display = 'block';
   document.getElementById('dashboard-view').style.display = 'none';
   document.getElementById('btn-new').style.display = 'none';
   document.getElementById('btn-export').style.display = 'none';
@@ -1321,11 +1319,11 @@ function showSetup() {
 function showDashboard() {
   document.getElementById('empty-view').style.display = 'none';
   document.getElementById('setup-view').style.display = 'none';
-  document.getElementById('dashboard-view').style.display = '';
+  document.getElementById('dashboard-view').style.display = 'block';
   document.getElementById('btn-new').style.display = 'none';
-  document.getElementById('btn-export').style.display = '';
-  document.getElementById('btn-edit').style.display = '';
-  document.getElementById('btn-reset').style.display = '';
+  document.getElementById('btn-export').style.display = 'inline-block';
+  document.getElementById('btn-edit').style.display = 'inline-block';
+  document.getElementById('btn-reset').style.display = 'inline-block';
 }
 
 function openSetup() {
