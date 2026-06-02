@@ -1820,6 +1820,8 @@ function exportLog() {
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
@@ -1832,9 +1834,10 @@ const firebaseConfig = {
 
 const fbApp = initializeApp(firebaseConfig, '21days');
 const db    = getFirestore(fbApp);
+const auth  = getAuth(fbApp);
 
-let _uid        = null;
-let _pushTimer  = null;
+let _uid       = null;
+let _pushTimer = null;
 
 function setSyncStatus(state) {
     const el = document.getElementById('sync-status');
@@ -1845,7 +1848,6 @@ function setSyncStatus(state) {
     if (state === 'saved') setTimeout(() => { if (el.textContent === '✓ synced') el.textContent = ''; }, 2500);
 }
 
-// Pull from Firestore → localStorage → reload view
 async function pull(uid) {
     setSyncStatus('syncing');
     try {
@@ -1854,7 +1856,6 @@ async function pull(uid) {
             const data = snap.data().state;
             if (data) {
                 localStorage.setItem('dooit_21days', JSON.stringify(data));
-                // Reload state into running app
                 if (typeof loadState === 'function') loadState();
             }
         }
@@ -1865,7 +1866,6 @@ async function pull(uid) {
     }
 }
 
-// Push localStorage → Firestore (debounced 1.5s)
 function push() {
     if (!_uid) return;
     clearTimeout(_pushTimer);
@@ -1885,28 +1885,25 @@ function push() {
     }, 1500);
 }
 
-// Expose to non-module code
 window.__21daysSync = { push };
 
-// Bootstrap — read auth user saved by app.html Google Sign-In
-function init() {
-    try {
-        const saved = localStorage.getItem('dooit_auth_user');
-        if (saved) {
-            const user = JSON.parse(saved);
-            _uid = user.id;
-            if (_uid) pull(_uid);
-        }
-    } catch(e) {
-        console.error('21days sync init error', e);
+// Use Firebase Auth state — same session as app.html, no extra sign-in needed
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        _uid = user.uid;
+        // Update localStorage with correct Firebase UID
+        try {
+            const saved = localStorage.getItem('dooit_auth_user');
+            const profile = saved ? JSON.parse(saved) : {};
+            localStorage.setItem('dooit_auth_user', JSON.stringify({
+                ...profile, id: user.uid
+            }));
+        } catch(e) {}
+        pull(_uid);
+    } else {
+        setSyncStatus('');
     }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+});
 </script>
 </body>
 </html>
