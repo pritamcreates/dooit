@@ -899,6 +899,7 @@
         <span class="brand-tagline">21 days challenge</span>
       </div>
       <div class="header-actions">
+        <span id="sync-status" style="font-size:0.6rem;opacity:0.45;letter-spacing:0.05em;align-self:center;"></span>
         <button onclick="window.location.href='app.html'">← Back to App</button>
         <button id="btn-export" onclick="exportLog()" style="display:none;">Export Log</button>
         <button id="btn-edit" onclick="openEditMode()" style="display:none;">Edit Challenge</button>
@@ -1291,7 +1292,10 @@ function loadState() {
   }
 }
 
-function save() { localStorage.setItem('dooit_21days', JSON.stringify(S)); }
+function save() {
+  localStorage.setItem('dooit_21days', JSON.stringify(S));
+  if (window.__21daysSync) window.__21daysSync.push();
+}
 
 // ════════════════════════════════════
 // VIEW SWITCHING
@@ -1806,6 +1810,102 @@ function exportLog() {
   a.click();
   URL.revokeObjectURL(url);
   toast('Log exported.');
+}
+</script>
+
+<!-- ══════════════════════════════════════
+     FIREBASE SYNC
+══════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
+    authDomain:        "letsdooit---final-edition.firebaseapp.com",
+    projectId:         "letsdooit---final-edition",
+    storageBucket:     "letsdooit---final-edition.firebasestorage.app",
+    messagingSenderId: "162170588177",
+    appId:             "1:162170588177:web:152261bfc17674451df5b0"
+};
+
+const fbApp = initializeApp(firebaseConfig, '21days');
+const db    = getFirestore(fbApp);
+
+let _uid        = null;
+let _pushTimer  = null;
+
+function setSyncStatus(state) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    const msgs = { syncing: '↑ syncing…', saved: '✓ synced', error: '⚠ sync error', '': '' };
+    el.textContent = msgs[state] || '';
+    el.style.opacity = state === 'saved' ? '0.35' : '0.75';
+    if (state === 'saved') setTimeout(() => { if (el.textContent === '✓ synced') el.textContent = ''; }, 2500);
+}
+
+// Pull from Firestore → localStorage → reload view
+async function pull(uid) {
+    setSyncStatus('syncing');
+    try {
+        const snap = await getDoc(doc(db, 'users', uid, 'meta', '21days'));
+        if (snap.exists()) {
+            const data = snap.data().state;
+            if (data) {
+                localStorage.setItem('dooit_21days', JSON.stringify(data));
+                // Reload state into running app
+                if (typeof loadState === 'function') loadState();
+            }
+        }
+        setSyncStatus('saved');
+    } catch(e) {
+        console.error('21days pull error', e);
+        setSyncStatus('error');
+    }
+}
+
+// Push localStorage → Firestore (debounced 1.5s)
+function push() {
+    if (!_uid) return;
+    clearTimeout(_pushTimer);
+    _pushTimer = setTimeout(async () => {
+        setSyncStatus('syncing');
+        try {
+            const raw = localStorage.getItem('dooit_21days');
+            const state = raw ? JSON.parse(raw) : null;
+            if (state) {
+                await setDoc(doc(db, 'users', _uid, 'meta', '21days'), { state }, { merge: true });
+            }
+            setSyncStatus('saved');
+        } catch(e) {
+            console.error('21days push error', e);
+            setSyncStatus('error');
+        }
+    }, 1500);
+}
+
+// Expose to non-module code
+window.__21daysSync = { push };
+
+// Bootstrap — read auth user saved by app.html Google Sign-In
+function init() {
+    try {
+        const saved = localStorage.getItem('dooit_auth_user');
+        if (saved) {
+            const user = JSON.parse(saved);
+            _uid = user.id;
+            if (_uid) pull(_uid);
+        }
+    } catch(e) {
+        console.error('21days sync init error', e);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
 }
 </script>
 </body>
