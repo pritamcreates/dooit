@@ -544,48 +544,69 @@
 </div>
 
 <script type="module">
+  import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, GoogleAuthProvider, signInWithCredential, onAuthStateChanged }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+  const firebaseConfig = {
+      apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
+      authDomain:        "letsdooit---final-edition.firebaseapp.com",
+      projectId:         "letsdooit---final-edition",
+      storageBucket:     "letsdooit---final-edition.firebasestorage.app",
+      messagingSenderId: "162170588177",
+      appId:             "1:162170588177:web:152261bfc17674451df5b0"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth  = getAuth(fbApp);
+
   // ── Config ──
   const GOOGLE_CLIENT_ID  = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.googleusercontent.com';
   const STORAGE_AUTH_USER = 'dooit_auth_user';
-  const APP_URL           = 'app.html'; // main dooit app
+  const APP_URL           = 'app.html';
 
   // ── State machine helpers ──
   function showState(id) {
     ['default-state', 'loading-state', 'success-state'].forEach(s => {
-      document.getElementById(s).style.display = s === id ? (id === 'default-state' ? 'block' : 'block') : 'none';
+      document.getElementById(s).style.display = s === id ? 'block' : 'none';
     });
   }
 
-  // ── Check if already signed in ──
-  try {
-    const saved = localStorage.getItem(STORAGE_AUTH_USER);
-    if (saved) {
-      const user = JSON.parse(saved);
-      // Already signed in — go straight to app
-      showSuccessAndRedirect(user);
+  // ── Check if Firebase session already alive ──
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      try {
+        const saved = localStorage.getItem(STORAGE_AUTH_USER);
+        const profile = saved ? JSON.parse(saved) : {};
+        const syncedUser = { id: user.uid, name: profile.name || user.displayName, email: profile.email || user.email, picture: profile.picture || user.photoURL };
+        localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(syncedUser));
+        showSuccessAndRedirect(syncedUser);
+      } catch(e) {
+        showSuccessAndRedirect({ id: user.uid, name: user.displayName, email: user.email, picture: user.photoURL });
+      }
     }
-  } catch(e) {}
+  });
 
   // ── Handle Google credential response ──
-  window.handleCredentialResponse = function(response) {
+  window.handleCredentialResponse = async function(response) {
     showState('loading-state');
-
     try {
       const idToken = response.credential;
       const payload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const profile = JSON.parse(atob(payload));
+      const padded  = payload + '=='.slice(0, (4 - payload.length % 4) % 4);
+      const profile = JSON.parse(atob(padded));
+
+      // Sign in to Firebase Auth to get real Firebase UID
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
 
       const user = {
-        id:      profile.sub,
+        id:      result.user.uid,
         name:    profile.name,
         email:   profile.email,
         picture: profile.picture,
-        token:   idToken,
       };
 
       localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(user));
-
-      // Small delay to feel intentional, not jarring
       setTimeout(() => showSuccessAndRedirect(user), 800);
 
     } catch(err) {
