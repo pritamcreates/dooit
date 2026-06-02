@@ -2703,10 +2703,13 @@ window.signOut = function() {
     window.location.href = 'index.html';
 };
 
-// Listen for Firebase Auth state — handles session restore on reload/dock open
+// Wait for Firebase Auth to resolve first, then decide whether to show Google Sign-In
+let _authResolved = false;
+
 onAuthStateChanged(auth, (user) => {
+    _authResolved = true;
     if (user) {
-        // Firebase session still alive — restore user without needing Google re-prompt
+        // Firebase session alive — restore silently, no Google prompt needed
         try {
             const saved = localStorage.getItem(STORAGE_AUTH_USER);
             const profile = saved ? JSON.parse(saved) : {};
@@ -2717,20 +2720,18 @@ onAuthStateChanged(auth, (user) => {
         }
         showUserUI();
         startSync(window.currentUser.id);
+    } else {
+        // No Firebase session — show Google Sign-In
+        initGoogleSignIn();
     }
 });
 
 function initGoogleSignIn() {
     if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) { setTimeout(initGoogleSignIn, 150); return; }
-    // If Firebase Auth already restored the session via onAuthStateChanged, skip prompt
-    if (window.currentUser) return;
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: true });
     google.accounts.id.renderButton(document.getElementById('google-signin-button'), { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' });
     google.accounts.id.prompt();
 }
-
-if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initGoogleSignIn); }
-else { initGoogleSignIn(); }
 </script>
 </body>
 </html>
