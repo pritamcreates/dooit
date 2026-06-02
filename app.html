@@ -2678,8 +2678,9 @@ async function handleCredentialResponse(response) {
         const uid = result.user.uid;
         window.currentUser = { id: uid, name: profile.name, email: profile.email, picture: profile.picture };
     } catch(e) {
-        console.warn('Firebase Auth sign-in failed, falling back to sub:', e);
-        window.currentUser = { id: profile.sub, name: profile.name, email: profile.email, picture: profile.picture };
+        console.error('Firebase Auth sign-in failed:', e);
+        setSyncStatus('error');
+        return;
     }
     try { localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(window.currentUser)); } catch(e) {}
     showUserUI(); startSync(window.currentUser.id);
