@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2540,6 +2539,8 @@ function toggleProjectsPanel() {
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, writeBatch }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, GoogleAuthProvider, signInWithCredential, onAuthStateChanged, signOut as fbSignOut }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
@@ -2553,6 +2554,7 @@ const firebaseConfig = {
 
 const fbApp = initializeApp(firebaseConfig);
 const db    = getFirestore(fbApp);
+const auth  = getAuth(fbApp);
 
 let unsubscribeTasks    = null;
 let unsubscribeProjects = null;
@@ -2663,12 +2665,22 @@ const GOOGLE_CLIENT_ID  = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.go
 const STORAGE_AUTH_USER = 'dooit_auth_user';
 window.currentUser = null;
 
-function handleCredentialResponse(response) {
+async function handleCredentialResponse(response) {
     const idToken = response.credential;
+    // Decode profile for display info
     const rawPayload = idToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
     const padded = rawPayload + '=='.slice(0, (4 - rawPayload.length%4)%4);
     const profile = JSON.parse(atob(padded));
-    window.currentUser = { id:profile.sub, name:profile.name, email:profile.email, picture:profile.picture };
+    try {
+        // Sign in to Firebase Auth to get real Firebase UID for Firestore rules
+        const credential = GoogleAuthProvider.credential(idToken);
+        const result = await signInWithCredential(auth, credential);
+        const uid = result.user.uid;
+        window.currentUser = { id: uid, name: profile.name, email: profile.email, picture: profile.picture };
+    } catch(e) {
+        console.warn('Firebase Auth sign-in failed, falling back to sub:', e);
+        window.currentUser = { id: profile.sub, name: profile.name, email: profile.email, picture: profile.picture };
+    }
     try { localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(window.currentUser)); } catch(e) {}
     showUserUI(); startSync(window.currentUser.id);
 }
@@ -2687,12 +2699,31 @@ window.signOut = function() {
     if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
     stopSync(); window.currentUser = null;
     try { localStorage.removeItem(STORAGE_AUTH_USER); } catch(e) {}
+    fbSignOut(auth).catch(()=>{});
     window.location.href = 'index.html';
 };
 
+// Listen for Firebase Auth state — handles session restore on reload/dock open
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Firebase session still alive — restore user without needing Google re-prompt
+        try {
+            const saved = localStorage.getItem(STORAGE_AUTH_USER);
+            const profile = saved ? JSON.parse(saved) : {};
+            window.currentUser = { id: user.uid, name: profile.name || user.displayName, email: profile.email || user.email, picture: profile.picture || user.photoURL };
+            localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(window.currentUser));
+        } catch(e) {
+            window.currentUser = { id: user.uid, name: user.displayName, email: user.email, picture: user.photoURL };
+        }
+        showUserUI();
+        startSync(window.currentUser.id);
+    }
+});
+
 function initGoogleSignIn() {
     if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) { setTimeout(initGoogleSignIn, 150); return; }
-    try { const saved = localStorage.getItem(STORAGE_AUTH_USER); if (saved) { window.currentUser = JSON.parse(saved); showUserUI(); startSync(window.currentUser.id); return; } } catch(e) {}
+    // If Firebase Auth already restored the session via onAuthStateChanged, skip prompt
+    if (window.currentUser) return;
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: true });
     google.accounts.id.renderButton(document.getElementById('google-signin-button'), { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' });
     google.accounts.id.prompt();
