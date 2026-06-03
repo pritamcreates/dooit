@@ -707,7 +707,7 @@
                 <span class="brand-tagline">task &amp; time tracker</span>
             </div>
             <div class="header-actions">
-                <div id="auth-area">
+                <div id="auth-area" style="visibility:hidden;">
                     <div id="google-signin-button"></div>
                     <div id="user-info" style="display:none;align-items:center;gap:8px;">
                         <img id="user-avatar" src="" alt="" style="width:24px;height:24px;border-radius:50%;display:none;">
@@ -2678,9 +2678,8 @@ async function handleCredentialResponse(response) {
         const uid = result.user.uid;
         window.currentUser = { id: uid, name: profile.name, email: profile.email, picture: profile.picture };
     } catch(e) {
-        console.error('Firebase Auth sign-in failed:', e);
-        setSyncStatus('error');
-        return;
+        console.warn('Firebase Auth sign-in failed, falling back to sub:', e);
+        window.currentUser = { id: profile.sub, name: profile.name, email: profile.email, picture: profile.picture };
     }
     try { localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(window.currentUser)); } catch(e) {}
     showUserUI(); startSync(window.currentUser.id);
@@ -2694,6 +2693,7 @@ function showUserUI() {
     document.getElementById('user-name').textContent = window.currentUser.name || window.currentUser.email;
     const avatar = document.getElementById('user-avatar');
     if (window.currentUser.picture) { avatar.src=window.currentUser.picture; avatar.style.display='block'; } else { avatar.style.display='none'; }
+    document.getElementById('auth-area').style.visibility = 'visible';
 }
 
 window.signOut = function() {
@@ -2732,6 +2732,7 @@ function initGoogleSignIn() {
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: true });
     google.accounts.id.renderButton(document.getElementById('google-signin-button'), { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' });
     google.accounts.id.prompt();
+    document.getElementById('auth-area').style.visibility = 'visible';
 }
 </script>
 </body>
