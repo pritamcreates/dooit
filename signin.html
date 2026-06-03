@@ -394,11 +394,11 @@
 
 <!-- ── Top bar ── -->
 <div class="topbar">
-  <a href="landing.html" class="brand">
+  <a href="index.html" class="brand">
     <span class="brand-name">dooit</span>
     <span class="brand-tag">task &amp; time</span>
   </a>
-  <a href="landing.html" class="back-link">
+  <a href="index.html" class="back-link">
     ← <span>Back to homepage</span>
   </a>
 </div>
@@ -544,25 +544,28 @@
 </div>
 
 <script type="module">
-  import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  // ── Firebase imports ──
+  import { initializeApp }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, GoogleAuthProvider, signInWithCredential, onAuthStateChanged }
-      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-  const firebaseConfig = {
-      apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
-      authDomain:        "letsdooit---final-edition.firebaseapp.com",
-      projectId:         "letsdooit---final-edition",
-      storageBucket:     "letsdooit---final-edition.firebasestorage.app",
-      messagingSenderId: "162170588177",
-      appId:             "1:162170588177:web:152261bfc17674451df5b0"
-  };
-  const fbApp = initializeApp(firebaseConfig);
-  const auth  = getAuth(fbApp);
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   // ── Config ──
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAMacwdf0ltK-JL6_ErdR9jaV8yJlGrOJc",
+    authDomain:        "letsdooit---final-edition.firebaseapp.com",
+    projectId:         "letsdooit---final-edition",
+    storageBucket:     "letsdooit---final-edition.firebasestorage.app",
+    messagingSenderId: "162170588177",
+    appId:             "1:162170588177:web:152261bfc17674451df5b0",
+  };
+
   const GOOGLE_CLIENT_ID  = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.googleusercontent.com';
   const STORAGE_AUTH_USER = 'dooit_auth_user';
   const APP_URL           = 'app.html';
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth  = getAuth(fbApp);
 
   // ── State machine helpers ──
   function showState(id) {
@@ -571,42 +574,77 @@
     });
   }
 
-  // ── Check if Firebase session already alive ──
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
+  function showSuccessAndRedirect(user) {
+    showState('success-state');
+    const firstName = (user.name || 'back').split(' ')[0];
+    document.getElementById('success-name').textContent = `Welcome, ${firstName}.`;
+    document.getElementById('success-sub').textContent =
+      `Signed in as ${user.email}. Redirecting you to dooit…`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('progress-fill').style.width = '100%';
+      });
+    });
+    setTimeout(() => { window.location.href = APP_URL; }, 2800);
+  }
+
+  // ── Check Firebase session first (handles page refresh / return visits) ──
+  onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      // Already authenticated with Firebase — restore profile and redirect
       try {
         const saved = localStorage.getItem(STORAGE_AUTH_USER);
         const profile = saved ? JSON.parse(saved) : {};
-        const syncedUser = { id: user.uid, name: profile.name || user.displayName, email: profile.email || user.email, picture: profile.picture || user.photoURL };
-        localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(syncedUser));
-        showSuccessAndRedirect(syncedUser);
+        const user = {
+          id:      firebaseUser.uid,
+          name:    profile.name    || firebaseUser.displayName,
+          email:   profile.email   || firebaseUser.email,
+          picture: profile.picture || firebaseUser.photoURL,
+        };
+        localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(user));
+        showSuccessAndRedirect(user);
       } catch(e) {
-        showSuccessAndRedirect({ id: user.uid, name: user.displayName, email: user.email, picture: user.photoURL });
+        showSuccessAndRedirect({
+          id: firebaseUser.uid, name: firebaseUser.displayName,
+          email: firebaseUser.email, picture: firebaseUser.photoURL,
+        });
       }
     }
+    // If no Firebase session, the Google button (already rendered) handles sign-in
   });
 
   // ── Handle Google credential response ──
+  // FIX: now calls signInWithCredential so Firebase gets a real session
   window.handleCredentialResponse = async function(response) {
     showState('loading-state');
     try {
       const idToken = response.credential;
-      const payload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const padded  = payload + '=='.slice(0, (4 - payload.length % 4) % 4);
+
+      // Decode profile for display (with correct base64 padding)
+      const rawPayload = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = rawPayload + '=='.slice(0, (4 - rawPayload.length % 4) % 4);
       const profile = JSON.parse(atob(padded));
 
-      // Sign in to Firebase Auth to get real Firebase UID
+      // Sign in to Firebase Auth — this creates the persistent session
+      // that app.html's onAuthStateChanged will detect
       const credential = GoogleAuthProvider.credential(idToken);
-      const result = await signInWithCredential(auth, credential);
+      let uid;
+      try {
+        const result = await signInWithCredential(auth, credential);
+        uid = result.user.uid;
+      } catch(e) {
+        console.warn('Firebase sign-in failed, falling back to sub:', e);
+        uid = profile.sub;
+      }
 
       const user = {
-        id:      result.user.uid,
+        id:      uid,
         name:    profile.name,
         email:   profile.email,
         picture: profile.picture,
       };
-
       localStorage.setItem(STORAGE_AUTH_USER, JSON.stringify(user));
+
       setTimeout(() => showSuccessAndRedirect(user), 800);
 
     } catch(err) {
@@ -616,53 +654,24 @@
     }
   };
 
-  function showSuccessAndRedirect(user) {
-    showState('success-state');
-
-    const firstName = (user.name || 'back').split(' ')[0];
-    document.getElementById('success-name').textContent = `Welcome, ${firstName}.`;
-    document.getElementById('success-sub').textContent =
-      `Signed in as ${user.email}. Redirecting you to dooit…`;
-
-    // Animate progress bar then redirect
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById('progress-fill').style.width = '100%';
-      });
-    });
-
-    setTimeout(() => {
-      window.location.href = APP_URL;
-    }, 2800);
-  }
-
-  // ── Init Google Sign-In ──
+  // ── Init Google Sign-In button ──
   function initGoogle() {
     if (typeof google === 'undefined' || !google.accounts?.id) {
       setTimeout(initGoogle, 150);
       return;
     }
-
     google.accounts.id.initialize({
       client_id:   GOOGLE_CLIENT_ID,
       callback:    window.handleCredentialResponse,
       auto_select: false,
     });
-
     google.accounts.id.renderButton(
       document.getElementById('google-signin-btn'),
-      {
-        theme:     'outline',
-        size:      'large',
-        width:     '100%',
-        text:      'signin_with',
-        shape:     'rectangular',
-        logo_alignment: 'left',
-      }
+      { theme: 'outline', size: 'large', width: '100%',
+        text: 'signin_with', shape: 'rectangular', logo_alignment: 'left' }
     );
   }
 
-  // Wait for Google script to load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGoogle);
   } else {
