@@ -386,8 +386,8 @@
                 </div>
                 <button id="show-summary-btn-header">End of Day</button>
                 <button id="show-reports-btn">Reports</button>
-                <button onclick="window.location.href='21days.html'">21 Days</button>
-                <button onclick="window.location.href='calendar.html'">📅 Calendar</button>
+                <button onclick="flushAndNavigate('21days.html')">21 Days</button>
+                <button onclick="flushAndNavigate('calendar.html')">📅 Calendar</button>
                 <button id="focus-mode-btn">Focus Mode</button>
             </div>
         </div>
@@ -729,16 +729,39 @@ async function fsSet(docPath, data, mergeFlag=false) {
 
 function debounced(key, fn, delay=600) {
     clearTimeout(_saving[key]);
+    if (delay === 0) { _saving[key] = 0; fn(); return; }
     _saving[key] = setTimeout(()=>{ _saving[key] = 0; fn(); }, delay);
 }
 
 // ── Per-collection save helpers ──
-function saveTasks()    { debounced('tasks',    _saveTasksNow); }
+function saveTasks()    { debounced('tasks',    _saveTasksNow, 0); }   // write immediately
 function savePtTasks()  { debounced('ptTasks',  _savePtTasksNow); }
 function saveProjects() { debounced('projects', _saveProjectsNow); }
 function saveEvents()   { debounced('events',   _saveEventsNow); }
 function saveNotifs()   { debounced('notifs',   _saveNotifsNow); }
 function saveMeta(key, data) { debounced('meta_'+key, ()=>_saveMetaNow(key, data)); }
+
+// Flush all pending debounced saves immediately (call before navigating away)
+function flushPendingSaves() {
+    Object.keys(_saving).forEach(key => {
+        if (_saving[key]) { clearTimeout(_saving[key]); _saving[key] = 0; }
+    });
+    if (!window._db || !window._uid) return Promise.resolve();
+    return Promise.all([
+        _saveTasksBatch(),
+        _savePtTasksNow(),
+        _saveProjectsNow(),
+        _saveEventsNow(),
+    ]);
+}
+
+// Safe navigation: flush saves first, then navigate
+async function flushAndNavigate(url) {
+    const tgt = event && event.currentTarget;
+    if (tgt) { tgt.disabled = true; tgt.textContent = 'Saving…'; }
+    try { await flushPendingSaves(); } catch(e) { console.warn('flush error', e); }
+    window.location.href = url;
+}
 
 async function _saveTasksBatch() {
     if (!window._db || !window._uid) return;
@@ -856,7 +879,7 @@ async function startListeners(uid) {
     if (_unsub.tasks) _unsub.tasks();
     _unsub.tasks = onSnapshot(collection(window._db, 'users', uid, 'tasks'), snap => {
         if (_saving.tasks) return;
-        if (Date.now() - _lastPullAt < 2000) return; // suppress echo right after pullAll
+        if (Date.now() - _lastPullAt < 500) return; // suppress echo right after pullAll
         const remote = []; snap.forEach(d => remote.push(normalizeTask(d.data())));
         tasks.length = 0; remote.forEach(t => tasks.push(t));
         render(); updateProductivityScore(); renderProgressCharts();
@@ -1819,6 +1842,9 @@ function initApp() {
     const evTitleInp=document.getElementById('ev-title');
     if(evTitleInp)evTitleInp.addEventListener('keydown',e=>{if(e.key==='Enter')addEvent();});
     document.getElementById('ev-date').value=new Date().toISOString().split('T')[0];
+
+    // Safety net: flush any unsaved data if the user closes/navigates away unexpectedly
+    window.addEventListener('beforeunload', () => { flushPendingSaves(); });
 
     requestNotificationPermission();
     updateCoachingPanel();
