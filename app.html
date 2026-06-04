@@ -656,7 +656,7 @@ let activeProgressTab = 'day';
 let _notifTick = 0, _scoreTick = 0;
 
 // ── DB references (set after Firebase init) ──
-let _db = null, _auth = null, _uid = null;
+// window._db/window._uid are on window, set by Firebase module script
 let _unsub = {}; // unsubscribe functions keyed by name
 let _saving = {}; // debounce timers
 
@@ -717,18 +717,18 @@ function getBreakTime(task) {
 // FIRESTORE SAVE — debounced per key
 // ─────────────────────────────────────────────────────────────
 async function fsSet(docPath, data, mergeFlag=false) {
-    if (!_db || !_uid) return;
+    if (!window._db || !window._uid) return;
     setSyncStatus('syncing');
     try {
         const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-        await setDoc(doc(_db, docPath), data, { merge: mergeFlag });
+        await setDoc(doc(window._db, docPath), data, { merge: mergeFlag });
         setSyncStatus('saved');
     } catch(e) { console.error('fsSet error', docPath, e); setSyncStatus('error'); }
 }
 
 function debounced(key, fn, delay=600) {
     clearTimeout(_saving[key]);
-    _saving[key] = setTimeout(fn, delay);
+    _saving[key] = setTimeout(()=>{ _saving[key] = 0; fn(); }, delay);
 }
 
 // ── Per-collection save helpers ──
@@ -740,36 +740,36 @@ function saveNotifs()   { debounced('notifs',   _saveNotifsNow); }
 function saveMeta(key, data) { debounced('meta_'+key, ()=>_saveMetaNow(key, data)); }
 
 async function _saveTasksBatch() {
-    if (!_db || !_uid) return;
+    if (!window._db || !window._uid) return;
     setSyncStatus('syncing');
     try {
         const { collection, doc, writeBatch, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-        const batch = writeBatch(_db);
-        const colRef = collection(_db, 'users', _uid, 'tasks');
+        const batch = writeBatch(window._db);
+        const colRef = collection(window._db, 'users', window._uid, 'tasks');
         const snap = await getDocs(colRef);
         snap.forEach(d => batch.delete(d.ref));
-        tasks.forEach(t => batch.set(doc(_db, 'users', _uid, 'tasks', t.id), t));
+        tasks.forEach(t => batch.set(doc(window._db, 'users', window._uid, 'tasks', t.id), t));
         await batch.commit();
         setSyncStatus('saved');
     } catch(e) { console.error('saveTasks error', e); setSyncStatus('error'); }
 }
 function _saveTasksNow() { _saveTasksBatch(); }
 
-async function _savePtTasksNow() { await fsSet(`users/${_uid}/meta/ptTasks`, { ptTasks }); }
-async function _saveProjectsNow() { await fsSet(`users/${_uid}/meta/projectDefs`, { projectDefs }); }
-async function _saveEventsNow() { await fsSet(`users/${_uid}/meta/events`, { events: upcomingEvents }); }
+async function _savePtTasksNow() { await fsSet(`users/${window._uid}/meta/ptTasks`, { ptTasks }); }
+async function _saveProjectsNow() { await fsSet(`users/${window._uid}/meta/projectDefs`, { projectDefs }); }
+async function _saveEventsNow() { await fsSet(`users/${window._uid}/meta/events`, { events: upcomingEvents }); }
 async function _saveNotifsNow() {
     const key = 'notifications_' + today;
-    await fsSet(`users/${_uid}/meta/${key}`, { notifs: currentDayNotifications });
+    await fsSet(`users/${window._uid}/meta/${key}`, { notifs: currentDayNotifications });
     _cleanOldNotifDocs();
 }
-async function _saveMetaNow(key, data) { await fsSet(`users/${_uid}/meta/${key}`, data); }
+async function _saveMetaNow(key, data) { await fsSet(`users/${window._uid}/meta/${key}`, data); }
 
 async function _cleanOldNotifDocs() {
-    if (!_db || !_uid) return;
+    if (!window._db || !window._uid) return;
     try {
         const { collection, getDocs, doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-        const metaCol = collection(_db, 'users', _uid, 'meta');
+        const metaCol = collection(window._db, 'users', window._uid, 'meta');
         const snap = await getDocs(metaCol);
         const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
         snap.forEach(d => {
@@ -777,7 +777,7 @@ async function _cleanOldNotifDocs() {
             if (id.startsWith('notifications_')) {
                 const dateStr = id.replace('notifications_', '');
                 if (new Date(dateStr) < cutoff) {
-                    deleteDoc(doc(_db, 'users', _uid, 'meta', id));
+                    deleteDoc(doc(window._db, 'users', window._uid, 'meta', id));
                 }
             }
         });
@@ -787,20 +787,39 @@ async function _cleanOldNotifDocs() {
 // ─────────────────────────────────────────────────────────────
 // FIRESTORE PULL — load all data on sign-in
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// TASK NORMALIZATION — ensures loaded tasks always have required fields
+// ─────────────────────────────────────────────────────────────
+function normalizeTask(t) {
+    if (!Array.isArray(t.breaks)) t.breaks = [];
+    if (t.status === undefined) t.status = 'pending';
+    if (t.priority === undefined) t.priority = 'later';
+    if (t.date === undefined) t.date = today;
+    if (t.rolledOver === undefined) t.rolledOver = false;
+    if (t.rolledOverFrom === undefined) t.rolledOverFrom = null;
+    if (t.actualStart === undefined) t.actualStart = null;
+    if (t.actualEnd === undefined) t.actualEnd = null;
+    if (t.plannedStart === undefined) t.plannedStart = '';
+    if (t.plannedEnd === undefined) t.plannedEnd = '';
+    if (t.note === undefined) t.note = '';
+    if (t.projectId === undefined) t.projectId = null;
+    return t;
+}
+
 async function pullAll(uid) {
     setSyncStatus('syncing');
     try {
         const { collection, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
         // Tasks
-        const taskSnap = await getDocs(collection(_db, 'users', uid, 'tasks'));
+        const taskSnap = await getDocs(collection(window._db, 'users', uid, 'tasks'));
         tasks.length = 0;
-        taskSnap.forEach(d => tasks.push(d.data()));
+        taskSnap.forEach(d => tasks.push(normalizeTask(d.data())));
 
         // Meta documents
         const metaDocs = ['ptTasks', 'projectDefs', 'events', 'notifications_' + today, 'activeTaskId', 'lastDate', 'firedEvNotifs'];
         for (const key of metaDocs) {
-            const s = await getDoc(doc(_db, 'users', uid, 'meta', key));
+            const s = await getDoc(doc(window._db, 'users', uid, 'meta', key));
             if (!s.exists()) continue;
             const data = s.data();
             if (key === 'ptTasks')     { ptTasks = data.ptTasks || { urgent:[], important:[], later:[] }; }
@@ -832,15 +851,15 @@ async function startListeners(uid) {
     const { collection, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
     if (_unsub.tasks) _unsub.tasks();
-    _unsub.tasks = onSnapshot(collection(_db, 'users', uid, 'tasks'), snap => {
+    _unsub.tasks = onSnapshot(collection(window._db, 'users', uid, 'tasks'), snap => {
         if (_saving.tasks) return;
-        const remote = []; snap.forEach(d => remote.push(d.data()));
+        const remote = []; snap.forEach(d => remote.push(normalizeTask(d.data())));
         tasks.length = 0; remote.forEach(t => tasks.push(t));
         render(); updateProductivityScore(); renderProgressCharts();
     }, err => console.error('tasks listener', err));
 
     if (_unsub.meta) _unsub.meta();
-    _unsub.meta = onSnapshot(collection(_db, 'users', uid, 'meta'), snap => {
+    _unsub.meta = onSnapshot(collection(window._db, 'users', uid, 'meta'), snap => {
         snap.forEach(d => {
             if (_saving['meta_' + d.id] || _saving[d.id]) return;
             const data = d.data();
@@ -863,7 +882,7 @@ async function startListeners(uid) {
 function stopListeners() {
     Object.values(_unsub).forEach(fn => fn && fn());
     _unsub = {};
-    _uid = null;
+    window._uid = null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -960,7 +979,7 @@ function addTask() {
     const sh=document.getElementById('new-task-start-hour').value, sm=document.getElementById('new-task-start-minute').value, sap=document.getElementById('new-task-start-ampm').value;
     const eh=document.getElementById('new-task-end-hour').value,   em=document.getElementById('new-task-end-minute').value,   eap=document.getElementById('new-task-end-ampm').value;
     const task = {
-        id: 't_'+Date.now(),
+        id: 't_'+Date.now()+'_'+Math.random().toString(36).slice(2),
         text,
         priority: document.getElementById('new-task-priority').value,
         projectId: document.getElementById('new-task-project').value || null,
@@ -1043,7 +1062,7 @@ function saveEdit(id) {
 }
 
 function _saveMeta_activeTask() {
-    if (_uid) debounced('meta_activeTaskId', ()=>fsSet(`users/${_uid}/meta/activeTaskId`,{value:activeTaskId}));
+    if (window._uid) debounced('meta_activeTaskId', ()=>fsSet(`users/${window._uid}/meta/activeTaskId`,{value:activeTaskId}));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1221,7 +1240,16 @@ function startGlobalTimer() {
     setInterval(()=>{
         const nd=new Date().toISOString().split('T')[0];
         if (nd!==today){today=nd;checkRollover();const el=document.getElementById('current-date-display');if(el)el.innerText=today;render();}
-        if (activeTaskId){const t=tasks.find(t=>t.id===activeTaskId);if(t&&t.status==='in_progress'){const el=document.getElementById(`timer-${t.id}`);if(el)el.innerText=formatDuration(getElapsed(t));}}
+        // Update timers for all in-progress tasks (active and paused-but-visible)
+        tasks.filter(t=>t.status==='in_progress').forEach(t=>{
+            const el=document.getElementById(`timer-${t.id}`);
+            if(el) el.innerText=formatDuration(getElapsed(t));
+        });
+        // Live break summary update
+        const todayTasks=tasks.filter(t=>t.date===today&&['pending','in_progress','done'].includes(t.status));
+        let totalBreak=0; todayTasks.forEach(t=>totalBreak+=getBreakTime(t));
+        const bEl=document.getElementById('daily-break-summary');
+        if(bEl) bEl.textContent='Break time today: '+formatDuration(totalBreak);
         updateFocusModeUI();
         if(++_notifTick>=30){checkNotifications();_notifTick=0;}
         if(++_scoreTick>=5){updateProductivityScore();_scoreTick=0;}
@@ -1248,7 +1276,7 @@ function showSummary() {
     let tf=0,tb=0; tt.forEach(t=>{tf+=getElapsed(t);tb+=getBreakTime(t);});
     const rows=comp.length===0?'<div style="font-size:0.78rem;opacity:.45;padding:6px 0;">No tasks completed yet.</div>':comp.map(t=>{
         const el=getElapsed(t),pm=getPlannedMinutes(t);
-        const d=(pm!==null&&el>0)?()=>{const v=Math.round((el-pm*60000)/60000);return v>=0?` <span style="opacity:.45">(+${v}m)</span>`:` <span style="opacity:.45">(${v}m)</span>`;}():'';
+        const d=(pm!==null&&el>0)?(()=>{const v=Math.round((el-pm*60000)/60000);return v>=0?` <span style="opacity:.45">(+${v}m)</span>`:` <span style="opacity:.45">(${v}m)</span>`;})():'';
         return `<div class="summary-stat"><span>${escHtml(t.text)}${d}</span><span>${formatDuration(el)}</span></div>`;
     }).join('');
     const pendRows=pend.length===0?'':pend.map(t=>`<div class="summary-stat" style="opacity:.6;"><span>${escHtml(t.text)}</span><span>${t.priority}</span></div>`).join('');
@@ -1396,7 +1424,7 @@ function checkEventNotifications() {
                     showBrowserNotif(`📅 Event ${lbl}`,`"${ev.title}"${ev.time?' at '+ev.time:''}`);
                     addNotification('ev_'+ev.id,ev.title,d===0?'EVENT TODAY':`EVENT IN ${d} DAY${d>1?'S':''}`,d===0?`Today${ev.time?' at '+ev.time:''}`:lbl);
                     firedEventNotifications.add(k);
-                    if(_uid) debounced('meta_firedEvNotifs',()=>fsSet(`users/${_uid}/meta/firedEvNotifs`,{list:[...firedEventNotifications]}));
+                    if(window._uid) debounced('meta_firedEvNotifs',()=>fsSet(`users/${window._uid}/meta/firedEvNotifs`,{list:[...firedEventNotifications]}));
                 }
             }
         });
@@ -1642,7 +1670,7 @@ function showWeeklyReviewModal() {
 }
 function saveWeeklyReview() {
     const notes=document.getElementById('weekly-review-notes').value;
-    if(_uid) saveMeta('weeklyReview_'+today,{notes,savedAt:new Date().toISOString()});
+    if(window._uid) saveMeta('weeklyReview_'+today,{notes,savedAt:new Date().toISOString()});
     closeModal();
 }
 
