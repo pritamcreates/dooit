@@ -39,15 +39,20 @@
         .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .header-actions button { font-size: 0.72rem; padding: 5px 10px; }
 
-        /* ── Quick-add bar ── */
-        .quick-add {
-            display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 10px 20px 0;
-        }
-        .quick-add input[type="text"] { flex-grow: 1; min-width: 160px; }
+        /* ── Smart Quick-add ── */
+        .quick-add { display: flex; gap: 6px; align-items: center; padding: 10px 0 0; flex-wrap: wrap; }
+        .quick-add-main { display: flex; flex: 1; min-width: 200px; gap: 0; }
+        .quick-add-main input[type="text"] { flex: 1; border-right: none; font-size: 0.88rem; padding: 7px 11px; }
+        #qa-expand-btn { border: 1px solid var(--border); padding: 7px 10px; font-size: 0.72rem; background: var(--light); color: var(--mid); white-space: nowrap; flex-shrink: 0; }
+        #qa-expand-btn:hover, #qa-expand-btn.active { background: var(--text); color: var(--bg); }
+        .quick-add-expanded { display: none; flex-wrap: wrap; gap: 5px; align-items: center; width: 100%; padding-top: 6px; border-top: 1px dashed var(--light); margin-top: 4px; }
+        .quick-add-expanded.open { display: flex; }
+        .quick-add-expanded label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; margin-right: 2px; }
         .time-input-group { display: flex; gap: 3px; align-items: center; }
         .time-input-group input[type="number"] { width: 42px; text-align: center; }
         .time-input-group select { width: auto; }
         .time-sep { opacity: 0.4; font-size: 0.85rem; padding: 0 1px; }
+        #add-task-btn { padding: 7px 14px; font-size: 0.8rem; flex-shrink: 0; }
 
         /* ── Plan Tomorrow ── */
         #plan-tomorrow-strip { border: 1px solid var(--border); background: #f7f7f4; margin-bottom: 16px; }
@@ -79,13 +84,107 @@
         .pt-actions { padding: 10px 14px; border-top: 1px solid var(--light); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .pt-promote-hint { font-size: 0.65rem; opacity: 0.45; font-style: italic; }
 
+        /* ── Daily Start Screen ── */
+        #daily-start-screen { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+        #daily-start-screen.visible { display: flex; }
+        .dss-inner { max-width: 560px; width: 100%; }
+        .dss-greeting { font-family: var(--font-serif); font-size: 2.4rem; letter-spacing: -0.02em; margin-bottom: 6px; }
+        .dss-date { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.4; margin-bottom: 32px; }
+        .dss-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; border: 1px solid var(--border); margin-bottom: 24px; }
+        .dss-stat { padding: 16px 14px; border-right: 1px solid var(--border); }
+        .dss-stat:last-child { border-right: none; }
+        .dss-stat-val { font-family: var(--font-serif); font-size: 2rem; line-height: 1; margin-bottom: 3px; }
+        .dss-stat-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; }
+        .dss-carries { margin-bottom: 24px; }
+        .dss-carries-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--light); }
+        .dss-carry-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--light); font-size: 0.82rem; gap: 8px; }
+        .dss-carry-name { flex: 1; word-break: break-word; }
+        .dss-carry-date { font-size: 0.62rem; opacity: 0.4; white-space: nowrap; }
+        .dss-priority-prompt { margin-bottom: 24px; }
+        .dss-priority-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; margin-bottom: 8px; }
+        .dss-priority-input { width: 100%; font-size: 0.88rem; padding: 10px 12px; border: 2px solid var(--border); background: var(--bg); }
+        .dss-priority-input:focus { border-color: var(--text); }
+        .dss-priority-hint { font-size: 0.65rem; opacity: 0.4; font-style: italic; margin-top: 5px; }
+        .dss-actions { display: flex; gap: 8px; }
+        .dss-cta { flex: 1; padding: 12px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--text); color: var(--bg); border: 1px solid var(--text); }
+        .dss-cta:hover { background: #222; }
+        .dss-skip { padding: 12px 16px; font-size: 0.72rem; opacity: 0.5; }
+        .dss-challenges-preview { margin-bottom: 20px; }
+        .dss-challenge-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); padding: 5px 10px; margin-right: 6px; margin-bottom: 6px; font-size: 0.72rem; }
+        .dss-challenge-day { font-family: var(--font-serif); font-size: 0.9rem; }
+
+        /* ── Today's Challenges Strip ── */
+        #challenges-strip { border: 1px solid var(--border); margin-bottom: 16px; background: #f7f7f4; }
+        .cs-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; user-select: none; background: var(--light); border-bottom: 1px solid var(--light); }
+        .cs-title { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+        .cs-badge { font-size: 0.62rem; padding: 1px 8px; border: 1px solid var(--border); background: var(--bg); }
+        .cs-body { display: none; padding: 12px 14px; }
+        .cs-body.open { display: block; }
+        .cs-due-banner { display: none; font-size: 0.72rem; padding: 6px 10px; background: #f0ede6; border: 1px solid var(--border); margin-bottom: 10px; }
+        .cs-cards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .cs-card { border: 1px solid var(--border); background: var(--bg); flex: 1; min-width: 200px; padding: 12px; }
+        .cs-card.done-today { background: #f5f9f0; border-color: #b8d4b0; }
+        .cs-card-name { font-weight: 500; font-size: 0.85rem; margin-bottom: 5px; word-break: break-word; }
+        .cs-card-meta { font-size: 0.62rem; opacity: 0.5; margin-bottom: 8px; display: flex; gap: 8px; }
+        .cs-card-progress { height: 3px; background: var(--light); margin-bottom: 10px; }
+        .cs-card-progress-fill { height: 100%; background: var(--text); transition: width 0.3s; }
+        .cs-card-check { display: flex; align-items: center; gap: 8px; }
+        .cs-check-btn { font-size: 0.65rem; padding: 4px 10px; }
+        .cs-check-btn.checked { background: var(--text); color: var(--bg); pointer-events: none; }
+        .cs-card-streak { font-size: 0.62rem; opacity: 0.5; margin-left: auto; }
+        .cs-quick-add-row { display: flex; border-top: 1px solid var(--light); margin-top: 2px; padding-top: 10px; }
+        .cs-quick-add-row input { flex: 1; border: 1px solid var(--border); border-right: none; font-size: 0.78rem; padding: 6px 9px; }
+        .cs-quick-add-row button { font-size: 0.68rem; padding: 6px 12px; }
+        .cs-empty { font-size: 0.78rem; font-style: italic; opacity: 0.4; text-align: center; padding: 16px 0 6px; }
+
+        /* ── Routines ── */
+        #routines-strip { border: 1px solid var(--border); margin-bottom: 16px; background: #f7f7f4; }
+        .rs-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; user-select: none; background: var(--light); border-bottom: 1px solid var(--light); }
+        .rs-title { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+        .rs-due-badge { font-size: 0.62rem; padding: 1px 8px; border: 1px solid var(--border); background: var(--text); color: var(--bg); }
+        .rs-body { display: none; padding: 12px 14px; }
+        .rs-body.open { display: block; }
+        .rs-list { margin-bottom: 12px; }
+        .rs-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--light); }
+        .rs-item:last-child { border-bottom: none; }
+        .rs-item-status { width: 10px; height: 10px; border: 1px solid var(--border); flex-shrink: 0; }
+        .rs-item-status.due { background: var(--text); }
+        .rs-item-status.soon { border-style: dashed; }
+        .rs-item-main { flex: 1; min-width: 0; }
+        .rs-item-name { font-size: 0.85rem; font-weight: 500; }
+        .rs-item-meta { font-size: 0.62rem; opacity: 0.5; margin-top: 2px; }
+        .rs-item-done-btn { font-size: 0.65rem; padding: 3px 9px; flex-shrink: 0; }
+        .rs-item-done-btn.completed { background: var(--text); color: var(--bg); pointer-events: none; opacity: 0.6; }
+        .rs-item-del { border: none; background: transparent; font-size: 0.9rem; cursor: pointer; padding: 0 3px; opacity: 0.25; flex-shrink: 0; }
+        .rs-item-del:hover { opacity: 1; background: var(--text); color: var(--bg); }
+        .rs-add-form { display: flex; gap: 5px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--light); }
+        .rs-add-form input[type="text"] { flex: 1; min-width: 160px; }
+        .rs-freq-wrap { display: flex; gap: 4px; align-items: center; }
+        .rs-freq-wrap input[type="number"] { width: 44px; text-align: center; }
+        .rs-freq-wrap select { width: auto; }
+        .rs-empty { font-size: 0.78rem; font-style: italic; opacity: 0.4; text-align: center; padding: 14px 0 6px; }
+
         /* ── Board ── */
         .board { display: grid; grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 32px; }
-        .column { border: 1px solid var(--border); padding: 14px; height: 560px; display: flex; flex-direction: column; }
-        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+        .column { border: 1px solid var(--border); padding: 14px; min-height: 200px; display: flex; flex-direction: column; }
+        .column.drag-over { background: #f0f5eb; border-color: var(--text); border-style: dashed; }
+        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; max-height: 520px; }
         .column h2 { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 9px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.14em; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; }
-        #col-previous-unfinished { border: 2px dashed var(--border); background: #f0ede6; }
-        #col-previous-unfinished h2 { opacity: 0.7; border-bottom-style: dashed; }
+        /* Carry Forward column — warm, collapsed by default */
+        #col-previous-unfinished { border: 2px dashed var(--border); background: #f7f5f0; }
+        #col-previous-unfinished h2 { opacity: 0.65; border-bottom-style: dashed; }
+        #col-previous-unfinished .cf-collapse-hint { font-size: 0.6rem; opacity: 0.4; font-style: italic; cursor: pointer; text-align: center; padding: 6px 0; }
+        #col-previous-unfinished .cf-collapse-hint:hover { opacity: 0.7; }
+        #col-previous-unfinished.collapsed .task-list { display: none; }
+        #col-previous-unfinished .cf-rescue-all { display: none; }
+        #col-previous-unfinished:not(.collapsed) .cf-rescue-all { display: block; }
+        .cf-rescue-all-btn { width: 100%; margin-top: 8px; font-size: 0.65rem; padding: 5px; letter-spacing: 0.06em; opacity: 0.7; }
+        /* task card drag */
+        .task-card { cursor: grab; }
+        .task-card:active { cursor: grabbing; }
+        .task-card.dragging { opacity: 0.4; transform: rotate(1deg); }
+        @keyframes flash-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .task-card.just-added { animation: flash-in 0.22s ease; }
         .unfinished-group-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; padding: 6px 2px 4px; border-bottom: 1px dashed var(--light); margin-bottom: 6px; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
         .unfinished-group-label:first-child { margin-top: 0; }
         .unfinished-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--light); }
@@ -103,7 +202,9 @@
         .empty-state { text-align: center; color: var(--mid); font-style: italic; margin-top: 24px; font-size: 0.78rem; opacity: 0.6; }
 
         /* ── Task Card ── */
-        .task-card { border: 1px solid var(--border); padding: 11px; margin-bottom: 12px; background: var(--bg); transition: box-shadow 0.15s; }
+        .task-card { border: 1px solid var(--border); padding: 11px; margin-bottom: 12px; background: var(--bg); transition: box-shadow 0.15s; cursor: grab; draggable: true; }
+        .task-card:active { cursor: grabbing; }
+        .task-card.dragging { opacity: 0.4; box-shadow: none; transform: rotate(1deg); }
         .task-card.in-progress { border-width: 2px; box-shadow: 3px 3px 0 var(--text); }
         .task-card.paused { border-style: dashed; background: #f5f5f2; }
         .task-card.collapsed .task-body { display: none; }
@@ -288,6 +389,10 @@
         .header-score-details { display: flex; flex-direction: column; gap: 1px; }
         .header-score-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; }
         .header-score-grade { font-size: 0.68rem; font-weight: 500; }
+        /* ── Weekly review ── */
+        #weekly-review-prompt { margin-bottom: 16px; border: 1px solid var(--border); padding: 10px 14px; align-items: center; justify-content: space-between; gap: 10px; background: var(--light); display: none; }
+        #weekly-review-prompt.visible { display: flex; }
+        .weekly-review-text { font-size: 0.8rem; font-family: var(--font-serif); font-style: italic; }
 
         /* ── Projects ── */
         #projects-panel-toggle { bottom: 20px; right: 68px; }
@@ -357,6 +462,37 @@
 <div id="loading-banner">
     <span id="loading-msg">Connecting…</span>
 </div>
+
+<!-- Daily Start Screen -->
+<div id="daily-start-screen">
+    <div class="dss-inner">
+        <div class="dss-greeting" id="dss-greeting">Good morning.</div>
+        <div class="dss-date" id="dss-date"></div>
+        <div class="dss-stats">
+            <div class="dss-stat"><div class="dss-stat-val" id="dss-yesterday-score">—</div><div class="dss-stat-lbl">Yesterday's score</div></div>
+            <div class="dss-stat"><div class="dss-stat-val" id="dss-carries">0</div><div class="dss-stat-lbl">Carried forward</div></div>
+            <div class="dss-stat"><div class="dss-stat-val" id="dss-streak">—</div><div class="dss-stat-lbl">Active challenges</div></div>
+        </div>
+        <div id="dss-carries-section" class="dss-carries" style="display:none;">
+            <div class="dss-carries-label">Tasks from yesterday</div>
+            <div id="dss-carries-list"></div>
+        </div>
+        <div id="dss-challenges-section" class="dss-challenges-preview" style="display:none;">
+            <div class="dss-carries-label" style="margin-bottom:8px;">21-day challenges</div>
+            <div id="dss-challenges-list"></div>
+        </div>
+        <div class="dss-priority-prompt">
+            <div class="dss-priority-label">What's your #1 priority today?</div>
+            <input type="text" class="dss-priority-input" id="dss-priority-input" placeholder="The one thing that would make today successful…">
+            <div class="dss-priority-hint">Optional — set your intention before the board opens</div>
+        </div>
+        <div class="dss-actions">
+            <button class="dss-cta" onclick="closeDailyStart()">Start my day →</button>
+            <button class="dss-skip" onclick="closeDailyStart(true)">Skip</button>
+        </div>
+    </div>
+</div>
+
 <div class="container">
 
     <header class="app-header">
@@ -392,27 +528,35 @@
             </div>
         </div>
         <div class="quick-add">
-            <input type="text" id="new-task-text" placeholder="What needs doing…">
-            <select id="new-task-priority">
-                <option value="urgent">Urgent</option>
-                <option value="important">Important</option>
-                <option value="later">Later</option>
-            </select>
-            <div class="time-input-group">
-                <input type="number" id="new-task-start-hour" min="1" max="12" placeholder="HH">
-                <span class="time-sep">:</span>
-                <input type="number" id="new-task-start-minute" min="0" max="59" placeholder="MM">
-                <select id="new-task-start-ampm"><option value="AM">AM</option><option value="PM">PM</option></select>
+            <div class="quick-add-main">
+                <input type="text" id="new-task-text" placeholder="Add a task… or 'urgent: call doctor 2pm'">
+                <button id="qa-expand-btn" title="Set time, priority, project">+ details</button>
             </div>
-            <span class="time-sep">–</span>
-            <div class="time-input-group">
-                <input type="number" id="new-task-end-hour" min="1" max="12" placeholder="HH">
-                <span class="time-sep">:</span>
-                <input type="number" id="new-task-end-minute" min="0" max="59" placeholder="MM">
-                <select id="new-task-end-ampm"><option value="AM">AM</option><option value="PM">PM</option></select>
+            <button id="add-task-btn">Add</button>
+            <div class="quick-add-expanded" id="qa-expanded">
+                <label>Priority</label>
+                <select id="new-task-priority">
+                    <option value="urgent">Urgent</option>
+                    <option value="important" selected>Important</option>
+                    <option value="later">Later</option>
+                </select>
+                <label style="margin-left:6px;">Start</label>
+                <div class="time-input-group">
+                    <input type="number" id="new-task-start-hour" min="1" max="12" placeholder="HH">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="new-task-start-minute" min="0" max="59" placeholder="MM">
+                    <select id="new-task-start-ampm"><option value="AM">AM</option><option value="PM">PM</option></select>
+                </div>
+                <span class="time-sep">–</span>
+                <label>End</label>
+                <div class="time-input-group">
+                    <input type="number" id="new-task-end-hour" min="1" max="12" placeholder="HH">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="new-task-end-minute" min="0" max="59" placeholder="MM">
+                    <select id="new-task-end-ampm"><option value="AM">AM</option><option value="PM">PM</option></select>
+                </div>
+                <select id="new-task-project" title="Project"><option value="">No project</option></select>
             </div>
-            <select id="new-task-project" title="Project"><option value="">No project</option></select>
-            <button id="add-task-btn">+ Add</button>
         </div>
     </header>
 
@@ -458,6 +602,56 @@
         </div>
     </div>
 
+    <!-- Today's 21-Day Challenges Strip -->
+    <div id="challenges-strip">
+        <div class="cs-header" onclick="toggleChallengesStrip()">
+            <span class="cs-title">🔥 Today's Challenges</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="cs-badge" class="cs-badge" style="display:none;">0 active</span>
+                <span id="cs-toggle-icon" style="font-size:0.75rem;opacity:0.5;">▼</span>
+            </div>
+        </div>
+        <div class="cs-body open" id="cs-body">
+            <div id="cs-due-banner" class="cs-due-banner"></div>
+            <div class="cs-cards" id="cs-cards">
+                <div class="cs-empty">No active challenges. Type a habit name below and press Begin.</div>
+            </div>
+            <div class="cs-quick-add-row">
+                <input type="text" id="cs-new-challenge-input" placeholder="Start a new 21-day challenge…">
+                <button onclick="startNewChallengeInline()">Begin →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Routines Section -->
+    <div id="routines-strip">
+        <div class="rs-header" onclick="toggleRoutinesStrip()">
+            <span class="rs-title">🔁 Routines</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="rs-due-badge" class="rs-due-badge" style="display:none;">0 due</span>
+                <span id="rs-toggle-icon" style="font-size:0.75rem;opacity:0.5;">▼</span>
+            </div>
+        </div>
+        <div class="rs-body" id="rs-body">
+            <div class="rs-list" id="rs-list">
+                <div class="rs-empty">No routines yet. Add your first standing obligation below.</div>
+            </div>
+            <div class="rs-add-form">
+                <input type="text" id="rs-new-name" placeholder="Routine name…" maxlength="60">
+                <div class="rs-freq-wrap">
+                    <span style="font-size:0.65rem;opacity:0.5;margin-right:2px;">Every</span>
+                    <input type="number" id="rs-new-freq" min="1" max="365" value="1">
+                    <select id="rs-new-unit">
+                        <option value="days">days</option>
+                        <option value="weeks">weeks</option>
+                        <option value="months">months</option>
+                    </select>
+                </div>
+                <button onclick="addRoutine()">+ Add</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Focus Mode Overlay -->
     <div id="focus-mode-overlay">
         <div id="focus-task-name"></div>
@@ -474,10 +668,38 @@
 
     <!-- Board -->
     <div class="board">
-        <div class="column" id="col-previous-unfinished"><h2>Unfinished <span class="count">(0)</span></h2><div class="task-list"></div></div>
-        <div class="column" id="col-urgent"><h2>Urgent <span class="count">(0)</span></h2><div class="task-list"></div></div>
-        <div class="column" id="col-important"><h2>Important <span class="count">(0)</span></h2><div class="task-list"></div></div>
-        <div class="column" id="col-later"><h2>Later <span class="count">(0)</span></h2><div class="task-list"></div></div>
+        <div class="column collapsed" id="col-previous-unfinished"
+             ondragover="dragOver(event,'previous-unfinished')"
+             ondrop="dropTask(event,'previous_unfinished')"
+             ondragleave="dragLeave(event)">
+            <h2>↩ Carry Forward <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+            <div class="cf-rescue-all">
+                <button class="cf-rescue-all-btn" onclick="rescheduleAllUnfinished()">Reschedule all to today →</button>
+            </div>
+            <div class="cf-collapse-hint" onclick="toggleCarryForwardCollapse()">tap to expand</div>
+        </div>
+        <div class="column" id="col-urgent"
+             ondragover="dragOver(event,'urgent')"
+             ondrop="dropTask(event,'urgent')"
+             ondragleave="dragLeave(event)">
+            <h2>Urgent <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+        <div class="column" id="col-important"
+             ondragover="dragOver(event,'important')"
+             ondrop="dropTask(event,'important')"
+             ondragleave="dragLeave(event)">
+            <h2>Important <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
+        <div class="column" id="col-later"
+             ondragover="dragOver(event,'later')"
+             ondrop="dropTask(event,'later')"
+             ondragleave="dragLeave(event)">
+            <h2>Later <span class="count">(0)</span></h2>
+            <div class="task-list"></div>
+        </div>
     </div>
 
     <!-- Panels -->
@@ -753,12 +975,26 @@ function flushPendingSaves() {
         _savePtTasksNow(),
         _saveProjectsNow(),
         _saveEventsNow(),
+        _saveRoutinesNow(),
+        _saveChallengesNow(),
     ]);
 }
 
 // Safe navigation: flush saves first, then navigate
 async function flushAndNavigate(url) {
-    // Fire-and-forget save, navigate immediately
+    // Before navigating to 21days.html, write the first active challenge
+    // back to the legacy dooit_21days key so that page can read it
+    if (url === '21days.html' && challenges.length > 0) {
+        const active = challenges.filter(c => {
+            if (!c.challenge) return false;
+            const idx = getTodayIdxForChallenge(c);
+            return idx >= 0 && idx < 21;
+        });
+        const target = active[0] || challenges[0];
+        if (target) {
+            try { localStorage.setItem('dooit_21days', JSON.stringify(target)); } catch(e) {}
+        }
+    }
     flushPendingSaves().catch(e => console.warn('flush error', e));
     window.location.href = url;
 }
@@ -854,7 +1090,7 @@ async function pullAll(uid) {
         const { collection, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
         // Fetch tasks and all meta docs in parallel
-        const metaKeys = ['ptTasks', 'projectDefs', 'events', 'notifications_' + today, 'activeTaskId', 'lastDate', 'firedEvNotifs'];
+        const metaKeys = ['ptTasks', 'projectDefs', 'events', 'notifications_' + today, 'activeTaskId', 'lastDate', 'firedEvNotifs', 'routines', 'challenges', '21days'];
         const [taskSnap, ...metaSnaps] = await Promise.all([
             getDocs(collection(window._db, 'users', uid, 'tasks')),
             ...metaKeys.map(key => getDoc(doc(window._db, 'users', uid, 'meta', key)))
@@ -872,6 +1108,12 @@ async function pullAll(uid) {
             if (key === 'notifications_' + today) { currentDayNotifications = data.notifs || []; }
             if (key === 'activeTaskId') { activeTaskId = data.value || null; }
             if (key === 'firedEvNotifs') { firedEventNotifications = new Set(data.list || []); }
+            if (key === 'routines')    { if (data.routines) routines = data.routines; }
+            if (key === 'challenges')  { if (data.challenges) challenges = data.challenges; }
+            if (key === '21days' && data.state && data.state.challenge && challenges.length === 0) {
+                // Legacy single-challenge doc — migrate into the new challenges array
+                challenges = [data.state];
+            }
         });
 
         setSyncStatus('saved');
@@ -920,6 +1162,14 @@ async function startListeners(uid) {
             if (d.id === 'events') {
                 upcomingEvents = data.events || [];
                 renderEvents();
+            }
+            if (d.id === 'routines' && !_saving['routines']) {
+                if (data.routines) routines = data.routines;
+                renderRoutines();
+            }
+            if (d.id === 'challenges' && !_saving['challenges']) {
+                if (data.challenges) challenges = data.challenges;
+                renderChallengesStrip();
             }
         });
     }, err => console.error('meta listener', err));
@@ -1017,26 +1267,38 @@ function clearAllPtTasks() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// SMART QUICK-ADD PARSE
+// ─────────────────────────────────────────────────────────────
+function parseTaskInput(text) {
+    let priority='important', parsedText=text, parsedTime='';
+    const pm=parsedText.match(/^(urgent|important|later)\s*:\s*/i);
+    if(pm){priority=pm[1].toLowerCase();parsedText=parsedText.slice(pm[0].length);}
+    const tm=parsedText.match(/\s+(at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+    if(tm){let h=parseInt(tm[2]),m=parseInt(tm[3]||'0');const ap=tm[4].toUpperCase();if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;parsedTime=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;parsedText=parsedText.replace(tm[0],'').trim();}
+    return {text:parsedText.trim()||text.trim(),priority,plannedStart:parsedTime,plannedEnd:''};
+}
+
+// ─────────────────────────────────────────────────────────────
 // ADD TASK
 // ─────────────────────────────────────────────────────────────
 function addTask() {
     const textInput = document.getElementById('new-task-text');
-    const text = textInput.value.trim(); if (!text) { textInput.focus(); return; }
-    const sh=document.getElementById('new-task-start-hour').value, sm=document.getElementById('new-task-start-minute').value, sap=document.getElementById('new-task-start-ampm').value;
-    const eh=document.getElementById('new-task-end-hour').value,   em=document.getElementById('new-task-end-minute').value,   eap=document.getElementById('new-task-end-ampm').value;
-    const task = {
-        id: 't_'+Date.now()+'_'+Math.random().toString(36).slice(2),
-        text,
-        priority: document.getElementById('new-task-priority').value,
-        projectId: document.getElementById('new-task-project').value || null,
-        note:'', date:today, status:'pending',
-        plannedStart:(sh&&sm)?convert12to24(sh,sm,sap):'',
-        plannedEnd:  (eh&&em)?convert12to24(eh,em,eap):'',
-        actualStart:null, actualEnd:null, rolledOver:false, rolledOverFrom:null, breaks:[], _justAdded:true
-    };
+    const raw = textInput.value.trim(); if (!raw) { textInput.focus(); return; }
+    const parsed = parseTaskInput(raw);
+    const qaOpen = document.getElementById('qa-expanded').classList.contains('open');
+    let priority = qaOpen ? document.getElementById('new-task-priority').value : parsed.priority;
+    let projectId = qaOpen ? (document.getElementById('new-task-project').value || null) : null;
+    let plannedStart = parsed.plannedStart, plannedEnd = '';
+    if (qaOpen) {
+        const sh=document.getElementById('new-task-start-hour').value, sm=document.getElementById('new-task-start-minute').value, sap=document.getElementById('new-task-start-ampm').value;
+        const eh=document.getElementById('new-task-end-hour').value, em=document.getElementById('new-task-end-minute').value, eap=document.getElementById('new-task-end-ampm').value;
+        if(sh&&sm) plannedStart=convert12to24(sh,sm,sap);
+        if(eh&&em) plannedEnd=convert12to24(eh,em,eap);
+    }
+    const task = { id:'t_'+Date.now()+'_'+Math.random().toString(36).slice(2), text:parsed.text, priority, projectId, note:'', date:today, status:'pending', plannedStart, plannedEnd, actualStart:null, actualEnd:null, rolledOver:false, rolledOverFrom:null, breaks:[], _justAdded:true };
     tasks.push(task); saveTasks(); render(); updateProductivityScore();
     textInput.value='';
-    ['new-task-start-hour','new-task-start-minute','new-task-end-hour','new-task-end-minute'].forEach(id=>document.getElementById(id).value='');
+    ['new-task-start-hour','new-task-start-minute','new-task-end-hour','new-task-end-minute'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     textInput.focus();
 }
 
@@ -1112,6 +1374,159 @@ function _saveMeta_activeTask() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// DRAG AND DROP
+// ─────────────────────────────────────────────────────────────
+let _dragTaskId = null;
+function dragStart(event, taskId) {
+    _dragTaskId = taskId; event.dataTransfer.effectAllowed='move'; event.dataTransfer.setData('text/plain',taskId);
+    setTimeout(()=>{const c=document.getElementById('card-'+taskId);if(c)c.classList.add('dragging');},0);
+}
+function dragEnd(event) {
+    const c=document.getElementById('card-'+_dragTaskId); if(c)c.classList.remove('dragging');
+    document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over')); _dragTaskId=null;
+}
+function dragOver(event, col) {
+    event.preventDefault(); event.dataTransfer.dropEffect='move';
+    document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));
+    const colId = col.replace(/_/g,'-');
+    const colEl=document.getElementById('col-'+colId); if(colEl)colEl.classList.add('drag-over');
+}
+function dragLeave(event) { const c=event.currentTarget; if(c&&!c.contains(event.relatedTarget))c.classList.remove('drag-over'); }
+function dropTask(event, dest) {
+    event.preventDefault(); document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));
+    const id=_dragTaskId||event.dataTransfer.getData('text/plain'); if(!id)return;
+    quickMoveTask(id, dest);
+}
+
+// ─────────────────────────────────────────────────────────────
+// CARRY FORWARD
+// ─────────────────────────────────────────────────────────────
+function toggleCarryForwardCollapse() {
+    const col=document.getElementById('col-previous-unfinished');
+    col.classList.toggle('collapsed');
+    const hint=col.querySelector('.cf-collapse-hint');
+    if(hint)hint.textContent=col.classList.contains('collapsed')?'tap to expand':'tap to collapse';
+}
+function rescheduleAllUnfinished() {
+    const prev=tasks.filter(t=>t.status==='previous_unfinished'); if(!prev.length)return;
+    prev.forEach(t=>{t.status='pending';t.rolledOver=true;t.rolledOverFrom=t.date!==today?t.date:t.rolledOverFrom;t.date=today;});
+    saveTasks(); render(); updateProductivityScore();
+}
+
+// ─────────────────────────────────────────────────────────────
+// DAILY START SCREEN
+// ─────────────────────────────────────────────────────────────
+function showDailyStartScreen() {
+    const skipped=sessionStorage.getItem('dooit_dss_skipped'); if(skipped===today)return;
+    const hour=new Date().getHours();
+    document.getElementById('dss-greeting').textContent=hour<12?'Good morning.':hour<17?'Good afternoon.':'Good evening.';
+    document.getElementById('dss-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+    const prev=tasks.filter(t=>t.status==='previous_unfinished');
+    const yest=new Date(); yest.setDate(yest.getDate()-1);
+    const yestStr=yest.toISOString().split('T')[0];
+    const yestTasks=tasks.filter(t=>t.date===yestStr);
+    const yestDone=yestTasks.filter(t=>t.status==='done').length;
+    const yestScore=yestTasks.length>0?Math.round((yestDone/yestTasks.length)*100):null;
+    document.getElementById('dss-yesterday-score').textContent=yestScore!==null?yestScore+'%':'—';
+    document.getElementById('dss-carries').textContent=prev.length;
+    const carriesSec=document.getElementById('dss-carries-section');
+    if(prev.length>0){
+        carriesSec.style.display='block';
+        document.getElementById('dss-carries-list').innerHTML=prev.slice(0,5).map(t=>`<div class="dss-carry-item"><span class="dss-carry-name">${escHtml(t.text)}</span><span class="dss-carry-date">${t.date}</span></div>`).join('')+(prev.length>5?`<div style="font-size:0.68rem;opacity:0.4;padding:5px 0;">…and ${prev.length-5} more</div>`:'');
+    } else carriesSec.style.display='none';
+    const active=challenges.filter(c=>c.challenge);
+    document.getElementById('dss-streak').textContent=active.length;
+    const cSec=document.getElementById('dss-challenges-section');
+    if(active.length>0){
+        cSec.style.display='block';
+        document.getElementById('dss-challenges-list').innerHTML=active.map(c=>{const idx=getTodayIdxForChallenge(c);const d=idx>=0&&idx<21?idx+1:'✓';return`<span class="dss-challenge-pill"><span class="dss-challenge-day">${d}</span><span>${escHtml(c.challenge.name)}</span></span>`;}).join('');
+    } else cSec.style.display='none';
+    document.getElementById('daily-start-screen').classList.add('visible');
+}
+function closeDailyStart(skip=false) {
+    document.getElementById('daily-start-screen').classList.remove('visible');
+    sessionStorage.setItem('dooit_dss_skipped',today);
+    const input=document.getElementById('dss-priority-input');
+    if(input&&input.value.trim()&&!skip){
+        const text=input.value.trim();
+        tasks.push({id:'t_'+Date.now()+'_'+Math.random().toString(36).slice(2),text,priority:'urgent',projectId:null,note:'',date:today,status:'pending',plannedStart:'',plannedEnd:'',actualStart:null,actualEnd:null,rolledOver:false,rolledOverFrom:null,breaks:[],_justAdded:true});
+        saveTasks();render();updateProductivityScore();
+    }
+    if(input)input.value='';
+}
+
+// ─────────────────────────────────────────────────────────────
+// 21-DAY CHALLENGES (inline)
+// ─────────────────────────────────────────────────────────────
+let challenges = [];
+let csOpen = true;
+function loadChallengesFromStorage(){
+    // Only load from localStorage if Firestore hasn't populated yet (offline fallback)
+    if (challenges.length > 0) return;
+    try {
+        // New multi-challenge format
+        const rawM = localStorage.getItem('dooit_challenges');
+        if (rawM) { const arr = JSON.parse(rawM); if (Array.isArray(arr)) { challenges = arr; return; } }
+        // Legacy single-challenge format
+        const rawL = localStorage.getItem('dooit_21days');
+        if (rawL) { const s = JSON.parse(rawL); if (s && s.challenge) { challenges = [s]; saveChallenges(); return; } }
+    } catch(e) {}
+    challenges = [];
+}
+function saveChallengeToStorage(c){
+    // kept for backward compat — now delegates to saveChallenges()
+    const idx = challenges.findIndex(x => x.challenge && c.challenge && x.challenge.name === c.challenge.name && x.challenge.startDate === c.challenge.startDate);
+    if (idx >= 0) challenges[idx] = c; else challenges.push(c);
+    saveChallenges();
+}
+function getTodayIdxForChallenge(c){if(!c.challenge||!c.challenge.startDate)return -1;const start=new Date(c.challenge.startDate+'T00:00:00');const now=new Date(today+'T00:00:00');return Math.round((now-start)/86400000);}
+function isChallengeCheckedToday(c){const idx=getTodayIdxForChallenge(c);if(idx<0||idx>=21)return false;return c.days[idx]&&c.days[idx].status==='done';}
+function calcChallengeStreak(c){const ti=getTodayIdxForChallenge(c);let s=0;for(let i=Math.min(ti,20);i>=0;i--){if(!c.days[i])break;if(c.days[i].status==='done')s++;else if(c.days[i].status==='pending'&&i===ti)continue;else break;}return s;}
+function toggleChallengesStrip(){csOpen=!csOpen;document.getElementById('cs-body').classList.toggle('open',csOpen);document.getElementById('cs-toggle-icon').textContent=csOpen?'▲':'▼';}
+function renderChallengesStrip(){
+    const badge=document.getElementById('cs-badge'),cards=document.getElementById('cs-cards'),dueBanner=document.getElementById('cs-due-banner');
+    const active=challenges.filter(c=>{if(!c.challenge)return false;const idx=getTodayIdxForChallenge(c);return idx>=0&&idx<21;});
+    badge.style.display=active.length>0?'inline':'none';badge.textContent=`${active.length} active`;
+    if(active.length===0){cards.innerHTML='<div class="cs-empty">No active challenges. Type a habit name below and press Begin.</div>';dueBanner.style.display='none';return;}
+    const notDone=active.filter(c=>!isChallengeCheckedToday(c));
+    if(notDone.length>0){dueBanner.style.display='block';dueBanner.textContent=`${notDone.length} challenge${notDone.length>1?'s':''} waiting for today's check-in`;}else dueBanner.style.display='none';
+    cards.innerHTML=active.map((c,ci)=>{
+        const idx=getTodayIdxForChallenge(c),dayNum=idx+1,done=c.days.filter(d=>d.status==='done').length,pct=Math.round((done/21)*100),checked=isChallengeCheckedToday(c),streak=calcChallengeStreak(c);
+        // Find true index in challenges array (active is filtered)
+        const realIdx=challenges.indexOf(c);
+        return`<div class="cs-card${checked?' done-today':''}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;"><div class="cs-card-name">${escHtml(c.challenge.name)}</div><button onclick="deleteChallenge(${realIdx})" title="Remove challenge" style="border:none;background:transparent;opacity:0.25;cursor:pointer;font-size:0.9rem;padding:0 2px;line-height:1;flex-shrink:0;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.25">×</button></div><div class="cs-card-meta"><span>Day ${dayNum} of 21</span><span>${c.challenge.cat||'Other'}</span></div><div class="cs-card-progress"><div class="cs-card-progress-fill" style="width:${pct}%"></div></div><div class="cs-card-check"><button class="cs-check-btn${checked?' checked':''}" onclick="checkInChallenge(${realIdx})" ${checked?'disabled':''}>${checked?'✓ Done today':'✓ Mark done'}</button><span class="cs-card-streak">${streak>0?'🔥 '+streak+' streak':''}</span></div></div>`;
+    }).join('');
+}
+function checkInChallenge(ci){const c=challenges[ci];if(!c)return;const idx=getTodayIdxForChallenge(c);if(idx<0||idx>=21)return;if(!c.days[idx])c.days[idx]={status:'pending',note:'',mood:null,date:null};c.days[idx].status='done';c.days[idx].date=today;saveChallenges();renderChallengesStrip();}
+function deleteChallenge(ci){if(!confirm('Remove this 21-day challenge?'))return;challenges.splice(ci,1);saveChallenges();renderChallengesStrip();}
+function startNewChallengeInline(){const input=document.getElementById('cs-new-challenge-input');const name=input?input.value.trim():'';if(!name){if(input)input.focus();return;}const nc={challenge:{name,desc:'',whys:[],cat:'Other',startDate:today},days:Array.from({length:21},()=>({status:'pending',note:'',mood:null,date:null}))};challenges.push(nc);saveChallenges();if(input)input.value='';renderChallengesStrip();}
+
+// ─────────────────────────────────────────────────────────────
+// ROUTINES
+// ─────────────────────────────────────────────────────────────
+let routines = [];
+let rsOpen = false;
+function freqDaysFromRoutine(r){const f=parseInt(r.freq)||1;if(r.unit==='weeks')return f*7;if(r.unit==='months')return f*30;return f;}
+function routineStatus(r){if(!r.lastDone)return'due';const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);if(ds>=fd)return'due';if(ds>=fd-2)return'soon';return'ok';}
+function routineStreakText(r){if(!r.lastDone)return'never done';const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);return`last done ${ds}d ago · every ${r.freq} ${r.unit}`;}
+function toggleRoutinesStrip(){rsOpen=!rsOpen;document.getElementById('rs-body').classList.toggle('open',rsOpen);document.getElementById('rs-toggle-icon').textContent=rsOpen?'▲':'▼';}
+function addRoutine(){const ne=document.getElementById('rs-new-name'),fe=document.getElementById('rs-new-freq'),ue=document.getElementById('rs-new-unit');const name=ne?ne.value.trim():'';if(!name){if(ne)ne.focus();return;}routines.push({id:'rt_'+Date.now()+'_'+Math.random().toString(36).slice(2),name,freq:parseInt(fe?fe.value:1)||1,unit:ue?ue.value:'days',lastDone:null,completedDates:[]});saveRoutines();renderRoutines();if(ne)ne.value='';if(fe)fe.value=1;}
+function completeRoutine(id){const r=routines.find(r=>r.id===id);if(!r)return;r.lastDone=today;if(!Array.isArray(r.completedDates))r.completedDates=[];if(!r.completedDates.includes(today))r.completedDates.push(today);saveRoutines();renderRoutines();updateRoutinesBadge();}
+function deleteRoutine(id){routines=routines.filter(r=>r.id!==id);saveRoutines();renderRoutines();updateRoutinesBadge();}
+function saveRoutines(){debounced('routines',_saveRoutinesNow);localStorage.setItem('dooit_routines',JSON.stringify(routines));}
+async function _saveRoutinesNow(){if(window._uid)await fsSet(`users/${window._uid}/meta/routines`,{routines});}
+function saveChallenges(){debounced('challenges',_saveChallengesNow);try{localStorage.setItem('dooit_challenges',JSON.stringify(challenges));}catch(e){}}
+async function _saveChallengesNow(){if(window._uid)await fsSet(`users/${window._uid}/meta/challenges`,{challenges});}
+function updateRoutinesBadge(){const due=routines.filter(r=>routineStatus(r)==='due').length;const b=document.getElementById('rs-due-badge');if(!b)return;b.style.display=due>0?'inline':'none';b.textContent=`${due} due`;}
+function renderRoutines(){
+    updateRoutinesBadge();
+    const list=document.getElementById('rs-list'); if(!list)return;
+    if(routines.length===0){list.innerHTML='<div class="rs-empty">No routines yet.</div>';return;}
+    const sorted=[...routines].sort((a,b)=>({due:0,soon:1,ok:2}[routineStatus(a)]-{due:0,soon:1,ok:2}[routineStatus(b)]));
+    list.innerHTML=sorted.map(r=>{const st=routineStatus(r);const done=r.lastDone===today;return`<div class="rs-item"><div class="rs-item-status ${done?'':st}"></div><div class="rs-item-main"><div class="rs-item-name">${escHtml(r.name)}</div><div class="rs-item-meta">${routineStreakText(r)}</div></div><button class="rs-item-done-btn${done?' completed':''}" onclick="completeRoutine('${r.id}')" ${done?'disabled':''}>${done?'✓ Done':'Done'}</button><button class="rs-item-del" onclick="deleteRoutine('${r.id}')">×</button></div>`;}).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────────────────────
 function render() {
@@ -1182,6 +1597,9 @@ function renderTaskCard(task, container) {
     card.className = 'task-card'+(isActive?' in-progress':(isPaused?' paused':''))+(task._justAdded?' just-added':'')+(task.status==='pending'?' collapsed':'');
     if (task._justAdded) { delete task._justAdded; }
     card.id = 'card-'+task.id;
+    card.draggable = true;
+    card.addEventListener('dragstart', e => dragStart(e, task.id));
+    card.addEventListener('dragend', dragEnd);
     card.addEventListener('click', e => toggleCardExpand(e, task.id));
     const proj = task.projectId ? projectDefs.find(p=>p.id===task.projectId) : null;
     card.innerHTML = `
@@ -1272,8 +1690,11 @@ function toggleQuickMove(e, id) {
 function quickMoveTask(id, dest) {
     const task=tasks.find(t=>t.id===id); if(!task) return;
     if (dest==='done'){completeTask(id);return;}
-    task.priority=dest;
-    if (task.status==='previous_unfinished'){task.status='pending';task.rolledOver=true;task.rolledOverFrom=task.date;task.date=today;}
+    if (dest==='previous_unfinished'){task.status='previous_unfinished';}
+    else {
+        task.priority=dest;
+        if (task.status==='previous_unfinished'){task.status='pending';task.rolledOver=true;task.rolledOverFrom=task.date;task.date=today;}
+    }
     const dd=document.getElementById('qm-'+id); if(dd)dd.classList.remove('open');
     saveTasks(); render(); updateProductivityScore();
 }
@@ -1830,6 +2251,13 @@ function initApp() {
     document.getElementById('current-date-display').innerText = today;
     if (new Date().getDay()===0) document.getElementById('weekly-review-prompt').classList.add('visible');
 
+    // Smart quick-add toggle
+    document.getElementById('qa-expand-btn').addEventListener('click',()=>{
+        const exp=document.getElementById('qa-expanded'),btn=document.getElementById('qa-expand-btn');
+        exp.classList.toggle('open');btn.classList.toggle('active');
+        btn.textContent=exp.classList.contains('open')?'– details':'+ details';
+    });
+
     document.getElementById('add-task-btn').addEventListener('click', addTask);
     document.getElementById('new-task-text').addEventListener('keypress', e=>{ if(e.key==='Enter') addTask(); });
     document.getElementById('show-summary-btn').addEventListener('click', showSummary);
@@ -1862,7 +2290,19 @@ function initApp() {
     if(evTitleInp)evTitleInp.addEventListener('keydown',e=>{if(e.key==='Enter')addEvent();});
     document.getElementById('ev-date').value=new Date().toISOString().split('T')[0];
 
-    // Safety net: flush any unsaved data if the user closes/navigates away unexpectedly
+    // Challenges & routines
+    const csInput=document.getElementById('cs-new-challenge-input');
+    if(csInput)csInput.addEventListener('keydown',e=>{if(e.key==='Enter')startNewChallengeInline();});
+    const rsInput=document.getElementById('rs-new-name');
+    if(rsInput)rsInput.addEventListener('keydown',e=>{if(e.key==='Enter')addRoutine();});
+    // Load routines from localStorage fallback
+    try{const rawR=localStorage.getItem('dooit_routines');if(rawR&&routines.length===0)routines=JSON.parse(rawR);}catch(e){}
+    loadChallengesFromStorage();
+
+    // DSS priority input enter key
+    const dssInput=document.getElementById('dss-priority-input');
+    if(dssInput)dssInput.addEventListener('keydown',e=>{if(e.key==='Enter')closeDailyStart();});
+
     window.addEventListener('beforeunload', () => { flushPendingSaves(); });
 
     requestNotificationPermission();
@@ -1875,7 +2315,10 @@ function initApp() {
     renderNotificationPanel();
     updateProductivityScore();
     renderProgressCharts();
+    renderChallengesStrip();
+    renderRoutines();
     startGlobalTimer();
+    setTimeout(()=>showDailyStartScreen(), 400);
 }
 
 function hideBanner() { const b=document.getElementById('loading-banner'); if(b)b.classList.add('hidden'); }
