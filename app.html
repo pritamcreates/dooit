@@ -386,8 +386,8 @@
                 </div>
                 <button id="show-summary-btn-header">End of Day</button>
                 <button id="show-reports-btn">Reports</button>
-                <button onclick="flushAndNavigate('21days.html',this)">21 Days</button>
-                <button onclick="flushAndNavigate('calendar.html',this)">📅 Calendar</button>
+                <button onclick="flushAndNavigate('21days.html')">21 Days</button>
+                <button onclick="flushAndNavigate('calendar.html')">📅 Calendar</button>
                 <button id="focus-mode-btn">Focus Mode</button>
             </div>
         </div>
@@ -757,9 +757,9 @@ function flushPendingSaves() {
 }
 
 // Safe navigation: flush saves first, then navigate
-async function flushAndNavigate(url, btn) {
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-    try { await flushPendingSaves(); } catch(e) { console.warn('flush error', e); }
+async function flushAndNavigate(url) {
+    // Fire-and-forget save, navigate immediately
+    flushPendingSaves().catch(e => console.warn('flush error', e));
     window.location.href = url;
 }
 
@@ -853,17 +853,18 @@ async function pullAll(uid) {
     try {
         const { collection, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
-        // Tasks
-        const taskSnap = await getDocs(collection(window._db, 'users', uid, 'tasks'));
+        // Fetch tasks and all meta docs in parallel
+        const metaKeys = ['ptTasks', 'projectDefs', 'events', 'notifications_' + today, 'activeTaskId', 'lastDate', 'firedEvNotifs'];
+        const [taskSnap, ...metaSnaps] = await Promise.all([
+            getDocs(collection(window._db, 'users', uid, 'tasks')),
+            ...metaKeys.map(key => getDoc(doc(window._db, 'users', uid, 'meta', key)))
+        ]);
         tasks.length = 0;
         taskSnap.forEach(d => tasks.push(normalizeTask(d.data())));
-        _lastSyncedTaskIds = new Set(tasks.map(t => t.id)); // track IDs so saves use upsert not delete-all
-
-        // Meta documents
-        const metaDocs = ['ptTasks', 'projectDefs', 'events', 'notifications_' + today, 'activeTaskId', 'lastDate', 'firedEvNotifs'];
-        for (const key of metaDocs) {
-            const s = await getDoc(doc(window._db, 'users', uid, 'meta', key));
-            if (!s.exists()) continue;
+        _lastSyncedTaskIds = new Set(tasks.map(t => t.id));
+        metaSnaps.forEach((s, i) => {
+            if (!s.exists()) return;
+            const key = metaKeys[i];
             const data = s.data();
             if (key === 'ptTasks')     { ptTasks = data.ptTasks || { urgent:[], important:[], later:[] }; }
             if (key === 'projectDefs') { projectDefs = data.projectDefs || []; }
@@ -871,7 +872,7 @@ async function pullAll(uid) {
             if (key === 'notifications_' + today) { currentDayNotifications = data.notifs || []; }
             if (key === 'activeTaskId') { activeTaskId = data.value || null; }
             if (key === 'firedEvNotifs') { firedEventNotifications = new Set(data.list || []); }
-        }
+        });
 
         setSyncStatus('saved');
         _lastPullAt = Date.now(); // reset after pull so listener ignores echo for 2s
