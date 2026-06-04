@@ -659,6 +659,7 @@ let _notifTick = 0, _scoreTick = 0;
 // window._db/window._uid are on window, set by Firebase module script
 let _unsub = {}; // unsubscribe functions keyed by name
 let _saving = {}; // debounce timers
+let _lastPullAt = 0; // timestamp of last pullAll — used to suppress listener echo
 
 // ─────────────────────────────────────────────────────────────
 // SYNC STATUS
@@ -807,6 +808,7 @@ function normalizeTask(t) {
 }
 
 async function pullAll(uid) {
+    _lastPullAt = Date.now();
     setSyncStatus('syncing');
     try {
         const { collection, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
@@ -831,6 +833,7 @@ async function pullAll(uid) {
         }
 
         setSyncStatus('saved');
+        _lastPullAt = Date.now(); // reset after pull so listener ignores echo for 2s
         checkRollover();
         render();
         renderPtTasks();
@@ -853,6 +856,7 @@ async function startListeners(uid) {
     if (_unsub.tasks) _unsub.tasks();
     _unsub.tasks = onSnapshot(collection(window._db, 'users', uid, 'tasks'), snap => {
         if (_saving.tasks) return;
+        if (Date.now() - _lastPullAt < 2000) return; // suppress echo right after pullAll
         const remote = []; snap.forEach(d => remote.push(normalizeTask(d.data())));
         tasks.length = 0; remote.forEach(t => tasks.push(t));
         render(); updateProductivityScore(); renderProgressCharts();
@@ -1863,6 +1867,9 @@ const GOOGLE_CLIENT_ID = '304870276366-tkt7j2g8g0qm88pgkq22mvp4qorif7ad.apps.goo
 window.currentUser = null;
 
 let _appInited = false;
+let _googleSignInInited = false;
+let _authHandled = false; // true once we've handled the first auth state
+
 function ensureInitApp() {
     if (_appInited) return;
     _appInited = true;
@@ -1903,12 +1910,15 @@ window.signOut = function() {
     if(typeof google!=='undefined') google.accounts.id.disableAutoSelect();
     stopListeners();
     window.currentUser=null; window._uid=null;
+    _authHandled = false;
     fbSignOut(auth).catch(()=>{});
     window.location.href='index.html';
 };
 
 function initGoogleSignIn() {
+    if (_googleSignInInited) return;
     if(typeof google==='undefined'||!google.accounts||!google.accounts.id){setTimeout(initGoogleSignIn,150);return;}
+    _googleSignInInited = true;
     google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID, callback:handleCredentialResponse, auto_select:true});
     google.accounts.id.renderButton(document.getElementById('google-signin-button'),{theme:'outline',size:'large',shape:'rectangular',text:'signin_with'});
     google.accounts.id.prompt();
@@ -1917,16 +1927,24 @@ function initGoogleSignIn() {
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        // Always keep the signed-in UI consistent, but only pull+listen once
         window.currentUser = { id: user.uid, name: user.displayName, email: user.email, picture: user.photoURL };
         window._uid = user.uid;
         showUserUI(window.currentUser);
-        await pullAll(user.uid);
-        await startListeners(user.uid);
-        ensureInitApp();
+        if (!_authHandled) {
+            _authHandled = true;
+            await pullAll(user.uid);
+            await startListeners(user.uid);
+            ensureInitApp();
+        }
     } else {
-        showBanner('Sign in to sync your data. App works offline too.');
-        initGoogleSignIn();
-        ensureInitApp();
+        // Only run sign-in init and app init once when signed out
+        if (!_authHandled) {
+            _authHandled = true;
+            showBanner('Sign in to sync your data. App works offline too.');
+            initGoogleSignIn();
+            ensureInitApp();
+        }
     }
 });
 </script>
