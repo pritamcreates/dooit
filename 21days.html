@@ -1770,8 +1770,20 @@ function toast(msg) {
 // ════════════════════════════════════
 function confirmReset() {
   if (confirm('Reset your 21-day challenge? All progress will be erased.')) {
+    const old = S;
     localStorage.removeItem('dooit_21days');
     S = { challenge: null, days: [] };
+    // Also remove from app.html's multi-challenge localStorage
+    try {
+      const raw = localStorage.getItem('dooit_challenges');
+      if (raw && old.challenge) {
+        let arr = JSON.parse(raw);
+        arr = arr.filter(c => !(c.challenge &&
+          c.challenge.name === old.challenge.name &&
+          c.challenge.startDate === old.challenge.startDate));
+        localStorage.setItem('dooit_challenges', JSON.stringify(arr));
+      }
+    } catch(e) {}
     showEmpty();
     toast('Challenge reset. Start fresh.');
   }
@@ -1875,7 +1887,25 @@ function push() {
             const raw = localStorage.getItem('dooit_21days');
             const state = raw ? JSON.parse(raw) : null;
             if (state) {
+                // Write to legacy path (21days.html's own doc)
                 await setDoc(doc(db, 'users', _uid, 'meta', '21days'), { state }, { merge: true });
+
+                // Also sync into the app.html multi-challenge array so the inline strip stays current.
+                try {
+                    const snap = await getDoc(doc(db, 'users', _uid, 'meta', 'challenges'));
+                    let arr = snap.exists() ? (snap.data().challenges || []) : [];
+                    const idx = arr.findIndex(c =>
+                        c.challenge &&
+                        c.challenge.name === state.challenge?.name &&
+                        c.challenge.startDate === state.challenge?.startDate
+                    );
+                    if (idx >= 0) arr[idx] = state;
+                    else arr.unshift(state);
+                    await setDoc(doc(db, 'users', _uid, 'meta', 'challenges'), { challenges: arr }, { merge: false });
+                    try { localStorage.setItem('dooit_challenges', JSON.stringify(arr)); } catch(e) {}
+                } catch(e2) {
+                    console.warn('21days→challenges sync error:', e2);
+                }
             }
             setSyncStatus('saved');
         } catch(e) {
