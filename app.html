@@ -1578,7 +1578,14 @@ function render() {
     const qw = todayTasks.filter(t => t.status==='done' && isTaskOnTime(t));
     document.getElementById('quick-wins-count').textContent = qw.length;
     const qwContent = document.getElementById('quick-wins-content');
-    qwContent.innerHTML=''; qw.forEach(t => renderQuickWinTask(t,qwContent));
+    qwContent.innerHTML='';
+    if (qw.length > 0) {
+        // Auto-open the section when there are wins
+        qwContent.classList.add('open');
+        qw.forEach(t => renderQuickWinTask(t, qwContent));
+    } else {
+        qwContent.innerHTML = '<div style="font-size:0.75rem;font-style:italic;opacity:0.4;padding:6px 2px;">Complete tasks on time or within 90 minutes to earn quick wins.</div>';
+    }
 
     let totalBreak=0; todayTasks.forEach(t=>totalBreak+=getBreakTime(t));
     const el=document.getElementById('daily-break-summary'); if(el)el.textContent='Break time today: '+formatDuration(totalBreak);
@@ -1960,9 +1967,19 @@ function setScoreDisplay(score,grade,breakdown) {
     const w=document.getElementById('header-score-widget'); if(breakdown)w.title=`Score: ${breakdown}`;
 }
 function isTaskOnTime(t) {
-    if(t.status!=='done'||!t.actualEnd||!t.plannedEnd) return false;
-    const d=new Date(t.actualEnd).toISOString().split('T')[0];
-    return t.actualEnd<=new Date(`${d}T${t.plannedEnd}`).getTime();
+    if (t.status !== 'done' || !t.actualEnd) return false;
+    // If a planned end time is set, check completion was before or at that time
+    if (t.plannedEnd) {
+        const deadline = new Date(`${t.date}T${t.plannedEnd}`).getTime();
+        return t.actualEnd <= deadline;
+    }
+    // No planned time: count as a quick win if the task was started and finished
+    // within the same session (actualStart exists and elapsed < 90 minutes)
+    if (t.actualStart) {
+        const elapsed = getElapsed(t);
+        return elapsed > 0 && elapsed <= 90 * 60 * 1000;
+    }
+    return false;
 }
 
 // ─────────────────────────────────────────────────────────────
