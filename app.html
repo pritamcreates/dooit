@@ -163,6 +163,11 @@
         .rs-freq-wrap input[type="number"] { width: 44px; text-align: center; }
         .rs-freq-wrap select { width: auto; }
         .rs-empty { font-size: 0.78rem; font-style: italic; opacity: 0.4; text-align: center; padding: 14px 0 6px; }
+        .rs-next-due-badge { font-size: 0.6rem; padding: 2px 7px; border: 1px solid var(--border); white-space: nowrap; letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; margin-right: 4px; }
+        .rs-next-due-badge.due { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .rs-next-due-badge.soon { border-style: dashed; }
+        .rs-next-due-badge.ok { opacity: 0.45; }
+        .rs-item-lock { font-size: 0.9rem; opacity: 0.4; padding: 0 3px; cursor: default; flex-shrink: 0; }
 
         /* ── Board ── */
         .board { display: grid; grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 32px; }
@@ -1108,7 +1113,7 @@ async function pullAll(uid) {
             if (key === 'notifications_' + today) { currentDayNotifications = data.notifs || []; }
             if (key === 'activeTaskId') { activeTaskId = data.value || null; }
             if (key === 'firedEvNotifs') { firedEventNotifications = new Set(data.list || []); }
-            if (key === 'routines')    { if (data.routines) routines = data.routines; }
+            if (key === 'routines')    { if (data.routines) routines = data.routines; ensureDesktopSortRoutine(); }
             if (key === 'challenges')  { if (data.challenges) challenges = data.challenges; }
             if (key === '21days' && data.state && data.state.challenge && challenges.length === 0) {
                 // Legacy single-challenge doc — migrate into the new challenges array
@@ -1165,6 +1170,7 @@ async function startListeners(uid) {
             }
             if (d.id === 'routines' && !_saving['routines']) {
                 if (data.routines) routines = data.routines;
+                ensureDesktopSortRoutine();
                 renderRoutines();
             }
             if (d.id === 'challenges' && !_saving['challenges']) {
@@ -1507,14 +1513,25 @@ function startNewChallengeInline(){const input=document.getElementById('cs-new-c
 let routines = [];
 let rsOpen = false;
 function freqDaysFromRoutine(r){const f=parseInt(r.freq)||1;if(r.unit==='weeks')return f*7;if(r.unit==='months')return f*30;return f;}
-function routineStatus(r){if(!r.lastDone)return'due';const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);if(ds>=fd)return'due';if(ds>=fd-2)return'soon';return'ok';}
-function routineStreakText(r){if(!r.lastDone)return'never done';const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);return`last done ${ds}d ago · every ${r.freq} ${r.unit}`;}
+function routineStatus(r){if(!r.lastDone)return'due';const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);if(ds>=fd)return'due';const soonWindow=fd<=2?0:Math.min(5,Math.ceil(fd*0.3));if(soonWindow>0&&ds>=fd-soonWindow)return'soon';return'ok';}
+function routineNextDue(r){const fd=freqDaysFromRoutine(r);if(!r.lastDone)return today;const nd=new Date(r.lastDone+'T00:00:00');nd.setDate(nd.getDate()+fd);return nd.toISOString().split('T')[0];}
+function routineNextDueLabel(r){const nd=routineNextDue(r);const diff=Math.floor((new Date(nd+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);if(diff<=0)return'due today';if(diff===1)return'due tomorrow';return`due ${nd}`;}
+function routineStreakText(r){if(!r.lastDone)return`never done · every ${r.freq} ${r.unit}`;const fd=freqDaysFromRoutine(r);const ds=Math.floor((new Date(today+'T00:00:00')-new Date(r.lastDone+'T00:00:00'))/86400000);return`done ${ds}d ago · every ${r.freq} ${r.unit}`;}
 function toggleRoutinesStrip(){rsOpen=!rsOpen;document.getElementById('rs-body').classList.toggle('open',rsOpen);document.getElementById('rs-toggle-icon').textContent=rsOpen?'▲':'▼';}
 function addRoutine(){const ne=document.getElementById('rs-new-name'),fe=document.getElementById('rs-new-freq'),ue=document.getElementById('rs-new-unit');const name=ne?ne.value.trim():'';if(!name){if(ne)ne.focus();return;}routines.push({id:'rt_'+Date.now()+'_'+Math.random().toString(36).slice(2),name,freq:parseInt(fe?fe.value:1)||1,unit:ue?ue.value:'days',lastDone:null,completedDates:[]});saveRoutines();renderRoutines();if(ne)ne.value='';if(fe)fe.value=1;}
 function completeRoutine(id){const r=routines.find(r=>r.id===id);if(!r)return;r.lastDone=today;if(!Array.isArray(r.completedDates))r.completedDates=[];if(!r.completedDates.includes(today))r.completedDates.push(today);saveRoutines();renderRoutines();updateRoutinesBadge();}
-function deleteRoutine(id){routines=routines.filter(r=>r.id!==id);saveRoutines();renderRoutines();updateRoutinesBadge();}
+function deleteRoutine(id){const r=routines.find(r=>r.id===id);if(!r||r.fixed)return;routines=routines.filter(r=>r.id!==id);saveRoutines();renderRoutines();updateRoutinesBadge();}
 function saveRoutines(){debounced('routines',_saveRoutinesNow);localStorage.setItem('dooit_routines',JSON.stringify(routines));}
 async function _saveRoutinesNow(){if(window._uid)await fsSet(`users/${window._uid}/meta/routines`,{routines});}
+function ensureDesktopSortRoutine(){
+    if(!routines.find(r=>r.id==='rt_desktop_sort')){
+        routines.push({id:'rt_desktop_sort',name:'Desktop Sort \u2014 drag everything to _INBOX',freq:1,unit:'days',lastDone:null,completedDates:[],fixed:true});
+        saveRoutines();
+    } else {
+        const r=routines.find(r=>r.id==='rt_desktop_sort');
+        if(!r.fixed){r.fixed=true;saveRoutines();}
+    }
+}
 function saveChallenges(){debounced('challenges',_saveChallengesNow);try{localStorage.setItem('dooit_challenges',JSON.stringify(challenges));}catch(e){}}
 async function _saveChallengesNow(){if(window._uid)await fsSet(`users/${window._uid}/meta/challenges`,{challenges});}
 function updateRoutinesBadge(){const due=routines.filter(r=>routineStatus(r)==='due').length;const b=document.getElementById('rs-due-badge');if(!b)return;b.style.display=due>0?'inline':'none';b.textContent=`${due} due`;}
@@ -1523,7 +1540,15 @@ function renderRoutines(){
     const list=document.getElementById('rs-list'); if(!list)return;
     if(routines.length===0){list.innerHTML='<div class="rs-empty">No routines yet.</div>';return;}
     const sorted=[...routines].sort((a,b)=>({due:0,soon:1,ok:2}[routineStatus(a)]-{due:0,soon:1,ok:2}[routineStatus(b)]));
-    list.innerHTML=sorted.map(r=>{const st=routineStatus(r);const done=r.lastDone===today;return`<div class="rs-item"><div class="rs-item-status ${done?'':st}"></div><div class="rs-item-main"><div class="rs-item-name">${escHtml(r.name)}</div><div class="rs-item-meta">${routineStreakText(r)}</div></div><button class="rs-item-done-btn${done?' completed':''}" onclick="completeRoutine('${r.id}')" ${done?'disabled':''}>${done?'✓ Done':'Done'}</button><button class="rs-item-del" onclick="deleteRoutine('${r.id}')">×</button></div>`;}).join('');
+    list.innerHTML=sorted.map(r=>{
+        const st=routineStatus(r);const done=r.lastDone===today;
+        const ndLabel=routineNextDueLabel(r);
+        const ndClass=st==='due'?'rs-next-due-badge due':st==='soon'?'rs-next-due-badge soon':'rs-next-due-badge ok';
+        const isFixed=r.fixed===true;
+        const delBtn=isFixed?`<span class="rs-item-lock" title="System routine">&#128274;</span>`:`<button class="rs-item-del" onclick="deleteRoutine('${r.id}')">x</button>`;
+        const doneLabel=done?'\u2713 Done':'Mark done';
+        return`<div class="rs-item"><div class="rs-item-status ${done?'':st}"></div><div class="rs-item-main"><div class="rs-item-name">${escHtml(r.name)}${isFixed?` <span style="font-size:0.6rem;opacity:0.4;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--border);padding:0 4px;margin-left:4px;">fixed</span>`:''}</div><div class="rs-item-meta">${routineStreakText(r)}</div></div><span class="${ndClass}">${ndLabel}</span><button class="rs-item-done-btn${done?' completed':''}" onclick="completeRoutine('${r.id}')" ${done?'disabled':''}>${doneLabel}</button>${delBtn}</div>`;
+    }).join('');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1765,6 +1790,15 @@ function showSummary() {
         </div>
         ${comp.length>0?`<div style="margin:14px 0 6px;font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Completed</div>${rows}`:rows}
         ${pend.length>0?`<div style="margin:14px 0 6px;font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Still pending</div>${pendRows}`:''}
+        <div class="plan-tomorrow-prompt" id="desktop-sort-check" style="background:#f7f5f0;border:2px solid var(--border);padding:14px;margin-top:16px;">
+            <h4 style="font-family:var(--font-serif);font-size:1rem;margin-bottom:6px;">&#128193; Desktop Sort</h4>
+            <p style="font-size:0.75rem;opacity:.65;margin-bottom:10px;">End-of-day habit — drag everything on your desktop into <code style="font-family:var(--font-mono);font-size:0.75rem;background:var(--light);padding:1px 5px;">_INBOX</code> before you close out.</p>
+            <div id="desktop-sort-status" style="margin-bottom:10px;font-size:0.78rem;"></div>
+            <div style="display:flex;gap:8px;">
+                <button onclick="markDesktopSortDone()" id="desktop-sort-done-btn" style="flex:1;">&#10003; Desktop is clear</button>
+                <button onclick="document.getElementById('desktop-sort-check').style.opacity='0.4'" style="opacity:0.5;font-size:0.72rem;">Skip</button>
+            </div>
+        </div>
         <div class="plan-tomorrow-prompt">
             <h4>Plan Tomorrow 📋</h4>
             <p style="font-size:0.75rem;opacity:.6;margin-bottom:8px;">Capture tomorrow's priorities — David Allen's cornerstone habit.</p>
@@ -1774,11 +1808,32 @@ function showSummary() {
                 <button onclick="closeModal()">Close</button>
             </div>
         </div>`);
+    setTimeout(initDesktopSortStatus, 50);
 }
 
 function savePlanTomorrowNotes() {
     const notes=document.getElementById('plan-tomorrow-notes'); if(notes) saveMeta('plan_'+today,{notes:notes.value});
     closeModal();
+}
+function markDesktopSortDone(){
+    const r=routines.find(r=>r.id==='rt_desktop_sort');
+    if(r){completeRoutine(r.id);}
+    const btn=document.getElementById('desktop-sort-done-btn');
+    const status=document.getElementById('desktop-sort-status');
+    if(btn){btn.textContent='✓ Marked done';btn.disabled=true;btn.style.background='var(--text)';btn.style.color='var(--bg)';}
+    if(status){status.textContent='Great — desktop cleared for today. See you tomorrow.';}
+}
+function initDesktopSortStatus(){
+    const status=document.getElementById('desktop-sort-status');
+    const btn=document.getElementById('desktop-sort-done-btn');
+    if(!status||!btn) return;
+    const r=routines.find(r=>r.id==='rt_desktop_sort');
+    if(r&&r.lastDone===today){
+        status.textContent='Already marked done today. Well done.';
+        btn.textContent='✓ Done';btn.disabled=true;btn.style.background='var(--text)';btn.style.color='var(--bg)';
+    } else {
+        status.textContent='Not done yet today.';
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2314,6 +2369,7 @@ function initApp() {
     if(rsInput)rsInput.addEventListener('keydown',e=>{if(e.key==='Enter')addRoutine();});
     // Load routines from localStorage fallback
     try{const rawR=localStorage.getItem('dooit_routines');if(rawR&&routines.length===0)routines=JSON.parse(rawR);}catch(e){}
+    ensureDesktopSortRoutine();
     loadChallengesFromStorage();
 
     // DSS priority input enter key
