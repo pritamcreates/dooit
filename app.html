@@ -39,15 +39,7 @@
         .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .header-actions button { font-size: 0.72rem; padding: 5px 10px; }
 
-        /* ── More Menu ── */
-        .more-menu-wrap { position: relative; display: inline-block; }
-        .more-dropdown { display: none; position: absolute; top: calc(100% + 4px); right: 0; z-index: 500; background: var(--bg); border: 1px solid var(--border); box-shadow: 4px 4px 0 rgba(0,0,0,0.08); min-width: 160px; }
-        .more-dropdown.open { display: block; }
-        .more-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 14px; font-size: 0.75rem; border: none; border-bottom: 1px solid var(--light); background: transparent; cursor: pointer; font-family: var(--font-mono); letter-spacing: 0.04em; color: var(--text); }
-        .more-dropdown button:last-child { border-bottom: none; }
-        .more-dropdown button:hover { background: var(--text); color: var(--bg); }
 
-        /* ── Smart Quick-add ── */
         .quick-add { display: flex; gap: 6px; align-items: center; padding: 10px 0 0; flex-wrap: wrap; }
         .quick-add-main { display: flex; flex: 1; min-width: 200px; gap: 0; }
         .quick-add-main input[type="text"] { flex: 1; border-right: none; font-size: 0.88rem; padding: 7px 11px; }
@@ -178,10 +170,10 @@
         .rs-item-lock { font-size: 0.9rem; opacity: 0.4; padding: 0 3px; cursor: default; flex-shrink: 0; }
 
         /* ── Board ── */
-        .board { display: grid; grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 24px; }
+        .board { display: grid; grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 32px; }
         .column { border: 1px solid var(--border); padding: 14px; min-height: 200px; display: flex; flex-direction: column; }
         .column.drag-over { background: #f0f5eb; border-color: var(--text); border-style: dashed; }
-        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; max-height: calc(100vh - 280px); min-height: 300px; }
+        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; max-height: 520px; }
         .column h2 { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 9px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.14em; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; }
         /* Carry Forward column — warm, collapsed by default */
         #col-previous-unfinished { border: 2px dashed var(--border); background: #f7f5f0; }
@@ -244,7 +236,7 @@
         .task-card.just-added { animation: flash-in 0.22s ease; }
 
         /* ── Panels ── */
-        .panels-grid { display: grid; grid-template-columns: 1.6fr 1.4fr 1fr; gap: 16px; margin-bottom: 0; }
+        .panels-grid { display: grid; grid-template-columns: 1.6fr 1.4fr 1fr; gap: 16px; }
         .panel { border: 1px solid var(--border); padding: 14px; }
         .panel h3 { border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 14px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono); font-weight: 500; display: flex; align-items: center; justify-content: space-between; }
 
@@ -332,7 +324,7 @@
         #reports-modal th { background: var(--light); font-weight: 500; }
 
         /* ── Notification panel ── */
-        #notification-panel { position: fixed; bottom: 60px; right: 20px; width: 300px; max-height: 380px; background: var(--bg); border: 2px solid var(--border); z-index: 1050; display: none; flex-direction: column; overflow-y: auto; }
+        #notification-panel { position: fixed; bottom: 68px; right: 20px; width: 300px; max-height: 380px; background: var(--bg); border: 2px solid var(--border); z-index: 1050; display: none; flex-direction: column; overflow-y: auto; }
         #notification-panel.open { display: flex; }
         #notification-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; position: sticky; top: 0; background: var(--bg); }
         .notification-entry { padding: 9px 12px; border-bottom: 1px dashed var(--light); font-size: 0.78rem; position: relative; }
@@ -394,9 +386,9 @@
         .top-task-bar { height: 100%; background: var(--text); }
         .top-task-time { font-size: 0.68rem; opacity: 0.55; white-space: nowrap; }
 
-        /* ── Score widget (footer only) ── */
-        .header-score-widget { display: none !important; } /* moved to footer */
-        .header-score-bar-bg { display: none; }
+        /* ── Score widget ── */
+        .header-score-widget { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); padding: 5px 11px; font-size: 0.72rem; letter-spacing: 0.04em; position: relative; min-width: 120px; }
+        .header-score-bar-bg { position: absolute; bottom: 0; left: 0; height: 2px; width: 100%; background: var(--light); }
         .header-score-bar-fill { height: 100%; background: var(--text); transition: width 0.4s ease; }
         .header-score-number { font-family: var(--font-serif); font-size: 1.1rem; line-height: 1; }
         .header-score-details { display: flex; flex-direction: column; gap: 1px; }
@@ -408,7 +400,8 @@
         .weekly-review-text { font-size: 0.8rem; font-family: var(--font-serif); font-style: italic; }
 
         /* ── Projects ── */
-        #projects-panel { position: fixed; bottom: 60px; right: 20px; width: 300px; background: var(--bg); border: 2px solid var(--border); z-index: 1050; display: none; flex-direction: column; max-height: 520px; overflow-y: auto; }
+        #projects-panel-toggle { bottom: 20px; right: 68px; }
+        #projects-panel { position: fixed; bottom: 68px; right: 68px; width: 300px; background: var(--bg); border: 2px solid var(--border); z-index: 1050; display: none; flex-direction: column; max-height: 520px; overflow-y: auto; }
         #projects-panel.open { display: flex; }
         #projects-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; position: sticky; top: 0; background: var(--bg); z-index: 1; }
         .projects-add-form { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 5px; }
@@ -432,12 +425,11 @@
         #coaching-quote { font-family: var(--font-serif); font-style: italic; font-size: 0.9rem; line-height: 1.55; margin-bottom: 5px; }
         #coaching-source { font-size: 0.65rem; opacity: 0.45; letter-spacing: 0.06em; text-transform: uppercase; }
 
-        /* ── Icon buttons (no longer floating — superseded by bottom tab bar) ── */
-        .icon-toggle-btn { display: none; } /* hidden — tabs handle this now */
-        .icon-badge { display: none; }
-        /* keep #notification-panel-toggle selector harmless */
-        #notification-panel-toggle { display: none; }
-        #google-signin-button { display: flex; align-items: center; min-height: 36px; }
+        /* ── Icon buttons ── */
+        .icon-toggle-btn { position: fixed; width: 40px; height: 40px; border: 1px solid var(--border); background: var(--bg); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1100; transition: background 0.12s, color 0.12s; }
+        .icon-toggle-btn:hover { background: var(--text); color: var(--bg); }
+        .icon-badge { position: absolute; top: -7px; right: -7px; background: var(--text); color: var(--bg); font-size: 0.62rem; width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; line-height: 1; font-family: var(--font-mono); }
+        #notification-panel-toggle { bottom: 20px; right: 20px; font-size: unset; }
         #google-signin-button { display: flex; align-items: center; min-height: 36px; }
         #user-info { border: 1px solid var(--border); padding: 5px 10px; }
         #user-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
@@ -454,24 +446,6 @@
         #loading-banner { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: var(--light); border-bottom: 1px solid var(--border); font-size: 0.78rem; }
         #loading-banner.hidden { display: none; }
 
-        /* ── Bottom Tab Bar ── */
-        #bottom-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; background: var(--bg); border-top: 2px solid var(--text); display: flex; z-index: 900; }
-        .bottom-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: transparent; font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); transition: background 0.12s, color 0.12s; border-right: 1px solid var(--light); padding: 0 4px; position: relative; }
-        .bottom-tab:last-child { border-right: none; }
-        .bottom-tab .tab-icon { font-size: 1rem; line-height: 1; }
-        .bottom-tab.active { background: var(--text); color: var(--bg); }
-        .bottom-tab:hover:not(.active) { background: var(--light); color: var(--text); }
-        .tab-badge { position: absolute; top: 6px; right: 12px; background: var(--text); color: var(--bg); font-size: 0.55rem; min-width: 14px; height: 14px; border-radius: 7px; display: flex; align-items: center; justify-content: center; padding: 0 3px; font-family: var(--font-mono); }
-        .bottom-tab.active .tab-badge { background: var(--bg); color: var(--text); }
-
-        /* ── Tab Drawer ── */
-        #tab-drawer { display: none; border-top: 1px solid var(--border); padding: 16px; background: #f7f7f4; margin-bottom: 0; }
-        #tab-drawer.open { display: block; }
-        /* The drawer sections just re-use existing strip styles, no changes needed */
-
-        /* ── Body padding for fixed bottom bar ── */
-        .container { padding-bottom: 72px !important; }
-
         /* ── Responsive ── */
         @media (max-width: 860px) { .board { grid-template-columns: 1fr 1fr; } .panels-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 540px) {
@@ -481,12 +455,11 @@
             .analytics-kpis { grid-template-columns: repeat(2,1fr); }
             .quick-add { padding: 8px 14px 0; gap: 5px; }
             .quick-add input[type="text"] { min-width: 120px; }
-            #projects-panel { width: 260px; right: 10px; bottom: 62px; }
-            #notification-panel { width: 260px; right: 10px; bottom: 62px; }
+            #projects-panel { width: 260px; right: 10px; bottom: 64px; }
+            #projects-panel-toggle { right: 58px; bottom: 12px; }
+            #notification-panel { width: 260px; right: 10px; bottom: 64px; }
+            #notification-panel-toggle { right: 10px; bottom: 12px; }
             .footer-summary { flex-direction: column; }
-            .bottom-tab .tab-label { display: none; }
-            .bottom-tab { font-size: 0; }
-            .bottom-tab .tab-icon { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -544,8 +517,7 @@
                     </div>
                     <span id="auth-status-note" style="font-size:0.75rem;opacity:0.45;">not signed in</span>
                 </div>
-                <!-- Score widget kept in DOM for JS, hidden via CSS -->
-                <div class="header-score-widget" id="header-score-widget" title="Daily productivity score" aria-hidden="true">
+                <div class="header-score-widget" id="header-score-widget" title="Daily productivity score">
                     <div class="header-score-number" id="header-score-num">—</div>
                     <div class="header-score-details">
                         <div class="header-score-label">Score / 100</div>
@@ -553,16 +525,11 @@
                     </div>
                     <div class="header-score-bar-bg"><div class="header-score-bar-fill" id="header-score-bar" style="width:0%"></div></div>
                 </div>
-                <button id="focus-mode-btn">⚡ Focus</button>
-                <div class="more-menu-wrap">
-                    <button id="more-menu-btn" onclick="toggleMoreMenu()" title="More actions">⋯ More</button>
-                    <div class="more-dropdown" id="more-dropdown">
-                        <button onclick="closeMoreMenu();showSummary()">📊 End of Day</button>
-                        <button id="show-reports-btn" onclick="closeMoreMenu();showReportsModal()">📋 Reports</button>
-                        <button onclick="closeMoreMenu();flushAndNavigate('21days.html')">🔥 21 Days</button>
-                        <button onclick="closeMoreMenu();flushAndNavigate('calendar.html')">📅 Calendar</button>
-                    </div>
-                </div>
+                <button id="show-summary-btn-header">End of Day</button>
+                <button id="show-reports-btn">Reports</button>
+                <button onclick="flushAndNavigate('21days.html')">21 Days</button>
+                <button onclick="flushAndNavigate('calendar.html')">📅 Calendar</button>
+                <button id="focus-mode-btn">Focus Mode</button>
             </div>
         </div>
         <div class="quick-add">
@@ -654,13 +621,174 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- TAB DRAWER — Plan / Habits / Review — hidden by default -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div id="tab-drawer">
+    <!-- Plan Tomorrow Strip -->
+    <div id="plan-tomorrow-strip">
+        <div class="pt-header" onclick="togglePlanTomorrow()">
+            <div class="pt-header-left">
+                <span class="pt-title">📋 Plan Tomorrow</span>
+                <span class="pt-subtitle">Capture next day's priorities before you close out</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="pt-counts" id="pt-counts"></div>
+                <span id="pt-toggle-icon" style="font-size:0.75rem;opacity:0.5;">▼</span>
+            </div>
+        </div>
+        <div class="pt-body" id="pt-body">
+            <div class="pt-col">
+                <div class="pt-col-header urgent-col"><span>🔴 Urgent</span><span id="pt-urgent-count" style="opacity:0.5;">0</span></div>
+                <div class="pt-col-tasks" id="pt-tasks-urgent"></div>
+                <div class="pt-add-row"><input type="text" id="pt-input-urgent" placeholder="Add urgent task…"><button class="pt-add-btn" onclick="addPtTask('urgent')">+</button></div>
+            </div>
+            <div class="pt-col">
+                <div class="pt-col-header important-col"><span>🟡 Important</span><span id="pt-important-count" style="opacity:0.5;">0</span></div>
+                <div class="pt-col-tasks" id="pt-tasks-important"></div>
+                <div class="pt-add-row"><input type="text" id="pt-input-important" placeholder="Add important task…"><button class="pt-add-btn" onclick="addPtTask('important')">+</button></div>
+            </div>
+            <div class="pt-col">
+                <div class="pt-col-header later-col"><span>🔵 Later</span><span id="pt-later-count" style="opacity:0.5;">0</span></div>
+                <div class="pt-col-tasks" id="pt-tasks-later"></div>
+                <div class="pt-add-row"><input type="text" id="pt-input-later" placeholder="Add later task…"><button class="pt-add-btn" onclick="addPtTask('later')">+</button></div>
+            </div>
+        </div>
+        <div class="pt-actions" id="pt-actions" style="display:none;">
+            <button onclick="promotePtTasksToToday()">▶ Promote all to Today's board</button>
+            <button onclick="clearAllPtTasks()" style="opacity:0.6;">Clear all</button>
+            <span class="pt-promote-hint">start your day by promoting these to the main board</span>
+        </div>
+    </div>
 
-        <!-- Plan Tomorrow pane -->
-        <div id="drawer-plan" style="display:none;">
+    <!-- Today's 21-Day Challenges Strip -->
+    <div id="challenges-strip">
+        <div class="cs-header" onclick="toggleChallengesStrip()">
+            <span class="cs-title">🔥 Today's Challenges</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="cs-badge" class="cs-badge" style="display:none;">0 active</span>
+                <span id="cs-toggle-icon" style="font-size:0.75rem;opacity:0.5;">▼</span>
+            </div>
+        </div>
+        <div class="cs-body open" id="cs-body">
+            <div id="cs-due-banner" class="cs-due-banner"></div>
+            <div class="cs-cards" id="cs-cards">
+                <div class="cs-empty">No active challenges. Type a habit name below and press Begin.</div>
+            </div>
+            <div class="cs-quick-add-row">
+                <input type="text" id="cs-new-challenge-input" placeholder="Start a new 21-day challenge…">
+                <button onclick="startNewChallengeInline()">Begin →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Routines Section -->
+    <div id="routines-strip">
+        <div class="rs-header" onclick="toggleRoutinesStrip()">
+            <span class="rs-title">🔁 Routines</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="rs-due-badge" class="rs-due-badge" style="display:none;">0 due</span>
+                <span id="rs-toggle-icon" style="font-size:0.75rem;opacity:0.5;">▼</span>
+            </div>
+        </div>
+        <div class="rs-body" id="rs-body">
+            <div class="rs-list" id="rs-list">
+                <div class="rs-empty">No routines yet. Add your first standing obligation below.</div>
+            </div>
+            <div class="rs-add-form">
+                <input type="text" id="rs-new-name" placeholder="Routine name…" maxlength="60">
+                <div class="rs-freq-wrap">
+                    <span style="font-size:0.65rem;opacity:0.5;margin-right:2px;">Every</span>
+                    <input type="number" id="rs-new-freq" min="1" max="365" value="1">
+                    <select id="rs-new-unit">
+                        <option value="days">days</option>
+                        <option value="weeks">weeks</option>
+                        <option value="months">months</option>
+                    </select>
+                </div>
+                <button onclick="addRoutine()">+ Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panels -->
+    <div class="panels-grid">
+        <div class="panel">
+            <h3>Progress</h3>
+            <div class="progress-tabs">
+                <button class="progress-tab active" onclick="switchProgressTab('day',this)">Day</button>
+                <button class="progress-tab" onclick="switchProgressTab('week',this)">Week</button>
+                <button class="progress-tab" onclick="switchProgressTab('month',this)">Month</button>
+            </div>
+            <div class="progress-view active" id="progress-day">
+                <div class="day-stat-row" id="day-stat-row"></div>
+                <div class="momentum-wrap"><div class="momentum-header"><span>Day momentum</span><span id="momentum-pct">0%</span></div><div class="momentum-track"><div class="momentum-fill" id="momentum-fill" style="width:0%"></div></div></div>
+                <div class="day-insight-line" id="day-insight-line"></div>
+            </div>
+            <div class="progress-view" id="progress-week">
+                <div class="progress-bar-rows" id="week-bars"></div>
+                <div class="week-kpi-row" id="week-kpi-row"></div>
+                <div class="progress-summary-line" id="week-summary-line"></div>
+            </div>
+            <div class="progress-view" id="progress-month">
+                <div class="progress-bar-rows" id="month-bars"></div>
+                <div class="progress-summary-line" id="month-summary-line"></div>
+            </div>
+        </div>
+        <div class="panel" id="events-panel">
+            <h3><span>Upcoming Events</span><span id="events-count-badge" style="font-size:0.68rem;opacity:0.5;font-weight:normal;letter-spacing:0;text-transform:none;"></span></h3>
+            <div class="events-add-row">
+                <input type="text" id="ev-title" placeholder="Meeting / event title…" maxlength="60">
+                <div class="events-field-row"><input type="date" id="ev-date"><input type="time" id="ev-time"></div>
+                <input type="text" id="ev-location" placeholder="📍 Location (optional)">
+                <textarea id="ev-note" placeholder="Notes (optional)…"></textarea>
+                <button class="events-add-btn" onclick="addEvent()">+ Add Event</button>
+            </div>
+            <div class="events-list" id="events-list"><div class="events-empty">No upcoming events. Add one above.</div></div>
+        </div>
+        <div class="panel">
+            <h3>Done Today</h3>
+            <div id="done-list"></div>
+            <div style="margin-top:16px;"><button id="show-summary-btn">End of Day Summary</button></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleSection('quick-wins-content')"><span>Quick Wins Today</span><span id="quick-wins-count">0</span></div>
+        <div class="collapsible-content" id="quick-wins-content"></div>
+    </div>
+
+    <div class="analytics-section" id="analytics-section">
+        <div class="analytics-header" onclick="toggleAnalytics()">
+            <span>Weekly Analytics</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span id="analytics-week-label" style="font-size:0.72rem;opacity:0.5;"></span>
+                <span id="analytics-toggle-icon">▼</span>
+            </div>
+        </div>
+        <div class="analytics-body" id="analytics-body">
+            <div class="analytics-nav">
+                <button onclick="analyticsChangeWeek(-1)">← Prev</button>
+                <span id="analytics-week-range" style="font-size:0.8rem;opacity:.7;"></span>
+                <button onclick="analyticsChangeWeek(1)" id="analytics-next-btn">Next →</button>
+            </div>
+            <div class="analytics-kpis" id="analytics-kpis"></div>
+            <div class="analytics-chart-label">Focus hours per day</div>
+            <div class="analytics-heatmap" id="analytics-heatmap"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">Weekly focus score &nbsp;<span id="analytics-score-val" style="font-weight:500;"></span></div>
+            <div class="analytics-score-bar-bg"><div class="analytics-score-bar-fill" id="analytics-score-fill"></div></div>
+            <div style="font-size:0.68rem;opacity:.45;margin-top:4px;" id="analytics-score-note"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">Tasks completed by priority</div>
+            <div class="analytics-priority-bars" id="analytics-priority-bars"></div>
+            <div class="analytics-two-col" id="analytics-insights"></div>
+            <div class="analytics-chart-label" style="margin-top:16px;">Most focused tasks this week</div>
+            <div id="analytics-top-tasks"></div>
+        </div>
+    </div>
+
+    <div id="coaching-panel">
+        <div class="coaching-panel-label">From the library</div>
+        <div id="coaching-quote"></div>
+        <div id="coaching-source"></div>
+    </div>
+
+
             <div id="plan-tomorrow-strip">
                 <div class="pt-header" onclick="togglePlanTomorrow()">
                     <div class="pt-header-left">
@@ -840,33 +968,7 @@
 
 </div><!-- /container -->
 
-<!-- ── Bottom Tab Bar ── -->
-<div id="bottom-tab-bar">
-    <button class="bottom-tab" id="tab-btn-plan" onclick="switchTab('plan')">
-        <span class="tab-icon">📋</span>
-        <span class="tab-label">Plan</span>
-        <span class="tab-badge" id="tab-badge-plan" style="display:none;">0</span>
-    </button>
-    <button class="bottom-tab" id="tab-btn-habits" onclick="switchTab('habits')">
-        <span class="tab-icon">🔥</span>
-        <span class="tab-label">Habits</span>
-        <span class="tab-badge" id="tab-badge-habits" style="display:none;">0</span>
-    </button>
-    <button class="bottom-tab" id="tab-btn-review" onclick="switchTab('review')">
-        <span class="tab-icon">📊</span>
-        <span class="tab-label">Review</span>
-    </button>
-    <button class="bottom-tab" id="tab-btn-projects" onclick="toggleProjectsPanel()">
-        <span class="tab-icon">📁</span>
-        <span class="tab-label">Projects</span>
-        <span class="tab-badge" id="projects-panel-count" style="display:none;">0</span>
-    </button>
-    <button class="bottom-tab" id="tab-btn-notifs" onclick="toggleNotificationPanel()">
-        <span class="tab-icon">🔔</span>
-        <span class="tab-label">Alerts</span>
-        <span class="tab-badge" id="unread-notification-count">0</span>
-    </button>
-</div>
+
 
 <!-- Generic Modal -->
 <div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
@@ -909,14 +1011,22 @@
     </div>
 </div>
 
-<!-- Projects Panel (floating popup, triggered from bottom tab bar) -->
+<!-- Projects Panel -->
+<div id="projects-panel-toggle" class="icon-toggle-btn" title="Projects" onclick="toggleProjectsPanel()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M1 4L4 1H9L11 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><line x1="4" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="11" x2="9" y2="11" stroke="currentColor" stroke-width="1.2"/></svg>
+    <span class="icon-badge" id="projects-panel-count" style="display:none;">0</span>
+</div>
 <div id="projects-panel">
     <div id="projects-panel-header"><span>Projects</span><span style="font-size:0.65rem;opacity:0.45;font-style:italic;">click to drill in</span></div>
     <div class="projects-add-form"><input type="text" id="new-project-name" placeholder="New project name…" maxlength="40"><button onclick="createProjectFromInput()">+ Add</button></div>
     <div id="projects-panel-list"><div style="padding:14px 12px;font-size:0.75rem;font-style:italic;opacity:0.4;text-align:center;">No projects yet.</div></div>
 </div>
 
-<!-- Notification Panel (floating popup, triggered from bottom tab bar) -->
+<!-- Notification Panel -->
+<div id="notification-panel-toggle" class="icon-toggle-btn" title="Notifications">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C8 1.5 4 3 4 8V11.5H12V8C12 3 8 1.5 8 1.5Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><line x1="2.5" y1="11.5" x2="13.5" y2="11.5" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 11.5 C6.5 12.33 7.17 13 8 13 C8.83 13 9.5 12.33 9.5 11.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+    <span class="icon-badge" id="unread-notification-count">0</span>
+</div>
 <div id="notification-panel">
     <div id="notification-panel-header"><span>Notifications</span><button id="clear-all-notifications" style="font-size:0.68rem;padding:2px 7px;">Clear all</button></div>
     <div id="notification-list"></div>
@@ -2420,18 +2530,9 @@ function copyClientReport(projId) {
 }
 function toggleProjectsPanel() {
     projectsPanelOpen=!projectsPanelOpen;
-    const panel=document.getElementById('projects-panel');
-    const tabBtn=document.getElementById('tab-btn-projects');
-    if(projectsPanelOpen){
-        panel.classList.add('open');
-        if(tabBtn)tabBtn.classList.add('active');
-        document.getElementById('notification-panel').classList.remove('open');
-        const ntBtn=document.getElementById('tab-btn-notifs');if(ntBtn)ntBtn.classList.remove('active');
-        renderProjectsPanel();
-    } else {
-        panel.classList.remove('open');
-        if(tabBtn)tabBtn.classList.remove('active');
-    }
+    const panel=document.getElementById('projects-panel'), toggle=document.getElementById('projects-panel-toggle');
+    if(projectsPanelOpen){panel.classList.add('open');if(toggle){toggle.style.background='var(--text)';toggle.style.color='var(--bg)';}document.getElementById('notification-panel').classList.remove('open');renderProjectsPanel();}
+    else{panel.classList.remove('open');if(toggle){toggle.style.background='';toggle.style.color='';}}
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2473,9 +2574,8 @@ function initApp() {
     document.getElementById('add-task-btn').addEventListener('click', addTask);
     document.getElementById('new-task-text').addEventListener('keypress', e=>{ if(e.key==='Enter') addTask(); });
     document.getElementById('show-summary-btn').addEventListener('click', showSummary);
-    // show-reports-btn is now inside the ⋯ More dropdown (inline onclick), but keep as fallback
-    const rBtn=document.getElementById('show-reports-btn');
-    if(rBtn)rBtn.addEventListener('click', showReportsModal);
+    document.getElementById('show-summary-btn-header').addEventListener('click', showSummary);
+    document.getElementById('show-reports-btn').addEventListener('click', showReportsModal);
     document.getElementById('daily-report-toggle').addEventListener('click', ()=>toggleReportView('daily'));
     document.getElementById('weekly-report-toggle').addEventListener('click', ()=>toggleReportView('weekly'));
     document.getElementById('daily-report-date').value = today;
@@ -2488,7 +2588,7 @@ function initApp() {
     document.getElementById('weekly-report-to').value=sun.toISOString().split('T')[0];
     document.getElementById('weekly-report-generate').addEventListener('click', generateWeeklyReport);
 
-    // notification-panel-toggle is now the tab bar button (inline onclick), no listener needed
+    document.getElementById('notification-panel-toggle').addEventListener('click', toggleNotificationPanel);
     document.getElementById('clear-all-notifications').addEventListener('click', clearAllNotifications);
     document.getElementById('focus-mode-btn').addEventListener('click', toggleFocusMode);
     document.getElementById('exit-focus-btn').addEventListener('click', exitFocusMode);
