@@ -254,6 +254,8 @@
             letter-spacing: -0.01em;
             color: var(--text);
             word-break: break-word;
+            flex: 1 1 auto;
+            min-width: 0;
         }
         .task-card.in-progress .task-name { font-weight: 500; }
         .task-card:first-child .task-name { font-weight: 500; }
@@ -2311,7 +2313,7 @@ let _dragId=null;
 function dragStart(e,id){_dragId=id;e.dataTransfer.effectAllowed='move';}
 function dragEnd(){_dragId=null;document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));}
 function dragOver(e,col){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));const el=document.getElementById('col-'+col);if(el)el.classList.add('drag-over');}
-function drop(e,priority){
+function dropTask(e,priority){
     e.preventDefault();
     document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));
     if(!_dragId)return;
@@ -2582,8 +2584,16 @@ async function handleCredentialResponse(response) {
         const result = await signInWithCredential(auth, cred);
         window.currentUser = { id: result.user.uid, name: profile.name, email: profile.email, picture: profile.picture };
     } catch(e) {
-        console.warn('Firebase Auth fallback:', e);
-        window.currentUser = { id: profile.sub, name: profile.name, email: profile.email, picture: profile.picture };
+        // Real Firebase Auth session could not be created — do NOT proceed as
+        // "signed in" with a fake id. Firestore rules require a genuine
+        // request.auth, so a fake id here would just make every sync fail
+        // forever with a permission error and no way to recover without a
+        // manual reload. Surface the failure instead and let the user retry.
+        console.error('Firebase sign-in failed:', e);
+        showBanner('Sign-in failed (' + (e && e.code ? e.code : 'unknown error') + '). Please try signing in again.');
+        _googleSignInInited = false;
+        initGoogleSignIn();
+        return;
     }
     showUserUI(window.currentUser);
     window._uid = window.currentUser.id;
