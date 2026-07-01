@@ -2435,10 +2435,104 @@ function initApp() {
     setTimeout(()=>showDailyStartScreen(), 400);
 }
 
+
 function hideBanner() { const b=document.getElementById('loading-banner'); if(b)b.classList.add('hidden'); }
 function showBanner(msg) {
     const b=document.getElementById('loading-banner'), m=document.getElementById('loading-msg');
     if(b)b.classList.remove('hidden'); if(m)m.textContent=msg||'Connecting…';
+}
+
+// ─────────────────────────────────────────────────────────────
+// MISSING FUNCTIONS — restored to fix initApp() crash
+// ─────────────────────────────────────────────────────────────
+
+// loadChallengesFromStorage — loads legacy localStorage challenge into memory
+function loadChallengesFromStorage() {
+    try {
+        const raw = localStorage.getItem('dooit_21days');
+        if (raw && challenges.length === 0) {
+            const c = JSON.parse(raw);
+            if (c && c.challenge) challenges = [c];
+        }
+    } catch(e) {}
+}
+
+// Daily Start Screen — morning briefing overlay
+function showDailyStartScreen() {
+    const screen = document.getElementById('daily-start-screen');
+    if (!screen) return;
+    // Only show on first load of the day
+    const lastShown = localStorage.getItem('dooit_dss_date');
+    if (lastShown === today) return;
+
+    // Populate stats
+    const todayTasks = tasks.filter(t => t.date === today);
+    const carries    = tasks.filter(t => t.status === 'previous_unfinished');
+    const doneYest   = tasks.filter(t => {
+        const d = new Date(); d.setDate(d.getDate()-1);
+        const yd = d.toISOString().split('T')[0];
+        return t.date === yd && t.status === 'done';
+    });
+
+    const greetEl  = document.getElementById('dss-greeting');
+    const dateEl   = document.getElementById('dss-date');
+    const statEls  = document.querySelectorAll('.dss-stat-val');
+    const carriesEl = document.getElementById('dss-carries-list');
+
+    const hr = new Date().getHours();
+    const greet = hr < 12 ? 'Good morning.' : hr < 17 ? 'Good afternoon.' : 'Good evening.';
+    if (greetEl) greetEl.textContent = greet;
+    if (dateEl)  dateEl.textContent  = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+    if (statEls[0]) statEls[0].textContent = todayTasks.length;
+    if (statEls[1]) statEls[1].textContent = carries.length;
+    if (statEls[2]) statEls[2].textContent = doneYest.length;
+
+    if (carriesEl) {
+        if (carries.length === 0) {
+            carriesEl.innerHTML = '<div style="font-size:0.75rem;opacity:0.4;font-style:italic;padding:6px 0;">Nothing carried over. Clean slate!</div>';
+        } else {
+            carriesEl.innerHTML = carries.slice(0,5).map(t =>
+                `<div class="dss-carry-item"><span class="dss-carry-name">${escHtml(t.text)}</span><span class="dss-carry-date">from ${t.date}</span></div>`
+            ).join('') + (carries.length > 5 ? `<div style="font-size:0.65rem;opacity:.4;padding:4px 0;">+ ${carries.length-5} more</div>` : '');
+        }
+    }
+
+    screen.classList.add('visible');
+}
+
+function closeDailyStart(skip) {
+    const screen = document.getElementById('daily-start-screen');
+    if (screen) screen.classList.remove('visible');
+    localStorage.setItem('dooit_dss_date', today);
+
+    // If they typed a priority task, add it
+    if (!skip) {
+        const input = document.getElementById('dss-priority-input');
+        if (input && input.value.trim()) {
+            const text = input.value.trim();
+            tasks.push({
+                id: 't_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+                text, priority:'urgent', projectId:null, note:'',
+                date:today, status:'pending',
+                plannedStart:'', plannedEnd:'',
+                actualStart:null, actualEnd:null,
+                rolledOver:false, rolledOverFrom:null, breaks:[],
+                _justAdded:true
+            });
+            saveTasks(); render(); updateProductivityScore();
+        }
+    }
+}
+
+// updateTabBadges — stub (tab bar removed, kept for safety)
+function updateTabBadges() {
+    // Tab bar was removed; badge counts now live in focus ribbon
+    const total = tasks.filter(t => t.date === today && t.status !== 'done').length;
+    const planBadge = document.getElementById('tab-badge-plan');
+    const habBadge  = document.getElementById('tab-badge-habits');
+    if (planBadge) { const pt = ptTasks.urgent.length+ptTasks.important.length+ptTasks.later.length; planBadge.textContent=pt; planBadge.style.display=pt>0?'flex':'none'; }
+    if (habBadge)  { const act = challenges.filter(c=>{if(!c.challenge)return false;const idx=getTodayIdxForChallenge(c);return idx>=0&&idx<21&&!isChallengeCheckedToday(c);}).length + routines.filter(r=>!r._hidden&&routineStatus(r)==='due').length; habBadge.textContent=act; habBadge.style.display=act>0?'flex':'none'; }
 }
 </script>
 
