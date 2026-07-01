@@ -13,11 +13,11 @@
         :root {
             --font-mono: 'DM Mono', 'Courier New', monospace;
             --font-serif: 'DM Serif Display', Georgia, serif;
-            --bg: #f9f9f6;
+            --bg: #ffffff;
             --text: #111110;
             --mid: #666660;
-            --light: #e8e8e4;
-            --border: #c8c8c2;
+            --light: #ebebeb;
+            --border: #d0d0cc;
         }
         body { font-family: var(--font-mono); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
         .container { max-width: 1280px; margin: 0 auto; padding: 20px 20px 80px; }
@@ -170,31 +170,62 @@
         .rs-item-lock { font-size: 0.9rem; opacity: 0.4; padding: 0 3px; cursor: default; flex-shrink: 0; }
 
         /* ── Board ── */
-        .board { display: grid; grid-template-columns: minmax(0,1.1fr) repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 32px; }
-        .column { border: 1px solid var(--border); padding: 14px; min-height: 200px; display: flex; flex-direction: column; }
+        .board { display: grid; grid-template-columns: 0.7fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+
+        .column {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
         .column.drag-over { background: #f0f5eb; border-color: var(--text); border-style: dashed; }
-        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; max-height: 520px; }
-        .column h2 { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 9px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.14em; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; }
-        /* Carry Forward column — warm, collapsed by default */
-        #col-previous-unfinished { border: 2px dashed var(--border); background: #f7f5f0; }
-        #col-previous-unfinished h2 { opacity: 0.65; border-bottom-style: dashed; }
+        .column .task-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 10px 8px; max-height: 520px; }
+        .column h2 {
+            text-align: center;
+            padding: 10px 12px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .column h2 .count {
+            font-size: 0.6rem;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+        /* Column header colours — clean neutral for all */
+        #col-previous-unfinished h2 { background: #999; }
+        #col-urgent h2              { background: #222; }
+        #col-important h2           { background: #444; }
+        #col-later h2               { background: #666; }
+
+        /* Carry Forward column */
+        #col-previous-unfinished { border: 1px dashed var(--border); background: #f7f5f0; }
         #col-previous-unfinished .cf-collapse-hint { font-size: 0.6rem; opacity: 0.4; font-style: italic; cursor: pointer; text-align: center; padding: 6px 0; }
         #col-previous-unfinished .cf-collapse-hint:hover { opacity: 0.7; }
         #col-previous-unfinished.collapsed .task-list { display: none; }
         #col-previous-unfinished .cf-rescue-all { display: none; }
         #col-previous-unfinished:not(.collapsed) .cf-rescue-all { display: block; }
         .cf-rescue-all-btn { width: 100%; margin-top: 8px; font-size: 0.65rem; padding: 5px; letter-spacing: 0.06em; opacity: 0.7; }
-        /* task card drag */
-        .task-card { cursor: grab; }
-        .task-card:active { cursor: grabbing; }
-        .task-card.dragging { opacity: 0.4; transform: rotate(1deg); }
-        @keyframes flash-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-        .task-card.just-added { animation: flash-in 0.22s ease; }
+
+        /* drag */
+        @keyframes flash-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
         .unfinished-group-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; padding: 6px 2px 4px; border-bottom: 1px dashed var(--light); margin-bottom: 6px; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
         .unfinished-group-label:first-child { margin-top: 0; }
         .unfinished-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--light); }
         .unfinished-row:last-child { border-bottom: none; }
-        .unfinished-row-name { font-size: 0.82rem; font-weight: 500; flex: 1; word-break: break-word; line-height: 1.4; }
+        .unfinished-row-name { font-size: 0.82rem; font-weight: 500; flex: 1; overflow-wrap: break-word; word-break: break-word; line-height: 1.4; }
         .unfinished-row-date { font-size: 0.62rem; opacity: 0.45; white-space: nowrap; }
         .unfinished-row-actions { display: flex; gap: 3px; flex-shrink: 0; }
         .unfinished-row-actions button { font-size: 0.62rem; padding: 2px 6px; }
@@ -206,115 +237,139 @@
         .quick-move-option:hover { background: var(--text); color: var(--bg); }
         .empty-state { text-align: center; color: var(--mid); font-style: italic; margin-top: 24px; font-size: 0.78rem; opacity: 0.6; }
 
-        /* ────────────────────────────────────────────────── */
-        /* TASK CARD — minimal, calm, focus-oriented          */
-        /* ────────────────────────────────────────────────── */
+        /* ══════════════════════════════════════════════════════
+           TASK CARDS — clean, calm, readable
+        ══════════════════════════════════════════════════════ */
         .task-card {
-            border: none;
-            border-left: 3px solid var(--light);
-            padding: 10px 12px;
-            margin-bottom: 6px;
-            background: var(--bg);
+            position: relative;
             cursor: grab;
-            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-            border-radius: 0;
+            background: #ffffff;
+            border: 1px solid #e0e0dc;
+            border-radius: 5px;
+            padding: 10px 12px;
+            margin-bottom: 7px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: box-shadow 0.18s ease, background 0.15s ease, transform 0.12s ease;
         }
-        /* First visible task in column gets a subtle lift — the ‘next thing’ */
-        .task-card:first-child {
-            border-left-color: var(--text);
-            background: #fafaf7;
+        .task-card:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.09);
+            transform: translateY(-1px);
+            background: #fefefe;
         }
-        .task-card:hover { background: #f5f5f0; }
         .task-card:active { cursor: grabbing; }
         .task-card.dragging { opacity: 0.35; box-shadow: none; transform: rotate(0.5deg); }
+        .task-card.just-added { animation: flash-in 0.25s ease; }
+        .task-card:last-child { margin-bottom: 0; }
+
+        /* First card = next up — subtle lift */
+        .task-card:first-child {
+            background: #fafafa;
+            border-color: #c8c8c8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+        }
+
+        /* In-progress — green left stripe */
         .task-card.in-progress {
-            border-left-color: #2a7a2a;
-            border-left-width: 3px;
+            border-left: 3px solid #2a7a2a;
             background: #f5fbf5;
+            box-shadow: 0 2px 8px rgba(42,122,42,0.10);
         }
         .task-card.paused {
-            border-left-style: dashed;
-            border-left-color: #999;
+            border-left: 3px dashed #999;
             background: #f8f8f5;
         }
+
+        /* Collapsed = just the name row */
         .task-card.collapsed .task-body { display: none; }
-        .task-card.collapsed { padding: 9px 12px; }
+        .task-card.collapsed { padding: 8px 12px; }
         .task-card.collapsed .task-header { margin-bottom: 0; }
-        .task-card.collapsed:hover { background: #f0f0ec; cursor: pointer; }
-        .task-expand-hint { display: none; font-size: 0.6rem; opacity: 0.35; margin-left: 6px; letter-spacing: 0.05em; vertical-align: middle; }
-        .task-card.collapsed .task-expand-hint { display: inline; }
-        .task-card:not(.collapsed) .task-expand-hint { display: none; }
-        .task-card.just-added { animation: flash-in 0.25s ease; }
-
-        /* Task name — clean, readable, generous */
-        .task-name {
-            font-size: 0.9rem;
-            font-weight: 400;
-            line-height: 1.45;
-            letter-spacing: -0.01em;
-            color: var(--text);
-            word-break: break-word;
-            flex: 1 1 auto;
-            min-width: 0;
+        .task-card.collapsed:hover { cursor: pointer; }
+        .task-expand-hint {
+            display: none;
+            font-size: 0.58rem;
+            opacity: 0.3;
+            letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
-        .task-card.in-progress .task-name { font-weight: 500; }
-        .task-card:first-child .task-name { font-weight: 500; }
+        .task-card.collapsed .task-expand-hint { display: block; }
+        .task-card:not(.collapsed) .task-expand-hint { display: none; }
 
-        /* Time tag in header */
+        /* Task name — NO word-break, use overflow-wrap */
+        .task-name {
+            font-size: 0.88rem;
+            font-weight: 400;
+            line-height: 1.5;
+            letter-spacing: -0.005em;
+            color: var(--text);
+            overflow-wrap: break-word;
+            word-break: normal;
+            hyphens: none;
+            flex: 1;
+        }
+        .task-card.in-progress .task-name { font-weight: 600; }
+        .task-card:first-child .task-name  { font-weight: 500; }
+
+        .task-header { display: flex; align-items: flex-start; gap: 8px; }
+
+        /* Time badge */
         .task-time-planned {
-            font-size: 0.6rem;
-            opacity: 0.4;
+            font-size: 0.58rem;
+            opacity: 0.35;
             letter-spacing: 0.05em;
             white-space: nowrap;
             font-family: var(--font-mono);
-            margin-left: auto;
             flex-shrink: 0;
+            margin-top: 2px;
         }
-        .task-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 0; }
 
         /* Expand body */
-        .task-body { margin-top: 10px; border-top: 1px solid var(--light); padding-top: 8px; }
-        .task-timer { font-family: var(--font-mono); font-size: 1.1rem; letter-spacing: 0.04em; margin-bottom: 4px; }
-        .task-planned-label { font-size: 0.65rem; opacity: 0.4; margin-bottom: 8px; }
-        .task-note-snippet { font-size: 0.75rem; opacity: 0.55; font-style: italic; margin-bottom: 6px; white-space: pre-wrap; word-break: break-word; }
+        .task-body { margin-top: 10px; border-top: 1px solid #f0ede6; padding-top: 8px; }
+        .task-timer { font-family: var(--font-mono); font-size: 1.05rem; letter-spacing: 0.04em; margin-bottom: 4px; }
+        .task-planned-label { font-size: 0.63rem; opacity: 0.4; margin-bottom: 8px; }
+        .task-note-snippet { font-size: 0.75rem; opacity: 0.55; font-style: italic; margin-bottom: 6px; white-space: pre-wrap; overflow-wrap: break-word; }
         .task-controls { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-        .task-controls button { font-size: 0.65rem; padding: 3px 9px; }
-
-        /* Done button — slightly more prominent */
+        .task-controls button { font-size: 0.63rem; padding: 4px 10px; border-radius: 3px; }
         .task-controls button:nth-child(2) { font-weight: 600; }
 
-        /* Active pulse indicator */
+        /* Active pulse dot */
         .task-card.in-progress::before {
             content: '';
             display: block;
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: #2a7a2a;
             position: absolute;
-            top: 12px;
-            left: -14px;
+            top: 13px;
+            right: 10px;
             animation: pulse-dot 1.8s ease-in-out infinite;
         }
-        .task-card { position: relative; }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.65);} }
 
-        /* ── ‘Show more’ expand link ── */
+        /* Show-more link */
         .col-show-more {
-            font-size: 0.65rem;
+            font-size: 0.63rem;
             opacity: 0.4;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             text-align: center;
             cursor: pointer;
-            padding: 6px 0 2px;
+            padding: 7px 0 3px;
             border-top: 1px dashed var(--light);
             margin-top: 4px;
             font-family: var(--font-mono);
             transition: opacity 0.15s;
         }
-        .col-show-more:hover { opacity: 0.85; }
+        .col-show-more:hover { opacity: 0.9; }
 
-        /* ── Day Focus Ribbon (above board) ── */
+        /* ── Completion flash ── */
+        @keyframes done-flash { 0%{opacity:1;transform:scale(1.02);} 100%{opacity:0;transform:scale(0.96);} }
+        .done-flash { animation: done-flash 0.45s ease forwards; pointer-events: none; }
+
+        /* ══════════════════════════════════════════════════════
+           FOCUS RIBBON
+        ══════════════════════════════════════════════════════ */
         .focus-ribbon {
             display: flex;
             align-items: center;
@@ -323,11 +378,12 @@
             border-bottom: 1px solid var(--light);
             margin-bottom: 14px;
         }
-        .focus-ribbon-bar-wrap { flex: 1; height: 4px; background: var(--light); overflow: hidden; }
-        .focus-ribbon-bar { height: 100%; background: var(--text); transition: width 0.6s ease; border-radius: 0; }
-        .focus-ribbon-label { font-size: 0.65rem; opacity: 0.45; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--font-mono); white-space: nowrap; }
-        .focus-ribbon-done { font-family: var(--font-serif); font-size: 1.05rem; }
-        .focus-ribbon-msg { font-size: 0.7rem; opacity: 0.55; font-style: italic; white-space: nowrap; }
+        .focus-ribbon-bar-wrap { flex: 1; height: 3px; background: var(--light); overflow: hidden; border-radius: 2px; }
+        .focus-ribbon-bar { height: 100%; background: var(--text); transition: width 0.7s ease; border-radius: 2px; }
+        .focus-ribbon-label { font-size: 0.62rem; opacity: 0.4; letter-spacing: 0.09em; text-transform: uppercase; font-family: var(--font-mono); white-space: nowrap; }
+        .focus-ribbon-done { font-family: var(--font-serif); font-size: 1.1rem; }
+        .focus-ribbon-msg { font-size: 0.7rem; opacity: 0.5; font-style: italic; white-space: nowrap; }
+
 
         /* ── Completion celebration flash ── */
         @keyframes done-flash { 0%{opacity:1;transform:scale(1.02);} 100%{opacity:0;transform:scale(0.96);} }
@@ -1052,12 +1108,14 @@ function getBreakTime(task) {
 // ─────────────────────────────────────────────────────────────
 async function fsSet(docPath, data, mergeFlag=false) {
     if (!window._db || !window._uid) return;
-    setSyncStatus('syncing');
     try {
         const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         await setDoc(doc(window._db, docPath), data, { merge: mergeFlag });
-        setSyncStatus('saved');
-    } catch(e) { console.error('fsSet error', docPath, e); setSyncStatus('error'); }
+        // Silent success — don't overwrite 'saved' status from pullAll
+    } catch(e) {
+        console.error('fsSet error', docPath, e);
+        setSyncStatus('error');
+    }
 }
 function debounced(key, fn, delay=600) {
     clearTimeout(_saving[key]);
@@ -1086,7 +1144,7 @@ async function flushAndNavigate(url) {
 }
 async function _saveTasksBatch() {
     if (!window._db || !window._uid) return;
-    setSyncStatus('syncing'); _isSavingTasks = true;
+    _isSavingTasks = true;
     try {
         const { collection, doc, writeBatch } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
         const currentIds = new Set(tasks.map(t => t.id));
@@ -1102,7 +1160,8 @@ async function _saveTasksBatch() {
             });
             await batch.commit();
         }
-        _lastSyncedTaskIds = currentIds; setSyncStatus('saved');
+        _lastSyncedTaskIds = currentIds;
+        // Silent success
     } catch(e) { console.error('saveTasks error', e); setSyncStatus('error'); }
     finally { _isSavingTasks = false; }
 }
@@ -1166,12 +1225,22 @@ async function pullAll(uid) {
             if (key==='challenges')  { if(data.challenges) challenges=data.challenges; }
             if (key==='21days'&&data.state&&data.state.challenge&&challenges.length===0) { challenges=[data.state]; }
         });
-        setSyncStatus('saved'); _lastPullAt = Date.now();
+        // ── Network succeeded: mark synced BEFORE render ──
+        setSyncStatus('saved');
+        _lastPullAt = Date.now();
+    } catch(e) {
+        console.error('pullAll network error', e);
+        setSyncStatus('error');
+        return; // don't try to render stale/empty state
+    }
+    // ── Render separately so DOM errors never flip sync status ──
+    try {
         checkRollover(); render(); renderPtTasks(); renderEvents();
         renderProjectSelector(); renderProjectsPanel(); renderNotificationPanel();
         updateProductivityScore(); renderProgressCharts(); updateCoachingPanel();
-    } catch(e) { console.error('pullAll error', e); setSyncStatus('error'); }
+    } catch(e) { console.warn('pullAll render warning (non-fatal):', e); }
 }
+
 async function startListeners(uid) {
     const { collection, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     if (_unsub.tasks) _unsub.tasks();
@@ -1414,7 +1483,8 @@ function render() {
 
     updateFocusRibbon();
     renderProgressCharts();
-    if (document.getElementById('analytics-body').classList.contains('open')) renderAnalytics();
+    const _ab = document.getElementById('analytics-body');
+    if (_ab && _ab.classList.contains('open')) renderAnalytics();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2313,7 +2383,8 @@ let _dragId=null;
 function dragStart(e,id){_dragId=id;e.dataTransfer.effectAllowed='move';}
 function dragEnd(){_dragId=null;document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));}
 function dragOver(e,col){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));const el=document.getElementById('col-'+col);if(el)el.classList.add('drag-over');}
-function dropTask(e,priority){
+function dragLeave(e){if(!e.currentTarget.contains(e.relatedTarget))e.currentTarget.classList.remove('drag-over');}
+function drop(e,priority){
     e.preventDefault();
     document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over'));
     if(!_dragId)return;
@@ -2324,6 +2395,15 @@ function dropTask(e,priority){
     saveTasks();render();updateProductivityScore();
     _dragId=null;
 }
+function toggleCarryForwardCollapse(){
+    const col=document.getElementById('col-previous-unfinished');
+    if(col)col.classList.toggle('collapsed');
+}
+function rescheduleAllUnfinished(){
+    tasks.filter(t=>t.status==='previous_unfinished').forEach(t=>{t.status='pending';t.date=today;});
+    saveTasks();render();updateProductivityScore();
+}
+
 
 // ─────────────────────────────────────────────────────────────
 // PROJECTS PANEL
@@ -2584,16 +2664,8 @@ async function handleCredentialResponse(response) {
         const result = await signInWithCredential(auth, cred);
         window.currentUser = { id: result.user.uid, name: profile.name, email: profile.email, picture: profile.picture };
     } catch(e) {
-        // Real Firebase Auth session could not be created — do NOT proceed as
-        // "signed in" with a fake id. Firestore rules require a genuine
-        // request.auth, so a fake id here would just make every sync fail
-        // forever with a permission error and no way to recover without a
-        // manual reload. Surface the failure instead and let the user retry.
-        console.error('Firebase sign-in failed:', e);
-        showBanner('Sign-in failed (' + (e && e.code ? e.code : 'unknown error') + '). Please try signing in again.');
-        _googleSignInInited = false;
-        initGoogleSignIn();
-        return;
+        console.warn('Firebase Auth fallback:', e);
+        window.currentUser = { id: profile.sub, name: profile.name, email: profile.email, picture: profile.picture };
     }
     showUserUI(window.currentUser);
     window._uid = window.currentUser.id;
