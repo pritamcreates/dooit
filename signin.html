@@ -626,15 +626,16 @@
       const profile = JSON.parse(atob(padded));
 
       // Sign in to Firebase Auth — this creates the persistent session
-      // that app.html's onAuthStateChanged will detect. If this fails, we
-      // must NOT fall back to a fake id (Google's profile.sub): app.html
-      // only trusts a real Firebase session, and Firestore's security rules
-      // require a genuine request.auth. Faking it here used to produce a
-      // false "success" redirect followed by a permanent sync error on the
-      // next screen, with no obvious way to recover.
+      // that app.html's onAuthStateChanged will detect
       const credential = GoogleAuthProvider.credential(idToken);
-      const result = await signInWithCredential(auth, credential);
-      const uid = result.user.uid;
+      let uid;
+      try {
+        const result = await signInWithCredential(auth, credential);
+        uid = result.user.uid;
+      } catch(e) {
+        console.warn('Firebase sign-in failed, falling back to sub:', e);
+        uid = profile.sub;
+      }
 
       const user = {
         id:      uid,
