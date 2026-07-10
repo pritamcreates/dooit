@@ -1,13 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>dooit — task &amp; time tracker for freelancers</title>
-<meta content="Your time is your income. dooit helps freelancers and solopreneurs track tasks, measure focus, and reclaim their day. Free to start." name="description"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dooit — task & time tracker</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Google Identity Services for One-Tap -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <script type="module">
+        import { navigate } from './src/router.js';
+        
+        // Dynamically load CSS based on route (or we could just load them all)
+        const loadCSS = (href) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        };
+        
+        loadCSS('src/styles/main.css');
+        loadCSS('src/styles/board.css');
+        loadCSS('src/styles/components.css');
+        loadCSS('src/styles/index.css'); // landing page specific
+        loadCSS('src/styles/calendar.css');
+        loadCSS('src/styles/21days.css');
+        loadCSS('src/styles/signin.css');
 
-<link href="src/styles/index.css" rel="stylesheet"/></head>
-<body><script src="src/views/index.js" type="module"></script></body>
+        // Start routing
+        document.addEventListener('DOMContentLoaded', () => {
+            navigate(window.location.pathname);
+        });
+    </script>
+</body>
 </html>
