@@ -32,14 +32,19 @@ export async function navigate(path) {
   }
 }
 
-// Intercept global link clicks
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a');
-  if (link && link.href && link.href.startsWith(window.location.origin)) {
-    e.preventDefault();
-    const path = link.pathname;
-    window.history.pushState({}, '', path);
-    navigate(path);
+  if (link && link.href) {
+    const url = new URL(link.href);
+    if (url.origin === window.location.origin) {
+      if (url.pathname !== window.location.pathname) {
+        e.preventDefault();
+        window.history.pushState({}, '', url.pathname + url.search + url.hash);
+        navigate(url.pathname);
+      } else if (url.hash) {
+        // Same path, just a hash change. Let the browser handle it natively.
+      }
+    }
   }
 });
 

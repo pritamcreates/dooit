@@ -13,7 +13,7 @@ export function render() {
 </div>
 <div class="header-actions">
 <span id="sync-status" style="font-size:0.6rem;opacity:0.45;letter-spacing:0.05em;align-self:center;"></span>
-<button onclick="window.location.href='app.html'">← Back to App</button>
+<button onclick="window.flushAndNavigate('/app')">← Back to App</button>
 <button id="btn-export" onclick="exportLog()" style="display:none;">Export Log</button>
 <button id="btn-edit" onclick="openEditMode()" style="display:none;">Edit Challenge</button>
 <button id="btn-reset" onclick="confirmReset()" style="opacity:0.5;">Reset</button>

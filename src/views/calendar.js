@@ -10,7 +10,7 @@ export function render() {
 <span class="page-title-label">calendar</span>
 </div>
 <div class="page-header-right">
-<button class="back-btn" onclick="window.location.href='app.html'">← Back to Dashboard</button>
+<button class="back-btn" onclick="window.flushAndNavigate('/app')">← Back to Dashboard</button>
 </div>
 </div>
 <div class="app">

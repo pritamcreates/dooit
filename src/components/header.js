@@ -142,8 +142,4 @@ export function toggleMoreMenu() {
 
 window.toggleMoreMenu = toggleMoreMenu;
 
-window.flushAndNavigate = (url) => {
-  // If debounced saves exist, this requires forcing them or waiting.
-  // Assuming 'db.js' saves are immediate or cache handles it.
-  window.location.href = url;
-};
+

@@ -303,7 +303,7 @@ export function render() {
 <div id="waitlist-form-area">
 <h3>Join the waitlist</h3>
 <p class="sub">Takes 20 seconds. No credit card.</p>
-<form id="waitlist-form" onsubmit="handleWaitlist(event)">
+<form id="waitlist-form">
 <div class="form-row">
 <label for="wl-name">Your name</label>
 <input id="wl-name" placeholder="Pritam Chhetri" required="" type="text"/>
@@ -351,20 +351,21 @@ export function render() {
     
     // Execute inline scripts
     
-  function handleWaitlist(e) {
-    e.preventDefault();
-    const name  = document.getElementById('wl-name').value.trim();
-    const email = document.getElementById('wl-email').value.trim();
-    const role  = document.getElementById('wl-role').value.trim();
+  const waitlistForm = document.getElementById('waitlist-form');
+  if (waitlistForm) {
+    waitlistForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name  = document.getElementById('wl-name').value.trim();
+      const email = document.getElementById('wl-email').value.trim();
+      const role  = document.getElementById('wl-role').value.trim();
 
-    // Store locally so you can collect entries even without a backend
-    const entries = JSON.parse(localStorage.getItem('dooit_waitlist') || '[]');
-    entries.push({ name, email, role, date: new Date().toISOString() });
-    localStorage.setItem('dooit_waitlist', JSON.stringify(entries));
+      const entries = JSON.parse(localStorage.getItem('dooit_waitlist') || '[]');
+      entries.push({ name, email, role, date: new Date().toISOString() });
+      localStorage.setItem('dooit_waitlist', JSON.stringify(entries));
 
-    // Show success state
-    document.getElementById('waitlist-form-area').style.display = 'none';
-    document.getElementById('success-msg').style.display = 'block';
+      document.getElementById('waitlist-form-area').style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+    });
   }
 
   // Smooth active nav link highlight on scroll
