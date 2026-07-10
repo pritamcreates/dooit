@@ -1,9 +1,7 @@
 
 export function render() {
     const content = `
- ════════════════════════════════════
-     NAV
-════════════════════════════════════ 
+
 <nav>
 <div class="nav-inner">
 <div class="nav-brand">
@@ -18,9 +16,7 @@ export function render() {
 </div>
 </div>
 </nav>
- ════════════════════════════════════
-     HERO
-════════════════════════════════════ 
+
 <section class="hero">
 <div class="container">
 <div class="hero-grid">
@@ -122,9 +118,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     TRUTH NUMBERS
-════════════════════════════════════ 
+
 <section class="truth-strip">
 <div class="container">
 <div class="truth-inner">
@@ -143,9 +137,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     FEATURES
-════════════════════════════════════ 
+
 <section class="features" id="features">
 <div class="container">
 <div class="section-header">
@@ -221,9 +213,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     HOW IT WORKS
-════════════════════════════════════ 
+
 <section class="how">
 <div class="container">
 <div class="section-header">
@@ -251,9 +241,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     PROOF / WHY IT MATTERS
-════════════════════════════════════ 
+
 <section class="proof">
 <div class="container">
 <div class="proof-inner">
@@ -282,9 +270,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     WAITLIST
-════════════════════════════════════ 
+
 <section class="waitlist" id="waitlist">
 <div class="container">
 <div class="waitlist-inner">
@@ -328,9 +314,7 @@ export function render() {
 </div>
 </div>
 </section>
- ════════════════════════════════════
-     FOOTER
-════════════════════════════════════ 
+
 <footer>
 <div class="container">
 <div class="footer-inner">

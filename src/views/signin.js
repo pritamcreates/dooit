@@ -1,7 +1,6 @@
 
 export function render() {
     const content = `
- ── Top bar ── 
 <div class="topbar">
 <a class="brand" href="index.html">
 <span class="brand-name">dooit</span>
@@ -11,7 +10,6 @@ export function render() {
     ← <span>Back to homepage</span>
 </a>
 </div>
- ── Main ── 
 <div class="page-body">
 <!-- Left: value prop -->
 <div class="left-panel">
