@@ -1,5 +1,5 @@
 
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
     const content = `
  ── Top bar ── 
 <div class="topbar">
@@ -279,4 +279,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-});
+}

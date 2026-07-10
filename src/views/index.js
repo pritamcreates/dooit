@@ -1,5 +1,5 @@
 
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
     const content = `
  ════════════════════════════════════
      NAV
@@ -389,4 +389,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-});
+}

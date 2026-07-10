@@ -1,5 +1,5 @@
 
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
     const content = `
 <div class="container">
 <!-- ══════════════════════════════════════
@@ -316,7 +316,7 @@ let modalMoodVal = null;
 // ════════════════════════════════════
 // BOOT
 // ════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
   buildMiniChain();
   loadState();
   renderQuote();
@@ -1026,4 +1026,4 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-});
+}

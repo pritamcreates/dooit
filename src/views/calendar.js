@@ -1,5 +1,5 @@
 
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
     const content = `
  TOP HEADER 
 <div class="page-header">
@@ -659,4 +659,4 @@ document.addEventListener('keydown',e=>{
 })();
 
 
-});
+}

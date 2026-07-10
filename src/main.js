@@ -18,7 +18,10 @@ import { initAnalytics, renderProgressCharts, renderDoneList } from './component
 import { initNotifications, renderNotifications } from './components/notifications.js';
 import { initProjects, renderProjects } from './components/projects.js';
 
-async function bootstrap() {
+let bootstrapped = false;
+export async function bootstrap() {
+  if (bootstrapped) return;
+  bootstrapped = true;
   // Initialize component event listeners
   initHeader();
   initBoard();
@@ -50,7 +53,7 @@ async function bootstrap() {
   });
 }
 
-function _renderAll() {
+export function _renderAll() {
   renderBoard();
   renderPlanTomorrow();
   renderChallenges();
@@ -61,6 +64,3 @@ function _renderAll() {
   renderNotifications();
   renderProjects();
 }
-
-// Start application
-document.addEventListener('DOMContentLoaded', bootstrap);

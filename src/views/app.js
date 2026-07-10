@@ -1,5 +1,6 @@
+import { bootstrap } from "../main.js";
 
-document.addEventListener('DOMContentLoaded', () => {
+export function render() {
     const content = `
 <div id="loading-banner" style="display:none;">
 <span id="loading-msg">Connecting…</span>
@@ -288,6 +289,5 @@ document.addEventListener('DOMContentLoaded', () => {
 `;
     document.body.insertAdjacentHTML('afterbegin', content);
     
-    // Execute inline scripts
-    
-});
+    bootstrap();
+}
