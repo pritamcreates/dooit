@@ -60,8 +60,8 @@ export function render() {
 <div class="more-menu-container">
 <button class="more-menu-btn" onclick="window.toggleMoreMenu()">•••</button>
 <div class="more-menu-dropdown" id="more-menu-dropdown">
-<button onclick="window.flushAndNavigate('calendar.html')">Calendar</button>
-<button onclick="window.flushAndNavigate('21days.html')">21 Days</button>
+<button onclick="window.flushAndNavigate('/calendar')">Calendar</button>
+<button onclick="window.flushAndNavigate('/21days')">21 Days</button>
 <button id="focus-mode-btn">Focus Mode</button>
 </div>
 </div>

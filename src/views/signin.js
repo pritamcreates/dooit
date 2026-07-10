@@ -128,7 +128,7 @@ export function render() {
 <div class="success-icon">✓</div>
 <h3 id="success-name">Welcome back.</h3>
 <p id="success-sub">Syncing your tasks now. You'll be redirected automatically.</p>
-<a class="go-btn" href="app.html" id="go-btn">Open dooit →</a>
+<a class="go-btn" href="/app" id="go-btn">Open dooit →</a>
 <div class="progress-bar">
 <div class="progress-fill" id="progress-fill"></div>
 </div>
@@ -183,7 +183,10 @@ export function render() {
         document.getElementById('progress-fill').style.width = '100%';
       });
     });
-    setTimeout(() => { window.location.href = APP_URL; }, 2800);
+    setTimeout(() => { 
+      if (window.flushAndNavigate) window.flushAndNavigate('/app');
+      else window.location.href = '/app';
+    }, 2800);
   }
 
   // ── Check Firebase session first (handles page refresh / return visits) ──

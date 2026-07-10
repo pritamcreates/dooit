@@ -11,8 +11,8 @@ export function render() {
 <div class="nav-links">
 <a class="btn" href="#features">Features</a>
 <a class="btn" href="#waitlist">Early Access</a>
-<a class="btn" href="21days.html">21 Days Challenge</a>
-<a class="btn btn-primary" href="signin.html">Open App →</a>
+<a class="btn" href="/21days">21 Days Challenge</a>
+<a class="btn btn-primary" href="/signin">Open App →</a>
 </div>
 </div>
 </nav>
@@ -320,10 +320,10 @@ export function render() {
 <div class="footer-inner">
 <span class="footer-brand">dooit</span>
 <div class="footer-links">
-<a href="signin.html">Open app</a>
+<a href="/signin">Open app</a>
 <a href="#features">Features</a>
 <a href="#waitlist">Early access</a>
-<a href="21days.html">21 Days Challenge</a>
+<a href="/21days">21 Days Challenge</a>
 </div>
 <span class="footer-copy">© 2026 dooit · Built with focus.</span>
 </div>
