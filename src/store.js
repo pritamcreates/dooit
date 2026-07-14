@@ -1,50 +1,58 @@
+// src/store.js
 /**
- * @module store
- * @description Shared application state. Imported as a mutable singleton
- *   by all components — mutations are immediately visible everywhere.
- *   Deliberately imperative; reactivity is driven by explicit render calls.
- */
-
-/** @type {string} ISO date string for today, e.g. "2025-07-10" */
-const _today = new Date().toISOString().split('T')[0];
-
-/**
- * Central application state.
- * All components import this object and mutate it directly.
- * After mutations, components call the relevant render function.
- *
- * @typedef {Object} AppState
+ * Simple global store for in‑memory state management.
+ * This follows the pattern used throughout the project – a mutable object
+ * that components can import and modify directly. For a production app,
+ * you would replace this with a proper state library or persistent storage.
  */
 export const state = {
-  // ── Task data ──────────────────────────────────────────────
-  tasks:          [],
-  activeTaskId:   null,
-  today:          _today,
-
-  // ── Plan Tomorrow ──────────────────────────────────────────
-  ptTasks: { urgent: [], important: [], later: [] },
-  ptOpen:  false,
-
-  // ── Projects ───────────────────────────────────────────────
-  projectDefs:       [],
-  selectedProjectId: null,
-
-  // ── Events ─────────────────────────────────────────────────
-  upcomingEvents: [],
-
-  // ── Routines & Challenges ──────────────────────────────────
-  routines:   [],
-  challenges: [],
-
-  // ── Notifications ──────────────────────────────────────────
-  currentDayNotifications: [],
-  firedNotifications:      new Set(),
-  firedEventNotifications: new Set(),
-  notificationPermissionGranted: false,
-
-  // ── UI State ───────────────────────────────────────────────
-  isFocusMode:         false,
-  activeProgressTab:   'day',
-  analyticsWeekOffset: 0,
-  projectsPanelOpen:   false,
+  // Task objects: { id, title, priority, dueDate, completed }
+  tasks: [],
+  // Simple notification objects: { id, message, read }
+  notifications: [],
+  // Currently signed‑in user (null when not authenticated)
+  user: null,
 };
+
+let nextTaskId = 1;
+let nextNotificationId = 1;
+
+export function addTask({ title, priority = 'Low', dueDate = null }) {
+  const task = {
+    id: nextTaskId++,
+    title,
+    priority,
+    dueDate,
+    completed: false,
+  };
+  state.tasks.push(task);
+  return task;
+}
+
+export function toggleTaskComplete(taskId) {
+  const task = state.tasks.find((t) => t.id === taskId);
+  if (task) {
+    task.completed = !task.completed;
+  }
+  return task;
+}
+
+export function addNotification(message) {
+  const notification = {
+    id: nextNotificationId++,
+    message,
+    read: false,
+  };
+  state.notifications.push(notification);
+  return notification;
+}
+
+export function markNotificationRead(notificationId) {
+  const n = state.notifications.find((n) => n.id === notificationId);
+  if (n) n.read = true;
+  return n;
+}
+
+export function clearNotifications() {
+  state.notifications = [];
+}

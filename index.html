@@ -1,39 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dooit — task & time tracker</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-    
-    <!-- Google Identity Services for One-Tap -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-    <script type="module">
-        import { navigate } from './src/router.js';
-        
-        // Dynamically load CSS based on route (or we could just load them all)
-        const loadCSS = (href) => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-        };
-        
-        loadCSS('src/styles/main.css');
-        loadCSS('src/styles/board.css');
-        loadCSS('src/styles/components.css');
-        loadCSS('src/styles/index.css'); // landing page specific
-        loadCSS('src/styles/calendar.css');
-        loadCSS('src/styles/21days.css');
-        loadCSS('src/styles/signin.css');
-
-        // Start routing
-        navigate(window.location.pathname);
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dooit - The All-In-One Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-black text-white antialiased font-inter">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
