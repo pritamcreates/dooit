@@ -298,16 +298,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-24 text-center">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
-        >
-          <Sparkles size={13} className="text-[#F5B800]" />
-          <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Dooit 2.0 is Live</span>
-        </motion.div>
+
 
         {/* Headline - clean white, no gradient */}
         <motion.h1

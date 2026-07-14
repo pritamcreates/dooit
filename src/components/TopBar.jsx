@@ -1,35 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Command, Bell, Settings, LogOut, User, ChevronRight, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../context/StoreContext';
+import { logoutUser } from '../services/firebase';
 
-const SAMPLE_NOTIFICATIONS = [
-  {
-    id: 1, unread: true, type: 'mention',
-    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Aria&backgroundColor=b6e3f4',
-    title: 'Alice mentioned you', body: 'Hey, can you review the Q4 roadmap?',
-    time: '2m ago',
-  },
-  {
-    id: 2, unread: true, type: 'task',
-    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob&backgroundColor=c0aede',
-    title: 'Task assigned to you', body: '"Design the onboarding flow" is now yours.',
-    time: '18m ago',
-  },
-  {
-    id: 3, unread: false, type: 'comment',
-    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Carol&backgroundColor=d1d4f9',
-    title: 'Carol commented', body: 'Looks great! Just a few minor tweaks needed.',
-    time: '1h ago',
-  },
-  {
-    id: 4, unread: false, type: 'update',
-    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=David&backgroundColor=ffd5dc',
-    title: 'Project status updated', body: '"Website Redesign" moved to In Review.',
-    time: '3h ago',
-  },
-];
+const SAMPLE_NOTIFICATIONS = [];
+
 
 export default function TopBar({ onOpenCommandPalette }) {
+  const { user } = useStore();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
@@ -38,6 +17,19 @@ export default function TopBar({ onOpenCommandPalette }) {
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
+  const handleSignOut = async () => {
+    try {
+      await logoutUser();
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const userDisplayName = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const userEmail = user?.email || 'user@dooit.app';
+  const userAvatar = user?.photoURL || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.uid || 'Felix'}&backgroundColor=transparent`;
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -159,13 +151,13 @@ export default function TopBar({ onOpenCommandPalette }) {
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F5B800]/30 to-purple-600/30 border-2 border-[#F5B800]/50 overflow-hidden">
               <img
-                src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=transparent"
+                src={userAvatar}
                 alt="User"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-xs font-semibold text-white leading-none">Pritam C.</p>
+              <p className="text-xs font-semibold text-white leading-none">{userDisplayName}</p>
               <p className="text-[10px] text-text-dim mt-0.5">Admin</p>
             </div>
           </button>
@@ -177,11 +169,11 @@ export default function TopBar({ onOpenCommandPalette }) {
               <div className="px-4 py-4 border-b border-white/5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full border-2 border-[#F5B800]/50 overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=transparent" alt="User" className="w-full h-full object-cover" />
+                    <img src={userAvatar} alt="User" className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-semibold">Pritam Chhetri</p>
-                    <p className="text-text-dim text-xs">pritam@dooit.app</p>
+                    <p className="text-white text-sm font-semibold">{userDisplayName}</p>
+                    <p className="text-text-dim text-xs truncate max-w-[120px]">{userEmail}</p>
                   </div>
                 </div>
               </div>
@@ -202,7 +194,7 @@ export default function TopBar({ onOpenCommandPalette }) {
                 </button>
                 <div className="my-1 border-t border-white/5" />
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={handleSignOut}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all"
                 >
                   <LogOut size={15} /> Sign Out

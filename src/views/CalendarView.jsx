@@ -7,27 +7,14 @@ const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 const EVENT_COLORS = ['#F5B800','#a855f7','#22d3ee','#34d399','#f87171','#fb923c'];
 
-const INITIAL_EVENTS = [
-  { id: 1, date: '', title: 'Team Sprint Planning', time: '09:00', color: '#F5B800' },
-  { id: 2, date: '', title: 'Product Demo', time: '14:00', color: '#a855f7' },
-  { id: 3, date: '', title: 'Client Meeting', time: '11:00', color: '#22d3ee' },
-  { id: 4, date: '', title: '1:1 with Alice', time: '15:00', color: '#34d399' },
-  { id: 5, date: '', title: 'Design Review', time: '10:00', color: '#fb923c' },
-];
+const INITIAL_EVENTS = [];
+
+function initEvents() {
+  return [];
+}
 
 function padZ(n) { return String(n).padStart(2, '0'); }
 function toDateStr(y, m, d) { return `${y}-${padZ(m + 1)}-${padZ(d)}`; }
-
-// Scatter events across the current month for demo
-function initEvents() {
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
-  const days = [5, 12, 14, now.getDate(), now.getDate() + 2];
-  return INITIAL_EVENTS.map((ev, i) => ({
-    ...ev,
-    date: toDateStr(y, m, Math.min(days[i], 28)),
-  }));
-}
 
 export default function CalendarView() {
   const today = new Date();

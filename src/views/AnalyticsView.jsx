@@ -3,23 +3,6 @@ import { motion } from 'framer-motion';
 import { BarChart2, TrendingUp, TrendingDown, CheckCircle2, Clock, Users, Zap } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
-const WEEKLY_DATA = [
-  { week: 'Mon', completed: 8,  total: 12 },
-  { week: 'Tue', completed: 14, total: 16 },
-  { week: 'Wed', completed: 10, total: 15 },
-  { week: 'Thu', completed: 18, total: 20 },
-  { week: 'Fri', completed: 15, total: 18 },
-  { week: 'Sat', completed: 6,  total: 8  },
-  { week: 'Sun', completed: 4,  total: 5  },
-];
-
-const HEATMAP_DATA = Array.from({ length: 52 }, (_, wi) =>
-  Array.from({ length: 7 }, (_, di) => ({
-    week: wi, day: di,
-    count: Math.floor(Math.random() * 8),
-  }))
-);
-
 function getHeatColor(count) {
   if (count === 0) return 'rgba(255,255,255,0.05)';
   if (count <= 2)  return '#F5B80040';
@@ -62,13 +45,75 @@ export default function AnalyticsView() {
   const inProgress = tasks.filter(t => t.col === 'progress').length;
   const completionPct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
 
-  const maxBarVal = Math.max(...WEEKLY_DATA.map(d => d.total));
+  // 1. DYNAMIC WEEKLY DATA based on task creation timestamps
+  const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weeklyMap = {};
+  WEEKDAY_NAMES.forEach(day => {
+    weeklyMap[day] = { completed: 0, total: 0 };
+  });
+
+  tasks.forEach(task => {
+    const timestamp = Number(task.id);
+    if (!isNaN(timestamp)) {
+      const date = new Date(timestamp);
+      const dayName = WEEKDAY_NAMES[date.getDay()];
+      weeklyMap[dayName].total += 1;
+      if (task.status === 'Done') {
+        weeklyMap[dayName].completed += 1;
+      }
+    }
+  });
+
+  const weeklyData = WEEKDAY_NAMES.map(day => ({
+    week: day,
+    completed: weeklyMap[day].completed,
+    total: weeklyMap[day].total
+  }));
+
+  // Fallback: If no tasks exist, show a minimal placeholder baseline for visual layout
+  const hasTasks = tasks.length > 0;
+  const displayWeeklyData = hasTasks ? weeklyData : [
+    { week: 'Sun', completed: 0, total: 0 },
+    { week: 'Mon', completed: 0, total: 0 },
+    { week: 'Tue', completed: 0, total: 0 },
+    { week: 'Wed', completed: 0, total: 0 },
+    { week: 'Thu', completed: 0, total: 0 },
+    { week: 'Fri', completed: 0, total: 0 },
+    { week: 'Sat', completed: 0, total: 0 }
+  ];
+
+  const maxBarVal = Math.max(...displayWeeklyData.map(d => d.total)) || 1;
+
+  // 2. DYNAMIC HEATMAP DATA based on task creation timestamps
+  const heatmapData = Array.from({ length: 52 }, (_, wi) =>
+    Array.from({ length: 7 }, (_, di) => ({
+      week: wi, day: di,
+      count: 0,
+    }))
+  );
+
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const todayMs = new Date().getTime();
+
+  tasks.forEach(task => {
+    const timestamp = Number(task.id);
+    if (!isNaN(timestamp)) {
+      const diffDays = Math.floor((todayMs - timestamp) / oneDayMs);
+      if (diffDays >= 0 && diffDays < 364) {
+        const dayIndex = new Date(timestamp).getDay();
+        const weekIndex = 51 - Math.floor(diffDays / 7);
+        if (weekIndex >= 0 && weekIndex < 52) {
+          heatmapData[weekIndex][dayIndex].count += 1;
+        }
+      }
+    }
+  });
 
   const metrics = [
-    { label: 'Total Tasks', value: tasks.length, sub: 'across all projects', icon: <CheckCircle2 size={18} />, color: '#F5B800', trend: '+12%', trendUp: true },
-    { label: 'Completed', value: doneCount, sub: `${completionPct}% completion rate`, icon: <Zap size={18} />, color: '#34d399', trend: '+8%', trendUp: true },
-    { label: 'In Progress', value: inProgress, sub: 'tasks in flight', icon: <Clock size={18} />, color: '#a855f7', trend: '+3%', trendUp: true },
-    { label: 'Team Members', value: 6, sub: 'active this week', icon: <Users size={18} />, color: '#22d3ee', trend: '-1', trendUp: false },
+    { label: 'Total Tasks', value: tasks.length, sub: 'across all projects', icon: <CheckCircle2 size={18} />, color: '#F5B800', trend: hasTasks ? '+100%' : '0%', trendUp: true },
+    { label: 'Completed', value: doneCount, sub: `${completionPct}% completion rate`, icon: <Zap size={18} />, color: '#34d399', trend: hasTasks ? `+${completionPct}%` : '0%', trendUp: true },
+    { label: 'In Progress', value: inProgress, sub: 'tasks in flight', icon: <Clock size={18} />, color: '#a855f7', trend: '0%', trendUp: true },
+    { label: 'Team Members', value: 0, sub: 'active this week', icon: <Users size={18} />, color: '#22d3ee', trend: '0', trendUp: false },
   ];
 
   return (
@@ -113,7 +158,7 @@ export default function AnalyticsView() {
           className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-white font-semibold">Tasks Completed — This Week</h2>
+            <h2 className="text-white font-semibold">Tasks Completed - This Week</h2>
             <div className="flex items-center gap-4 text-xs text-text-dim">
               <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-[#F5B800] inline-block" /> Completed</span>
               <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-white/15 inline-block" /> Total</span>
@@ -121,7 +166,7 @@ export default function AnalyticsView() {
           </div>
 
           <div className="flex items-end gap-3 h-40">
-            {WEEKLY_DATA.map((d, i) => {
+            {displayWeeklyData.map((d, i) => {
               const isHovered = hoveredBar === i;
               return (
                 <div
@@ -145,7 +190,7 @@ export default function AnalyticsView() {
                       animate={{ scaleY: 1 }}
                       transition={{ delay: 0.4 + i * 0.06, duration: 0.5, ease: 'easeOut' }}
                       style={{
-                        height: `${(d.completed / d.total) * 100}%`,
+                        height: d.total > 0 ? `${(d.completed / d.total) * 100}%` : '0%',
                         originY: 'bottom',
                         background: isHovered
                           ? 'linear-gradient(to top, #F5B800, #fde68a)'
@@ -218,10 +263,10 @@ export default function AnalyticsView() {
         transition={{ delay: 0.5 }}
         className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
       >
-        <h2 className="text-white font-semibold mb-4">Activity Heatmap — Last 12 Months</h2>
+        <h2 className="text-white font-semibold mb-4">Activity Heatmap - Last 12 Months</h2>
         <div className="overflow-x-auto custom-scrollbar pb-2">
           <div className="flex gap-1" style={{ minWidth: '700px' }}>
-            {HEATMAP_DATA.map((week, wi) => (
+            {heatmapData.map((week, wi) => (
               <div key={wi} className="flex flex-col gap-1">
                 {week.map((cell) => (
                   <div

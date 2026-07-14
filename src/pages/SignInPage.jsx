@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { loginWithGoogle, auth } from '../services/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -12,21 +14,48 @@ export default function SignInPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState('form'); // 'form' | 'success'
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setStep('success');
-    await new Promise(r => setTimeout(r, 1000));
-    navigate('/app');
+    setErrorMsg('');
+    try {
+      if (tab === 'signin') {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        if (name.trim()) {
+          await updateProfile(credential.user, { displayName: name.trim() });
+        }
+      }
+      setStep('success');
+      await new Promise(r => setTimeout(r, 1000));
+      navigate('/app');
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message.replace('Firebase: ', ''));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogle = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    navigate('/app');
+    setErrorMsg('');
+    try {
+      await loginWithGoogle();
+      setStep('success');
+      await new Promise(r => setTimeout(r, 1000));
+      navigate('/app');
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message.replace('Firebase: ', ''));
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6 py-12 relative overflow-hidden">
@@ -139,6 +168,12 @@ export default function SignInPage() {
                   <span className="text-white/20 text-xs font-medium uppercase tracking-wider">or</span>
                   <div className="flex-1 h-px bg-white/8" />
                 </div>
+
+                {errorMsg && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl text-center mb-4">
+                    {errorMsg}
+                  </div>
+                )}
 
                 {/* Form Inputs */}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
