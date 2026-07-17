@@ -16,13 +16,7 @@ const QUICK_ACTIONS = [
   { label: 'Settings', icon: <Settings size={16} />, color: '#34d399', path: '/app/settings' },
 ];
 
-const RECENT_ACTIVITY = [
-  { id: 1, type: 'task', icon: <CheckCircle2 size={14} />, color: '#22d3ee', text: 'Completed "Update landing page copy"', time: '2m ago' },
-  { id: 2, type: 'comment', icon: <Star size={14} />, color: '#F5B800', text: 'Alice commented on "Q4 Roadmap"', time: '15m ago' },
-  { id: 3, type: 'alert', icon: <AlertCircle size={14} />, color: '#f87171', text: 'Task "API Integration" is overdue', time: '1h ago' },
-  { id: 4, type: 'task', icon: <CheckCircle2 size={14} />, color: '#22d3ee', text: 'Completed "Fix auth bug"', time: '2h ago' },
-  { id: 5, type: 'fire', icon: <Flame size={14} />, color: '#fb923c', text: 'You are on a 5-day streak! 🔥', time: '3h ago' },
-];
+
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -72,6 +66,17 @@ export default function DashboardView() {
     { label: 'In Progress', value: inProgress, sub: 'tasks in flight', icon: <Zap size={18} />, color: '#a855f7' },
     { label: 'Total Tasks', value: tasks.length, sub: 'across all projects', icon: <TrendingUp size={18} />, color: '#22d3ee' },
   ];
+
+  const recentActivities = tasks.map(t => {
+    const isCompleted = t.status === 'Done';
+    return {
+      id: t.id,
+      icon: isCompleted ? <CheckCircle2 size={14} /> : <Zap size={14} />,
+      color: isCompleted ? '#34d399' : '#F5B800',
+      text: isCompleted ? `Completed "${t.title}"` : `Created task "${t.title}"`,
+      time: 'Recently'
+    };
+  }).slice(0, 5);
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -231,7 +236,7 @@ export default function DashboardView() {
           <h2 className="text-white font-semibold">Recent Activity</h2>
         </div>
         <div className="divide-y divide-white/5">
-          {RECENT_ACTIVITY.map((item, i) => (
+          {recentActivities.map((item, i) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0 }}
@@ -246,6 +251,13 @@ export default function DashboardView() {
               <span className="text-xs text-text-dim/50 flex-shrink-0">{item.time}</span>
             </motion.div>
           ))}
+          {recentActivities.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-10 opacity-35">
+              <CheckCircle2 size={24} className="text-[#34d399] mb-2" />
+              <p className="text-white text-xs font-semibold">No recent activity</p>
+              <p className="text-[10px] text-text-dim mt-0.5">Tasks created or completed will show up here</p>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
