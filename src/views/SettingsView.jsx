@@ -1,6 +1,20 @@
 import React from 'react';
+import { logoutUser } from '../services/firebase';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 
 export default function SettingsView() {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await logoutUser();
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto h-full flex flex-col">
       <div className="mb-8">
@@ -11,7 +25,7 @@ export default function SettingsView() {
       <div className="flex flex-col gap-6">
         
         {/* Profile Section */}
-        <section className="p-6 glass-card rounded-xl">
+        <section className="p-6 bg-white/[0.015] border border-white/5 rounded-xl">
           <h2 className="text-xl font-bold text-white mb-4">Profile</h2>
           <div className="flex items-center gap-6 mb-6">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-white/10 overflow-hidden">
@@ -38,7 +52,7 @@ export default function SettingsView() {
         </section>
 
         {/* Workspace Preferences */}
-        <section className="p-6 glass-card rounded-xl">
+        <section className="p-6 bg-white/[0.015] border border-white/5 rounded-xl">
           <h2 className="text-xl font-bold text-white mb-4">Preferences</h2>
           <div className="flex items-center justify-between py-3 border-b border-white/5">
             <div>
@@ -50,7 +64,7 @@ export default function SettingsView() {
             </div>
           </div>
           
-          <div className="flex items-center justify-between py-3 border-b border-white/5">
+          <div className="flex items-center justify-between py-3">
             <div>
               <h3 className="font-semibold text-white">Email Notifications</h3>
               <p className="text-sm text-text-dim">Receive daily summaries</p>
@@ -59,6 +73,18 @@ export default function SettingsView() {
               <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
             </div>
           </div>
+        </section>
+
+        {/* Danger Zone */}
+        <section className="p-6 bg-red-500/[0.02] border border-red-500/10 rounded-xl">
+          <h2 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h2>
+          <p className="text-xs text-text-dim mb-4">Actions here are immediate and affect your active session.</p>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-bold text-sm rounded-xl transition-all"
+          >
+            <LogOut size={16} /> Sign Out
+          </button>
         </section>
 
       </div>
