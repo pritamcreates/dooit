@@ -7,11 +7,14 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+/* Custom Spring presets */
+const SPRING_TRANSITION = { type: 'spring', stiffness: 380, damping: 30 };
+
 /* Grid Background */
 function GridBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <svg className="absolute inset-0 w-full h-full opacity-[0.035]" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.025]" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
             <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1" />
@@ -23,23 +26,23 @@ function GridBackground() {
   );
 }
 
-/* Subtle ambient orbs - no strong yellow */
+/* Subtle ambient orbs */
 function FloatingOrbs() {
   return (
     <>
       <div
         className="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full blur-[160px] pointer-events-none opacity-60"
-        style={{ background: 'radial-gradient(circle, rgba(245,184,0,0.08) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(245,184,0,0.05) 0%, transparent 70%)' }}
       />
       <div
         className="absolute bottom-[-20%] right-[-15%] w-[50%] h-[50%] rounded-full blur-[160px] pointer-events-none opacity-60"
-        style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%)' }}
       />
     </>
   );
 }
 
-/* Initials Avatar - replaces Notion-style icons */
+/* Initials Avatar */
 function InitialsAvatar({ name, color, size = 28 }) {
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   return (
@@ -120,11 +123,25 @@ const PROOF_USERS = [
   { name: 'Luke R', color: '#f87171' },
 ];
 
-/* App Mockup */
+/* Interactive App Mockup Component for Sandbox Demo */
 function AppMockup() {
+  const [demoTasks, setDemoTasks] = useState([
+    { id: 1, title: 'Design onboarding flow', done: true, w: 90 },
+    { id: 2, title: 'Implement hotkey listeners', done: false, w: 75 },
+    { id: 3, title: 'Setup Firestore collections rules', done: false, w: 85 },
+    { id: 4, title: 'Add trial billing wall warning', done: true, w: 60 }
+  ]);
+
+  const toggleTask = (id) => {
+    setDemoTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  };
+
+  const doneCount = demoTasks.filter(t => t.done).length;
+  const progressPct = Math.round((doneCount / demoTasks.length) * 100);
+
   return (
-    <div className="rounded-2xl border border-white/10 overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.9)] bg-[#0d0d0d]">
-      {/* Window chrome */}
+    <div className="rounded-2xl border border-white/5 overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.9)] bg-[#0d0d0d]">
+      {/* Window header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5 bg-black/60">
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500/70" />
@@ -152,62 +169,81 @@ function AppMockup() {
           ].map(item => (
             <div
               key={item.label}
-              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg ${item.active ? 'bg-[#F5B800]/10' : ''}`}
+              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg ${item.active ? 'bg-white/5' : ''}`}
             >
               <div className={`w-2 h-2 rounded-full ${item.active ? 'bg-[#F5B800]' : 'bg-[#333]'}`} />
               <div
                 className="h-2.5 rounded"
                 style={{
                   width: `${item.label.length * 6}px`,
-                  background: item.active ? '#F5B800' : 'rgba(255,255,255,0.12)',
+                  background: item.active ? '#FFF' : 'rgba(255,255,255,0.12)',
                 }}
               />
             </div>
           ))}
         </div>
 
-        {/* Main panel */}
+        {/* Main interactive area */}
         <div className="flex-1 p-6 bg-[#0d0d0d] flex flex-col gap-4">
           {/* Stat cards */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { val: '24', label: 'Tasks Due', color: '#F5B800' },
-              { val: '87%', label: 'Completion', color: '#34d399' },
+              { val: '24', label: 'Tasks Due', color: '#94a3b8' },
+              { val: `${progressPct}%`, label: 'Completion', color: '#F5B800' },
               { val: '6', label: 'Team Online', color: '#a855f7' },
             ].map(s => (
-              <div key={s.label} className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
+              <div key={s.label} className="rounded-xl bg-white/[0.02] p-3 text-left">
                 <p className="font-bold text-xl" style={{ color: s.color }}>{s.val}</p>
                 <p className="text-[10px] mt-0.5" style={{ color: '#555' }}>{s.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Task rows */}
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex-1">
-            <div className="h-3 w-20 bg-white/15 rounded mb-4" />
-            {[100, 78, 92, 65].map((w, i) => (
-              <div key={i} className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
-                <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" />
-                <div className="h-2 rounded bg-white/10 flex-1" style={{ maxWidth: `${w}%` }} />
+          {/* Interactive tasks box */}
+          <div className="rounded-xl bg-white/[0.015] p-4 flex-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-3 w-24 bg-white/15 rounded" />
+              <span className="text-[10px] text-text-dim/50">Click items to toggle</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {demoTasks.map((t) => (
                 <div
-                  className="h-5 w-14 rounded-full flex-shrink-0"
-                  style={{ background: i === 0 ? 'rgba(245,184,0,0.2)' : 'rgba(255,255,255,0.05)' }}
-                />
-              </div>
-            ))}
+                  key={t.id}
+                  onClick={() => toggleTask(t.id)}
+                  className="flex items-center gap-3 py-2 px-2.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer group"
+                >
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                    t.done ? 'border-[#F5B800] bg-[#F5B800]/20' : 'border-white/20 group-hover:border-white/40'
+                  }`}>
+                    {t.done && <div className="w-1.5 h-1.5 rounded-full bg-[#F5B800]" />}
+                  </div>
+                  <span className={`text-xs transition-all ${
+                    t.done ? 'text-white/30 line-through' : 'text-white/80'
+                  }`}>
+                    {t.title}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Mini chart */}
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+          {/* Dynamic Interactive Mini Chart */}
+          <div className="rounded-xl bg-white/[0.015] p-4">
             <div className="h-3 w-28 bg-white/15 rounded mb-3" />
             <div className="flex items-end gap-2 h-14">
-              {[35, 60, 48, 75, 55, 90, 68].map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t"
-                  style={{ height: `${h}%`, background: i === 5 ? '#F5B800' : 'rgba(255,255,255,0.1)' }}
-                />
-              ))}
+              {[35, 60, 48, 75, 55, 90, 68].map((h, i) => {
+                const isSelected = i === Math.floor(progressPct / 15);
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t transition-all duration-300"
+                    style={{
+                      height: `${h}%`,
+                      background: isSelected ? '#F5B800' : 'rgba(255,255,255,0.1)'
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
@@ -216,20 +252,20 @@ function AppMockup() {
   );
 }
 
-/* Navbar */
+/* Navbar with Scroll-spy CTA */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
+    const fn = () => setScrolled(window.scrollY > 180);
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-350 ${
         scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5 shadow-xl' : ''
       }`}
     >
@@ -284,7 +320,7 @@ function Navbar() {
   );
 }
 
-/* Main Component */
+/* Main Page Component */
 export default function HomePage() {
   const { scrollY } = useScroll();
   const mockupY = useTransform(scrollY, [0, 600], [0, -50]);
@@ -298,13 +334,11 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-24 text-center">
-
-
         {/* Headline - clean white, no gradient */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
+          transition={{ duration: 0.7, delay: 0.1, ...SPRING_TRANSITION }}
           className="text-5xl sm:text-6xl lg:text-[80px] font-black tracking-tighter leading-[1.05] mb-6 max-w-5xl text-white"
         >
           The workspace that
@@ -316,18 +350,18 @@ export default function HomePage() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
+          transition={{ duration: 0.6, delay: 0.25, ...SPRING_TRANSITION }}
           className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto leading-relaxed mb-10 font-light"
         >
           One beautifully unified workspace for your tasks, docs, calendar, analytics, and team.
           Built for teams who want to move fast and stay focused.
         </motion.p>
 
-        {/* CTA - only one button */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.4, ...SPRING_TRANSITION }}
           className="flex flex-col sm:flex-row items-center gap-4 mb-8"
         >
           <Link
@@ -347,7 +381,7 @@ export default function HomePage() {
           className="flex items-center gap-3 text-[#666] text-sm"
         >
           <div className="flex -space-x-2">
-            {PROOF_USERS.map((u, i) => (
+            {PROOF_USERS.map((u) => (
               <InitialsAvatar key={u.name} name={u.name} color={u.color} size={28} />
             ))}
           </div>
@@ -423,16 +457,16 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
-                className="group relative p-7 rounded-2xl border border-white/8 bg-white/[0.025] hover:border-white/15 hover:bg-white/[0.05] transition-all overflow-hidden cursor-default"
+                transition={{ delay: i * 0.08, duration: 0.5, ...SPRING_TRANSITION }}
+                className="group relative p-7 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-white/10 transition-all overflow-hidden cursor-default"
               >
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
-                  style={{ background: `radial-gradient(circle at 30% 20%, ${f.color}12, transparent 65%)` }}
+                  style={{ background: `radial-gradient(circle at 30% 20%, ${f.color}08, transparent 65%)` }}
                 />
                 <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
-                  style={{ background: `${f.color}15` }}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform group-hover:scale-105"
+                  style={{ background: `${f.color}10` }}
                 >
                   <span style={{ color: f.color }}>{f.icon}</span>
                 </div>
@@ -450,7 +484,7 @@ export default function HomePage() {
       >
         <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-10 text-center">
           {[
-            { num: '4,200+', label: 'Active teams', color: '#F5B800' },
+            { num: '4,200+', label: 'Active teams', color: '#94a3b8' },
             { num: '2.4M', label: 'Tasks completed', color: '#a855f7' },
             { num: '99.9%', label: 'Uptime SLA', color: '#34d399' },
           ].map((s, i) => (
@@ -459,7 +493,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.1, ...SPRING_TRANSITION }}
             >
               <p className="text-5xl sm:text-6xl font-black mb-2" style={{ color: s.color }}>{s.num}</p>
               <p className="text-white/40 font-medium">{s.label}</p>
@@ -468,7 +502,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials with initials avatars */}
+      {/* Testimonials */}
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -488,8 +522,8 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative p-7 rounded-2xl border border-white/8 bg-white/[0.025] hover:border-white/15 transition-all"
+                transition={{ delay: i * 0.1, ...SPRING_TRANSITION }}
+                className="relative p-7 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-white/10 transition-all"
               >
                 <div className="flex gap-1 mb-5">
                   {[1, 2, 3, 4, 5].map(s => <Star key={s} size={14} fill="#F5B800" className="text-[#F5B800]" />)}

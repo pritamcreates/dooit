@@ -10,9 +10,18 @@ export function useStore() {
 }
 
 export function StoreProvider({ children }) {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const local = localStorage.getItem('dooit_tasks');
+    return local ? JSON.parse(local) : [];
+  });
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+
+  // Sync tasks to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem('dooit_tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   // Sync auth state
   useEffect(() => {
@@ -26,7 +35,6 @@ export function StoreProvider({ children }) {
   // Sync tasks from Firestore in real-time if logged in
   useEffect(() => {
     if (!user) {
-      setTasks([]);
       return;
     }
 
@@ -110,6 +118,8 @@ export function StoreProvider({ children }) {
     tasks,
     user,
     loading,
+    isFocusMode,
+    setIsFocusMode,
     addTask,
     moveTask,
     toggleTaskStatus,

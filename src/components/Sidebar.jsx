@@ -4,17 +4,12 @@ import { CheckCircle2, Inbox, FolderOpen, Users, Settings, HelpCircle, LayoutDas
 
 export default function Sidebar() {
   const navItems = [
-  { name: 'Dashboard', path: '/app', icon: <LayoutDashboard size={18} /> },
-  { name: 'Inbox', path: '/app/inbox', icon: <Inbox size={18} /> },
-  { name: 'My Tasks', path: '/app/tasks', icon: <CheckCircle2 size={18} /> },
-  { name: 'Projects', path: '/app/projects', icon: <FolderOpen size={18} /> },
-  { name: 'Team', path: '/app/team', icon: <Users size={18} /> },
-  { name: 'Docs', path: '/app/docs', icon: <BookOpen size={18} /> },
-  { name: 'Calendar', path: '/app/calendar', icon: <Calendar size={18} /> },
-  { name: 'People', path: '/app/people', icon: <LifeBuoy size={18} /> },
-  { name: 'Analytics', path: '/app/analytics', icon: <BarChart2 size={18} /> },
-
-];
+    { name: 'Dashboard', path: '/app', icon: <LayoutDashboard size={18} /> },
+    { name: 'Inbox', path: '/app/inbox', icon: <Inbox size={18} /> },
+    { name: 'My Tasks', path: '/app/tasks', icon: <CheckCircle2 size={18} /> },
+    { name: 'Projects', path: '/app/projects', icon: <FolderOpen size={18} /> },
+    { name: 'Analytics', path: '/app/analytics', icon: <BarChart2 size={18} /> },
+  ];
 
   return (
     <aside className="w-64 border-r border-white/5 bg-surface/50 backdrop-blur-xl flex flex-col h-screen p-4 flex-shrink-0">

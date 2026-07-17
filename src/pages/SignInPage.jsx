@@ -126,11 +126,15 @@ export default function SignInPage() {
                   <h2 className="text-2xl font-black text-white mb-1.5">
                     {tab === 'signin' ? 'Sign in to Dooit' : 'Create your account'}
                   </h2>
-                  <p className="text-white/40 text-sm">
+                  <p className="text-white/40 text-sm mb-4">
                     {tab === 'signin'
                       ? 'Enter your details below to continue.'
                       : 'Start your free workspace today.'}
                   </p>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-text-dim font-bold tracking-wider uppercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F5B800]" />
+                    14-day premium trial active
+                  </div>
                 </div>
 
                 {/* Tab Switcher */}

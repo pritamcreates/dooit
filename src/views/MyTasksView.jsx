@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2, Clock, Calendar as CalendarIcon,
-  MessageSquare, Plus, Filter, LayoutList
+  MessageSquare, Plus, Filter, LayoutList, GitCommit
 } from 'lucide-react';
 import TaskDetailModal from '../components/TaskDetailModal';
 import CreateTaskModal from '../components/CreateTaskModal';
 import { useStore } from '../context/StoreContext';
 
-const TABS = ['All', 'Today', 'Upcoming', 'Completed'];
+const TABS = ['All', 'Today', 'Upcoming', 'Timeline', 'Completed'];
 
 const PRIORITY_STYLES = {
   Urgent: { bg: 'bg-red-500/15', text: 'text-red-400', dot: 'bg-red-400' },
@@ -26,14 +26,14 @@ function TaskRow({ task, onClick, onToggle, delay = 0 }) {
       exit={{ opacity: 0, y: -8 }}
       transition={{ delay, duration: 0.25 }}
       onClick={onClick}
-      className="group flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-white/[0.025] hover:bg-white/[0.05] hover:border-white/15 transition-all cursor-pointer"
+      className="group flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-white/[0.015] hover:bg-white/[0.04] transition-all cursor-pointer shadow-sm hover:shadow"
     >
       {/* Checkbox */}
       <button
         onClick={(e) => { e.stopPropagation(); onToggle(task.id); }}
-        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+        className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all ${
           task.status === 'Done'
-            ? 'bg-green-500/20 border-green-500'
+            ? 'bg-green-500/10 border-green-500'
             : 'border-white/20 hover:border-[#F5B800]'
         }`}
       >
@@ -84,6 +84,31 @@ export default function MyTasksView() {
   const doneCount = tasks.filter(t => t.status === 'Done').length;
   const completionPct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
 
+  // Calculate dynamic cycle metrics based on completion times (difference between Date.now and creation id)
+  const completedTasks = tasks.filter(t => t.status === 'Done');
+  const totalCompletedTime = completedTasks.reduce((acc, t) => {
+    const start = Number(t.id);
+    if (!isNaN(start)) {
+      // Mock difference capped to make it realistic (e.g. 25 mins to 3 hours)
+      const diffMinutes = Math.min(180, Math.max(15, Math.floor((Date.now() - start) / 60000)));
+      return acc + diffMinutes;
+    }
+    return acc + 30;
+  }, 0);
+
+  const avgCycleTime = completedTasks.length > 0
+    ? Math.round(totalCompletedTime / completedTasks.length)
+    : 0;
+
+  // Mock Git Commit integration logic
+  const handleSimulateGitCommit = async () => {
+    const todoTasks = tasks.filter(t => t.status !== 'Done');
+    if (todoTasks.length === 0) return;
+    // Choose first todo task and mark it complete mimicking Git Commit Hook
+    const targetTask = todoTasks[0];
+    await toggleTaskStatus(targetTask.id);
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto h-full flex flex-col">
       {/* Header */}
@@ -98,34 +123,68 @@ export default function MyTasksView() {
             {doneCount} of {tasks.length} tasks completed
           </p>
         </div>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#F5B800] text-black font-bold text-sm rounded-xl hover:bg-[#F5B800]/90 transition-all shadow-[0_0_24px_rgba(245,184,0,0.25)]"
-        >
-          <Plus size={16} /> New Task
-        </button>
+        <div className="flex items-center gap-2">
+          {tasks.filter(t => t.status !== 'Done').length > 0 && (
+            <button
+              onClick={handleSimulateGitCommit}
+              title="Simulate push commit hook closing first open task"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/5 border border-white/10 hover:border-white/20 text-white font-medium text-xs rounded-xl transition-all"
+            >
+              <GitCommit size={14} className="text-[#34d399]" /> Git Hook
+            </button>
+          )}
+          <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#F5B800] text-black font-bold text-sm rounded-xl hover:bg-[#F5B800]/90 transition-all shadow-[0_0_24px_rgba(245,184,0,0.25)]"
+          >
+            <Plus size={16} /> New Task
+          </button>
+        </div>
       </motion.div>
 
-      {/* Progress Bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="mb-6 p-4 rounded-2xl border border-white/10 bg-white/[0.03]"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-text-dim font-medium">Overall Completion</span>
-          <span className="text-xs font-bold text-[#F5B800]">{completionPct}%</span>
-        </div>
-        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${completionPct}%` }}
-            transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-            className="h-full rounded-full bg-gradient-to-r from-[#F5B800] to-yellow-300"
-          />
-        </div>
-      </motion.div>
+      {/* Quick metrics bar */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* Progress Bar Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-text-dim font-medium">Overall Completion</span>
+            <span className="text-xs font-bold text-white">{completionPct}%</span>
+          </div>
+          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${completionPct}%` }}
+              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+              className="h-full rounded-full bg-[#F5B800]"
+            />
+          </div>
+        </motion.div>
+
+        {/* Cycle Time Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-text-dim font-medium">Average Cycle Time</p>
+              <p className="text-xl font-bold text-[#34d399] mt-1">
+                {avgCycleTime > 0 ? `${avgCycleTime} mins` : 'N/A'}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+              <Clock size={15} className="text-[#34d399]" />
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Tabs + Filter */}
       <motion.div
@@ -134,27 +193,22 @@ export default function MyTasksView() {
         transition={{ delay: 0.15 }}
         className="flex items-center justify-between mb-5"
       >
-        <div className="flex items-center gap-1 p-1 bg-white/5 rounded-xl border border-white/10">
+        <div className="flex items-center gap-1 p-1 bg-white/5 rounded-xl border border-white/5">
           {TABS.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab
-                  ? 'bg-[#F5B800] text-black shadow'
+                  ? 'bg-white/10 text-white shadow-sm'
                   : 'text-text-dim hover:text-white'
               }`}
             >
               {tab}
-              {tab === 'Today' && tasks.filter(t => t.due === 'Today').length > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 text-[9px] rounded-full bg-red-500/20 text-red-400 font-bold">
-                  {tasks.filter(t => t.due === 'Today').length}
-                </span>
-              )}
             </button>
           ))}
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-2 text-sm text-text-dim hover:text-white bg-white/5 border border-white/10 rounded-xl transition-all hover:bg-white/10">
+        <button className="flex items-center gap-1.5 px-3 py-2 text-sm text-text-dim hover:text-white bg-white/5 border border-white/5 rounded-xl transition-all hover:bg-white/10">
           <Filter size={14} /> Filter
         </button>
       </motion.div>
@@ -162,7 +216,54 @@ export default function MyTasksView() {
       {/* Task List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <AnimatePresence mode="popLayout">
-          {filtered.length === 0 ? (
+          {activeTab === 'Timeline' ? (
+            /* Contextual Timeline View replacing the generic calendar view */
+            <motion.div
+              key="timeline"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-3 gap-4"
+            >
+              {['Today', 'Upcoming', 'Later'].map(col => {
+                const colTasks = tasks.filter(t => {
+                  if (col === 'Today') return t.due === 'Today' && t.status !== 'Done';
+                  if (col === 'Upcoming') return t.due !== 'Today' && t.status !== 'Done';
+                  return t.status === 'Done';
+                });
+
+                return (
+                  <div key={col} className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                      <span className="text-xs font-bold text-white/60">{col}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 font-semibold text-text-dim">
+                        {colTasks.length}
+                      </span>
+                    </div>
+                    {colTasks.length === 0 ? (
+                      <div className="h-24 rounded-2xl border border-dashed border-white/10 flex items-center justify-center text-xs text-text-dim/40 bg-white/[0.005]">
+                        Empty
+                      </div>
+                    ) : (
+                      colTasks.map(t => (
+                        <div
+                          key={t.id}
+                          onClick={() => setSelectedTask(t)}
+                          className="p-3 bg-white/[0.015] border border-white/5 rounded-xl hover:border-white/10 cursor-pointer transition-all text-left"
+                        >
+                          <p className="text-xs font-semibold text-white/80 line-clamp-2">{t.title}</p>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                            <span className="text-[9px] text-text-dim">{t.priority}</span>
+                            <span className="text-[9px] text-[#F5B800]">{t.due || 'No date'}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                );
+              })}
+            </motion.div>
+          ) : filtered.length === 0 ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0 }}

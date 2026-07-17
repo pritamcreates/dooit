@@ -10,10 +10,6 @@ import KanbanView from './views/KanbanView';
 import ReportingView from './views/ReportingView';
 import PortfoliosView from './views/PortfoliosView';
 import GoalsView from './views/GoalsView';
-import TeamView from './views/TeamView';
-import DocsView from './views/DocsView';
-import CalendarView from './views/CalendarView';
-import PeopleView from './views/PeopleView';
 import AnalyticsView from './views/AnalyticsView';
 // SupportView import removed
 import DashboardView from './views/DashboardView';
@@ -36,10 +32,6 @@ function App() {
             <Route path="reporting" element={<ReportingView />} />
             <Route path="portfolios" element={<PortfoliosView />} />
             <Route path="goals" element={<GoalsView />} />
-            <Route path="team" element={<TeamView />} />
-            <Route path="docs" element={<DocsView />} />
-            <Route path="calendar" element={<CalendarView />} />
-            <Route path="people" element={<PeopleView />} />
             <Route path="analytics" element={<AnalyticsView />} />
             // Support route removed
             <Route path="settings" element={<SettingsView />} />
